@@ -1,0 +1,253 @@
+# Tracked-title registry — the collector's single source of truth for which
+# titles to poll on Twitch (PRD §7).
+#
+# Fields:
+#   id                    canonical slug, stable identifier used across the project
+#   display_name          human-readable name
+#   twitch_category_id    Twitch Helix game_id for `Get Streams`. REQUIRED for polling.
+#   twitch_category_verified
+#                         false until a human has confirmed this ID against the
+#                         Twitch API. The collector will still poll unverified
+#                         IDs but logs a warning in the run metadata for each
+#                         one, since a wrong ID silently returns zero streams
+#                         rather than erroring.
+#   is_active             whether the collector polls this title at all
+#   liquipedia_page       Liquipedia page name (Phase 2 — leave null for now)
+#   genre / platform      reference tags (Phase 3 classification — leave null for now)
+#
+# Region is deliberately NOT configured here — see PRD §6: region is measured
+# from tournament data and broadcast-language mix, not set as a static tag.
+#
+# All entries below were verified 2026-08-31 against the live Twitch API
+# (Get Games / Search Categories), using the title list from the research
+# brief's phase table (§1) and niche table (§6). Two are judgment calls,
+# flagged inline: which Age of Empires entry, and which current-generation
+# version of each fighting game to track (the actively-played one, not a
+# legacy release the category history also contains). Verify/re-verify a
+# category ID with:
+#   python -c "
+#   import os, httpx
+#   token = httpx.post('https://id.twitch.tv/oauth2/token', params={
+#       'client_id': os.environ['TWITCH_CLIENT_ID'],
+#       'client_secret': os.environ['TWITCH_CLIENT_SECRET'],
+#       'grant_type': 'client_credentials'}).json()['access_token']
+#   r = httpx.get('https://api.twitch.tv/helix/search/categories',
+#       params={'query': 'League of Legends'},
+#       headers={'Client-Id': os.environ['TWITCH_CLIENT_ID'],
+#                'Authorization': f'Bearer {token}'})
+#   print(r.json())
+#   "
+#
+# Adding a title is a config edit, not a code change.
+
+titles:
+  # --- Classic phase (2013-15) ---
+  - id: league_of_legends
+    display_name: League of Legends
+    twitch_category_id: "21779"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: dota2
+    display_name: Dota 2
+    twitch_category_id: "29595"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: counter_strike
+    display_name: Counter-Strike 2
+    twitch_category_id: "32399"
+    twitch_category_verified: true # Twitch's unified category is named "Counter-Strike", covers CS2
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: starcraft2
+    display_name: StarCraft II
+    twitch_category_id: "490422"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: hearthstone
+    display_name: Hearthstone
+    twitch_category_id: "138585"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  # --- Console phase (2016-20) ---
+  - id: rocket_league
+    display_name: Rocket League
+    twitch_category_id: "30921"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: rainbow_six_siege
+    display_name: Rainbow Six Siege
+    twitch_category_id: "460630"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: overwatch
+    display_name: Overwatch
+    twitch_category_id: "515025"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: tekken
+    display_name: Tekken 8
+    twitch_category_id: "538054672"
+    twitch_category_verified: true # judgment call: current-gen entry (Twitch also has separate Tekken 7 / Tekken 3 / etc. categories)
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: street_fighter
+    display_name: Street Fighter 6
+    twitch_category_id: "55453844"
+    twitch_category_verified: true # judgment call: current-gen entry
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: mortal_kombat
+    display_name: Mortal Kombat 1
+    twitch_category_id: "904864974"
+    twitch_category_verified: true # judgment call: current-gen entry
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: guilty_gear
+    display_name: Guilty Gear -Strive-
+    twitch_category_id: "517159"
+    twitch_category_verified: true # judgment call: current-gen entry
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  # --- Second Coming phase (2021-24) ---
+  - id: valorant
+    display_name: VALORANT
+    twitch_category_id: "516575"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: apex_legends
+    display_name: Apex Legends
+    twitch_category_id: "511224"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: fortnite
+    display_name: Fortnite
+    twitch_category_id: "33214"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: pubg
+    display_name: "PUBG: BATTLEGROUNDS"
+    twitch_category_id: "493057"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: pubg_mobile
+    display_name: PUBG Mobile
+    twitch_category_id: "505884"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: free_fire
+    display_name: Free Fire
+    twitch_category_id: "502732"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: mobile_legends_bb
+    display_name: "Mobile Legends: Bang Bang"
+    twitch_category_id: "494184"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: wild_rift
+    display_name: "League of Legends: Wild Rift"
+    twitch_category_id: "514858"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: teamfight_tactics
+    display_name: Teamfight Tactics
+    twitch_category_id: "513143"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  - id: brawl_stars
+    display_name: Brawl Stars
+    twitch_category_id: "497497"
+    twitch_category_verified: true
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true
+
+  # --- RTS (referenced alongside StarCraft II in the niche table, §6) ---
+  - id: age_of_empires_ii
+    display_name: Age of Empires II
+    twitch_category_id: "13389"
+    twitch_category_verified: true # judgment call: brief says "Age of Empires" without a version; AoE2 is the entry with an active competitive scene
+    liquipedia_page: null
+    genre: null
+    platform: null
+    is_active: true

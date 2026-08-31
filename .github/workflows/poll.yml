@@ -1,0 +1,92 @@
+name: Twitch live-viewership poll
+
+on:
+  schedule:
+    # Hourly, on the hour, UTC (PRD §9.1 default cadence).
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      titles:
+        description: "Comma-separated title ids to poll (default: all active titles in config/titles.yaml)"
+        required: false
+        default: ""
+      duration_minutes:
+        description: "Event mode: keep polling for this many minutes (0 = single poll)"
+        required: false
+        default: "0"
+      interval_minutes:
+        description: "Event mode: minutes between polls"
+        required: false
+        default: "5"
+      skip_platform_totals:
+        description: "Skip the platform-wide total pagination (recommended for tight event-mode intervals)"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: twitch-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Poll Twitch (loop when in event mode)
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          TITLES="${{ github.event.inputs.titles }}"
+          DURATION="${{ github.event.inputs.duration_minutes }}"
+          INTERVAL="${{ github.event.inputs.interval_minutes }}"
+          SKIP_TOTALS="${{ github.event.inputs.skip_platform_totals }}"
+          DURATION="${DURATION:-0}"
+          INTERVAL="${INTERVAL:-5}"
+          SKIP_TOTALS="${SKIP_TOTALS:-true}"
+
+          ARGS=()
+          if [ -n "$TITLES" ]; then
+            ARGS+=(--titles "$TITLES")
+          fi
+          if [ "$SKIP_TOTALS" = "true" ]; then
+            ARGS+=(--skip-platform-totals)
+          fi
+
+          end_time=$(( $(date +%s) + DURATION * 60 ))
+          overall_status=0
+          while true; do
+            python collectors/twitch_poll.py "${ARGS[@]}" || overall_status=1
+
+            git add data/raw
+            if ! git diff --cached --quiet; then
+              git commit -m "Twitch snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+              git push
+            fi
+
+            if [ "$DURATION" -le 0 ] || [ "$(date +%s)" -ge "$end_time" ]; then
+              break
+            fi
+            sleep $(( INTERVAL * 60 ))
+          done
+
+          exit $overall_status

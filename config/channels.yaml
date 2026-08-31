@@ -1,0 +1,25 @@
+# Official broadcast channels per title (PRD §7).
+#
+# Two consumers:
+#   - Tier 1 of the collector's capture policy (config/capture.yaml): any
+#     stream from a channel listed here is captured at full detail on every
+#     poll, regardless of viewer count.
+#   - Later, the numerator for "% of category attention on official
+#     channels" (PRD §6 is_official_broadcast, brief §7 limitation 4).
+#
+# Requires manual curation and periodic review — channels change between
+# seasons. Empty for now; nothing has been curated yet, so Tier 1 currently
+# matches nothing and every stream is classified by viewer count alone
+# (Tier 2 / Tier 3). That's a safe default: it costs some storage
+# efficiency until curated, not correctness.
+#
+# Match key is the Twitch login (lowercase, stable across display-name
+# changes), not the display name shown on stream.
+#
+# Structure:
+# channels:
+#   <title_id from config/titles.yaml>:
+#     - some_official_channel_login
+#     - another_official_channel_login
+
+channels: {}

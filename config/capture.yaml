@@ -1,0 +1,43 @@
+# Tiered capture policy for the Twitch collector (collectors/twitch_poll.py).
+#
+# Every stream returned for a tracked title is classified into one of three
+# tiers on each poll:
+#
+#   1. Channel listed in config/channels.yaml for that title
+#        -> always full detail, regardless of viewer count.
+#   2. Not listed, but viewer_count >= full_detail_min_viewers
+#        -> full detail.
+#   3. Not listed, and below the threshold
+#        -> no per-stream record. Its viewer_count is folded into that
+#           title's below_threshold.viewer_total for the poll, and its
+#           language into below_threshold.viewer_total_by_language.
+#
+# "Full detail" always includes title and tags, on every tier — these are
+# needed later for co-stream detection (matching a stream's title text
+# against tournament names). Co-streamers are by definition not on the
+# curated channel list, so dropping their titles at capture time would
+# permanently foreclose that. thumbnail_url and type are dropped from every
+# tier; nothing planned in the PRD uses either.
+#
+# full_detail_min_viewers was picked from the real viewer-count distribution
+# of an actual poll (2026-08-31, 10,595 streams across the 23 titles tracked
+# at the time), not guessed. Record-count vs. viewer-total retention at each
+# candidate threshold:
+#
+#   threshold   % of streams kept   % of total viewers retained
+#   1                     94.6%                       100.0%
+#   2                     55.5%                        99.0%   <- biggest single jump: 1-viewer streams are ~41% of all records and ~0% of viewership
+#   3                     42.1%                        98.3%   <- chosen value
+#   5                     29.3%                        97.1%
+#   10                    17.9%                        95.1%
+#   20                    11.1%                         92.6%
+#
+# 3 sits just past the sharpest elbow (1→2 alone cuts ~41% of records for
+# ~1% of viewership) while keeping total viewer-count loss under 2%. Raise
+# it for more compression at a larger (still small) viewer-total cost; lower
+# it toward 2 for a bit less compression and a bit more margin on
+# borderline co-streams. Re-derive this table from any snapshot's raw
+# per-title stream lists if the live distribution ever looks like it's
+# shifted meaningfully from the one above.
+
+full_detail_min_viewers: 3
