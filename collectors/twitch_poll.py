@@ -134,13 +134,18 @@ def load_capture_config(path: Path) -> dict:
     return config
 
 
-def slim_stream(stream: dict) -> dict:
-    return {field_name: stream.get(field_name) for field_name in FULL_DETAIL_FIELDS}
+def slim_stream(stream: dict, is_official_broadcast: bool) -> dict:
+    record = {field_name: stream.get(field_name) for field_name in FULL_DETAIL_FIELDS}
+    record["is_official_broadcast"] = is_official_broadcast
+    return record
 
 
 def tier_streams(streams: list[dict], official_logins: set[str], min_viewers: int) -> tuple[list[dict], dict]:
     """Classify streams per config/capture.yaml. Returns (full_detail_records,
-    below_threshold_aggregate)."""
+    below_threshold_aggregate). is_official_broadcast is recorded on each
+    full-detail record as of capture time — config/channels.yaml changes
+    over time (seasons), so this must not be re-derived later from
+    whatever channels.yaml happens to say when the ETL runs."""
     full_detail: list[dict] = []
     below_stream_count = 0
     below_viewer_total = 0
@@ -149,8 +154,9 @@ def tier_streams(streams: list[dict], official_logins: set[str], min_viewers: in
     for stream in streams:
         login = (stream.get("user_login") or "").lower()
         viewer_count = stream.get("viewer_count", 0)
-        if login in official_logins or viewer_count >= min_viewers:
-            full_detail.append(slim_stream(stream))
+        is_official = login in official_logins
+        if is_official or viewer_count >= min_viewers:
+            full_detail.append(slim_stream(stream, is_official))
         else:
             below_stream_count += 1
             below_viewer_total += viewer_count

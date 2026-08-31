@@ -1,5 +1,7 @@
-# Phase 1 (collector) dependencies only.
-# pandas / plotly / jupyter / pytest etc. get added when the ETL and
-# analysis layers are built (PRD §8).
+# Phase 1 (collector) + Phase 2 (schema/ETL/Liquipedia connector).
+# pandas / plotly / jupyter get added when the analysis/notebooks layer is
+# built (Phase 4+, PRD §8).
 httpx>=0.27
 pyyaml>=6.0
+mwparserfromhell>=0.6
+pytest>=8.0
