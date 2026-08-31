@@ -1,0 +1,66 @@
+name: Twitch collector heartbeat
+
+# Silent collector failure is the worst failure mode in this project (PRD
+# §2, §10) — live viewership data cannot be backfilled. This workflow fails
+# loudly if the newest raw snapshot is older than expected. A failing
+# scheduled GitHub Actions workflow emails the repo owner by default, which
+# is the alerting mechanism for Phase 1.
+
+on:
+  schedule:
+    - cron: "0 12 * * *" # daily, noon UTC
+  workflow_dispatch:
+    inputs:
+      threshold_minutes:
+        description: "Fail if the newest raw snapshot is older than this many minutes"
+        required: false
+        default: "180"
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check snapshot freshness
+        env:
+          THRESHOLD_MINUTES: ${{ github.event.inputs.threshold_minutes }}
+        run: |
+          python3 - <<'PY'
+          import glob, gzip, json, os, sys
+          from datetime import datetime, timezone
+
+          threshold = int(os.environ.get("THRESHOLD_MINUTES") or "180")
+
+          files = sorted(glob.glob("data/raw/twitch/**/*.json.gz", recursive=True))
+          if not files:
+              print("::error::No raw Twitch snapshots found under data/raw/twitch/ — the collector has never run successfully.")
+              sys.exit(1)
+
+          latest = files[-1]
+          with gzip.open(latest, "rt") as f:
+              snapshot = json.load(f)
+
+          captured_at = snapshot.get("captured_at")
+          if not captured_at:
+              print(f"::error::{latest} has no captured_at field.")
+              sys.exit(1)
+
+          captured = datetime.strptime(captured_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+          now = datetime.now(timezone.utc)
+          gap_minutes = (now - captured).total_seconds() / 60
+
+          print(f"Latest snapshot: {latest}")
+          print(f"captured_at: {captured_at} ({gap_minutes:.0f} minutes ago)")
+
+          if gap_minutes > threshold:
+              print(f"::error::Newest snapshot is {gap_minutes:.0f} minutes old, exceeding the {threshold}-minute threshold. The collector may be silently failing.")
+              sys.exit(1)
+
+          if snapshot.get("status") != "ok":
+              print(f"::warning::Latest snapshot status is '{snapshot.get('status')}', not 'ok' — check its errors field.")
+
+          print("Heartbeat OK.")
+          PY

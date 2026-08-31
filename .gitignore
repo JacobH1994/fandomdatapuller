@@ -1,0 +1,22 @@
+# Secrets
+.env
+
+# Databases (derived and disposable — rebuilt from data/raw/, see CLAUDE.md)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
