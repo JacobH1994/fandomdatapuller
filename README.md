@@ -7,9 +7,11 @@ the full build spec.
 
 ## Status
 
-**Phase 1 only:** the Twitch live-viewership collector, tracked-title
-config, raw snapshot landing zone, and heartbeat monitoring. No database,
-ETL, or other connectors yet.
+**Phase 1 + 2:** the Twitch live-viewership collector, tracked-title config,
+raw snapshot landing zone, heartbeat monitoring, the SQLite schema, an
+idempotent ETL from raw snapshots into it, and a Liquipedia tournament
+connector. Classification (genre/platform/region tagging) and the
+niche-share/concentration metrics layer are not built yet.
 
 ## Setup
 
@@ -42,3 +44,33 @@ tab with the `titles`, `duration_minutes`, and `interval_minutes` inputs.
 GitHub's default failure-notification email) if the newest raw snapshot is
 older than 3 hours — the signal that the hourly collector has silently
 stopped running.
+
+## Database
+
+`data/research.db` is derived and disposable — gitignored, and rebuildable
+at any time from `data/raw/`:
+
+```
+python etl/load_snapshots.py            # incremental: only new raw files
+python etl/load_snapshots.py --rebuild   # wipe and reload everything
+```
+
+## Liquipedia connector
+
+On-demand (not scheduled — historical tournament data doesn't change on a
+clock). Uses the standard MediaWiki API, not LPDB (which needs an approved
+registration this project doesn't have) — see `collectors/liquipedia.py`'s
+docstring for the full rationale and a known gap (fighting-game titles
+aren't covered yet).
+
+```
+python collectors/liquipedia.py                      # all active titles
+python collectors/liquipedia.py --titles dota2,valorant
+python collectors/liquipedia.py --refresh             # bypass the local cache
+```
+
+## Tests
+
+```
+pytest
+```
