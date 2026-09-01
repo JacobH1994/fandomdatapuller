@@ -213,15 +213,32 @@ def category_members(client: httpx.Client, wiki: str, category: str, limiter: Ra
 
 
 def discover_tournament_pages(
-    client: httpx.Client, wiki: str, limiter: RateLimiter
+    client: httpx.Client, wiki: str, limiter: RateLimiter, category_filter: str | None = None
 ) -> tuple[list[str], str | None]:
     """Returns (page_titles, convention_used). convention_used is None if no
-    known tier convention had any members on this wiki."""
+    known tier convention had any members on this wiki (after filtering, if
+    category_filter is set).
+
+    category_filter matters for a wiki shared by several games (confirmed:
+    Liquipedia's "fighters" wiki hosts Tekken, Street Fighter, Mortal Kombat,
+    Guilty Gear, and others together under the SAME wiki-wide tier
+    categories — there is no per-game split at the category level). Without
+    filtering, every title sharing that wiki would discover the identical
+    unfiltered page pool and each would attribute every other game's
+    tournaments to itself. category_filter, when given, keeps only pages
+    whose title contains it (case-insensitive substring match against the
+    page title — e.g. "Tekken" matches "Tekken 8 World Tour/2024 Finals").
+    This is a heuristic, not a verified per-page game tag, and is noted as
+    such wherever it's used. If filtering empties the result, that's treated
+    the same as "no convention found" — skipped, not silently widened back
+    to the unfiltered pool."""
     for top, second in TIER_CONVENTIONS:
         top_pages = category_members(client, wiki, top, limiter)
         second_pages = category_members(client, wiki, second, limiter)
-        if top_pages or second_pages:
-            combined = sorted(set(top_pages) | set(second_pages))
+        combined = sorted(set(top_pages) | set(second_pages))
+        if category_filter:
+            combined = [p for p in combined if category_filter.lower() in p.lower()]
+        if combined:
             return combined, f"{top} + {second}"
     return [], None
 
@@ -256,14 +273,19 @@ def fetch_wikitext(
     return None
 
 
-NUMERIC_RE = re.compile(r"[\d.]+")
+NUMERIC_RE = re.compile(r"\d+(?:\.\d+)?")  # requires an actual digit, unlike [\d.]+ which can match a lone "."
 
 
 def _clean_number(value: str) -> float | None:
     if not value:
         return None
     match = NUMERIC_RE.search(value.replace(",", ""))
-    return float(match.group()) if match else None
+    if not match:
+        return None
+    try:
+        return float(match.group())
+    except ValueError:
+        return None
 
 
 def parse_infobox(wikitext: str) -> dict | None:
@@ -281,6 +303,7 @@ def parse_infobox(wikitext: str) -> dict | None:
             return None
 
         prize_pool = _clean_number(get("prizepoolusd") or get("prizepool") or "")
+        team_number = _clean_number(get("team_number") or "")
         return {
             "tier": get("liquipediatier"),
             "prize_pool": prize_pool,
@@ -288,7 +311,7 @@ def parse_infobox(wikitext: str) -> dict | None:
             "start_date": get("sdate"),
             "end_date": get("edate"),
             "country": get("country"),
-            "team_number": int(m.group()) if get("team_number") and (m := NUMERIC_RE.search(get("team_number"))) else None,
+            "team_number": int(team_number) if team_number is not None else None,
         }
     return None
 
@@ -362,17 +385,24 @@ def main() -> int:
     with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
         for t in titles:
             wiki = t["liquipedia_wiki"]
-            pages, convention = discover_tournament_pages(client, wiki, limiter)
+            category_filter = t.get("liquipedia_category")
+            pages, convention = discover_tournament_pages(client, wiki, limiter, category_filter)
             if convention is None:
-                msg = f"{t['id']}: no recognized tier-category convention on wiki '{wiki}' — skipped"
+                reason = (
+                    f"no pages titled like '{category_filter}' in a recognized tier category"
+                    if category_filter
+                    else "no recognized tier-category convention"
+                )
+                msg = f"{t['id']}: {reason} on wiki '{wiki}' — skipped"
                 print(f"[warn] {msg}", file=sys.stderr)
                 skipped_titles.append(t["id"])
                 continue
 
             known = known_pages_by_wiki.get(wiki, set())
             to_fetch = [p for p in pages if p not in known]
+            filter_note = f", filtered to titles containing '{category_filter}'" if category_filter else ""
             print(
-                f"[info] {t['id']}: using '{convention}' on wiki '{wiki}' — {len(pages)} candidate pages, "
+                f"[info] {t['id']}: using '{convention}' on wiki '{wiki}'{filter_note} — {len(pages)} candidate pages, "
                 f"{len(to_fetch)} new (skipping {len(pages) - len(to_fetch)} already in research.db)",
                 flush=True,
             )
