@@ -31,14 +31,25 @@ downstream (analysis/metrics.py) is `tier in {"1", "2"}` uniformly, with no
 per-wiki label mapping needed despite the discovery-category variance above.
 
 On-demand, not scheduled: historical tournament data doesn't change on a
-clock (PRD §9.2). Responses are cached locally under data/cache/liquipedia/
-(gitignored — unlike Twitch, this is re-fetchable at any time, so the cache
-is disposable, not a permanent record) and re-requested only with --refresh.
+clock (PRD §9.2). Wikitext fetches are cached locally under
+data/cache/liquipedia/ (gitignored — unlike Twitch, this is re-fetchable at
+any time, so the cache is disposable, not a permanent record).
+
+Rerunning this later is an "update," not a full recrawl: discovery
+(categorymembers) is never cached — it's cheap regardless of a wiki's
+history size, just a handful of paginated requests per tier category — so
+every run sees Liquipedia's current tournament list, including anything
+added since the last run. What makes a rerun fast is that any page already
+present in the `tournaments` table is skipped entirely (no wikitext fetch,
+no reparse), so a rerun's cost is proportional to what's actually new, not
+to the whole history. Pass --refresh to instead force re-fetching and
+re-parsing pages that are already in research.db too (e.g. a tournament's
+prize pool or tier changed after the fact).
 
 Usage:
-    python collectors/liquipedia.py
+    python collectors/liquipedia.py                       # crawl, or update: only new tournaments
     python collectors/liquipedia.py --titles counter_strike,dota2
-    python collectors/liquipedia.py --refresh
+    python collectors/liquipedia.py --refresh              # also re-fetch/re-parse known pages
 """
 
 from __future__ import annotations
@@ -173,14 +184,11 @@ def api_get(client: httpx.Client, wiki: str, params: dict, limiter: RateLimiter)
     return None
 
 
-def category_members(
-    client: httpx.Client, wiki: str, category: str, limiter: RateLimiter, cache: Cache
-) -> list[str]:
-    cache_key = f"categorymembers:{category}"
-    cached = cache.get(wiki, "categorymembers", cache_key)
-    if cached is not None:
-        return cached
-
+def category_members(client: httpx.Client, wiki: str, category: str, limiter: RateLimiter) -> list[str]:
+    """Deliberately NOT cached across runs, unlike wikitext fetches — this is
+    the discovery step, and the whole point of a later "update" run is to
+    see tournaments added since the last one. It's cheap regardless: a
+    handful of paginated requests per category, not one per tournament."""
     titles: list[str] = []
     cmcontinue = None
     while True:
@@ -201,18 +209,17 @@ def category_members(
         if not cmcontinue:
             break
 
-    cache.set(wiki, "categorymembers", cache_key, titles)
     return titles
 
 
 def discover_tournament_pages(
-    client: httpx.Client, wiki: str, limiter: RateLimiter, cache: Cache
+    client: httpx.Client, wiki: str, limiter: RateLimiter
 ) -> tuple[list[str], str | None]:
     """Returns (page_titles, convention_used). convention_used is None if no
     known tier convention had any members on this wiki."""
     for top, second in TIER_CONVENTIONS:
-        top_pages = category_members(client, wiki, top, limiter, cache)
-        second_pages = category_members(client, wiki, second, limiter, cache)
+        top_pages = category_members(client, wiki, top, limiter)
+        second_pages = category_members(client, wiki, second, limiter)
         if top_pages or second_pages:
             combined = sorted(set(top_pages) | set(second_pages))
             return combined, f"{top} + {second}"
@@ -317,7 +324,17 @@ def upsert_tournament(conn: sqlite3.Connection, title_id: str, wiki: str, page_t
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--titles", help="comma-separated title ids (default: all is_active titles)")
-    parser.add_argument("--refresh", action="store_true", help="bypass the local cache")
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help=(
+            "force re-fetch and re-parse of pages already in research.db "
+            "(e.g. to pick up a corrected prize pool or tier). Without this, "
+            "a rerun does fresh discovery (so it sees new tournaments) but "
+            "skips any page already present in the tournaments table — "
+            "that's the normal 'update' workflow, not a special mode."
+        ),
+    )
     args = parser.parse_args()
 
     all_titles = load_titles(TITLES_CONFIG)
@@ -330,6 +347,11 @@ def main() -> int:
     conn = get_connection()
     seed_titles_and_aliases(conn, all_titles)
 
+    known_pages_by_wiki: dict[str, set[str]] = {}
+    if not args.refresh:
+        for wiki, page in conn.execute("SELECT liquipedia_wiki, liquipedia_page FROM tournaments"):
+            known_pages_by_wiki.setdefault(wiki, set()).add(page)
+
     cache = Cache(CACHE_DIR, refresh=args.refresh)
     limiter = RateLimiter(GENERAL_MIN_INTERVAL)
     started_at = utcnow_iso()
@@ -340,17 +362,23 @@ def main() -> int:
     with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
         for t in titles:
             wiki = t["liquipedia_wiki"]
-            pages, convention = discover_tournament_pages(client, wiki, limiter, cache)
+            pages, convention = discover_tournament_pages(client, wiki, limiter)
             if convention is None:
                 msg = f"{t['id']}: no recognized tier-category convention on wiki '{wiki}' — skipped"
                 print(f"[warn] {msg}", file=sys.stderr)
                 skipped_titles.append(t["id"])
                 continue
 
-            print(f"[info] {t['id']}: using '{convention}' on wiki '{wiki}' — {len(pages)} candidate pages", flush=True)
-            for i, page_title in enumerate(pages, 1):
+            known = known_pages_by_wiki.get(wiki, set())
+            to_fetch = [p for p in pages if p not in known]
+            print(
+                f"[info] {t['id']}: using '{convention}' on wiki '{wiki}' — {len(pages)} candidate pages, "
+                f"{len(to_fetch)} new (skipping {len(pages) - len(to_fetch)} already in research.db)",
+                flush=True,
+            )
+            for i, page_title in enumerate(to_fetch, 1):
                 if i % 25 == 0:
-                    print(f"[info] {t['id']}: {i}/{len(pages)} pages processed", flush=True)
+                    print(f"[info] {t['id']}: {i}/{len(to_fetch)} new pages processed", flush=True)
                 wikitext = fetch_wikitext(client, wiki, page_title, limiter, cache)
                 if wikitext is None:
                     errors.append(f"{t['id']}/{page_title}: page fetch failed or missing")
