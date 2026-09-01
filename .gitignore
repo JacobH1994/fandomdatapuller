@@ -4,6 +4,8 @@
 # Databases (derived and disposable — rebuilt from data/raw/, see CLAUDE.md)
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
 
