@@ -301,7 +301,20 @@ def _clean_number(value: str) -> float | None:
 
 def parse_infobox(wikitext: str) -> dict | None:
     """Extracts fields from the `Infobox league` template. Returns None if
-    no such template is found (logged by the caller, not guessed)."""
+    no such template is found (logged by the caller, not guessed).
+
+    Editors commonly leave an inline HTML comment right after a field's
+    value (confirmed live, e.g. `|liquipediatier=2<!-- discussed on Discord:
+    ... -->`), typically to record the rationale for a judgment-call value
+    like tier. get() uses strip_code() (mwparserfromhell's plain-text
+    rendering, which drops comments/refs/etc.) rather than a raw str() of
+    the value, so that trailing commentary doesn't get stored as part of
+    the field itself. This mattered concretely: a raw str() left
+    tier="2<!-- ... -->" in `tournaments.tier`, which silently failed
+    analysis/metrics.py's exact `tier in {"1","2"}` check — undercounting
+    qualifying tournaments for every title whose editors do this (confirmed
+    on dota2, guilty_gear, hearthstone, mortal_kombat, pubg_mobile,
+    street_fighter, tekken)."""
     parsed = mwparserfromhell.parse(wikitext)
     for template in parsed.filter_templates():
         name = template.name.strip().lower()
@@ -310,7 +323,7 @@ def parse_infobox(wikitext: str) -> dict | None:
 
         def get(param: str) -> str | None:
             if template.has(param):
-                return str(template.get(param).value).strip() or None
+                return template.get(param).value.strip_code().strip() or None
             return None
 
         prize_pool = _clean_number(get("prizepoolusd") or get("prizepool") or "")

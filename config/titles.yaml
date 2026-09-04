@@ -412,7 +412,7 @@ titles:
     twitch_category_id: "13389"
     twitch_category_verified: true # judgment call: brief says "Age of Empires" without a version; AoE2 is the entry with an active competitive scene
     liquipedia_wiki: ageofempires
-    liquipedia_category: null
+    liquipedia_category: Age of Empires II Competitions # verified live 2026-09-05 (2,650 pages) — the "ageofempires" wiki hosts AoE I/II/III/IV/Online together under the same wiki-wide tier categories (confirmed: AoE I "Rise of Rome"-era tournaments and AoE IV events were previously miscounted into this title's data before this filter was added), same contamination pattern as the fighting-game wiki (see collectors/liquipedia.py)
     genre: rts
     platform: pc
     is_active: true
