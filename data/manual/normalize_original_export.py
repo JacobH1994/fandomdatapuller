@@ -24,7 +24,8 @@ borrow Tekken's evidence for a title it wasn't measuring. That's a real
 "hand-built table has no opinion on street_fighter" — not a "reached
 never" judgment — see data/manual/README.md.
 
-Run again only if milestone_table_original_export.csv changes.
+Run again if milestone_table_original_export.csv changes, or if
+RECONCILIATION_NOTES below is edited.
 """
 
 from pathlib import Path
@@ -77,6 +78,59 @@ NOT_TRACKED = {"Crossfire", "TrackMania", "Halo"}
 # somewhere to route a genuinely new ambiguous case if one shows up later.
 AMBIGUOUS: set[str] = set()
 
+# Reconciliation explanations (2026-09-05), appended to each title's notes
+# below rather than hand-edited into milestone_table.csv directly — this
+# file regenerates that CSV from scratch on every run, so an edit made
+# straight to the output would silently vanish on the next run (the same
+# reason the Street Fighter/Tekken split lives in NAME_TO_TITLE_ID above,
+# not in the CSV). PRD §9 requires every reconciliation disagreement to be
+# "explained or corrected," not just counted — this is where that record
+# lives for the ones that are explained rather than fixed. Full reasoning:
+# docs/milestone_reconciliation.md.
+_ERA_RELATIVE_TIER_NOTE = (
+    "[Pipeline note, 2026-09-05] Pipeline's milestone_year is earlier than "
+    "this row's, and that's expected, not a bug: Liquipedia's tier label is "
+    "era-relative to a title's own contemporary competitive scene, not a "
+    "fixed production-scale bar (PRD §6). get_success_milestone's "
+    "qualifying_window_scale field records the window's actual absolute "
+    "prize-pool/team-scale figures alongside milestone_year, deliberately "
+    "not gating on them — the two years answer different questions "
+    "(earliest structural qualification vs. when it felt like mainstream "
+    "arrival). See docs/milestone_reconciliation.md."
+)
+
+_GENERATIONAL_BOUNDARY_NOTES = {
+    "tekken": (
+        "[Pipeline note, 2026-09-05] This row's 2018 figure (TWT peak "
+        "viewership, CPT/TWT circuit founding) describes Tekken 7's era. "
+        "title_id='tekken' tracks Tekken 8 (2024) only, per this project's "
+        "current-gen-only convention (config/titles.yaml) — not a pipeline "
+        "error, a different product. Tekken 8's own pipeline milestone is "
+        "2025. See docs/milestone_reconciliation.md."
+    ),
+    "mortal_kombat": (
+        "[Pipeline note, 2026-09-05] This row's own source is "
+        "escharts.com/games/mkx — Mortal Kombat X (2015). "
+        "title_id='mortal_kombat' tracks Mortal Kombat 1 (2023) only, per "
+        "this project's current-gen-only convention (config/titles.yaml) — "
+        "not a pipeline error, a different product. MK1's own pipeline "
+        "milestone is 2024. See docs/milestone_reconciliation.md."
+    ),
+}
+
+_ERA_RELATIVE_TIER_TITLES = {
+    "league_of_legends", "dota2", "counter_strike", "starcraft2", "hearthstone",
+    "rocket_league", "rainbow_six_siege", "overwatch", "guilty_gear", "valorant",
+    "apex_legends", "fortnite", "pubg", "pubg_mobile", "free_fire",
+    "mobile_legends_bb", "wild_rift", "teamfight_tactics", "brawl_stars",
+    "age_of_empires_ii",
+}
+
+RECONCILIATION_NOTES: dict[str, str] = {
+    **{t: _ERA_RELATIVE_TIER_NOTE for t in _ERA_RELATIVE_TIER_TITLES},
+    **_GENERATIONAL_BOUNDARY_NOTES,
+}
+
 
 def main() -> None:
     raw = pd.read_csv(RAW_PATH, header=2)
@@ -93,6 +147,15 @@ def main() -> None:
     mapped["title_id"] = mapped["Game Title"].map(NAME_TO_TITLE_ID)
     mapped["milestone_year"] = mapped["Success Milestone Reached"]
     mapped["notes"] = mapped["Jake's Additional Validation"]
+
+    def append_reconciliation_note(row):
+        note = RECONCILIATION_NOTES.get(row["title_id"])
+        if not note:
+            return row["notes"]
+        existing = row["notes"] if isinstance(row["notes"], str) and row["notes"].strip() else None
+        return f"{existing} | {note}" if existing else note
+
+    mapped["notes"] = mapped.apply(append_reconciliation_note, axis=1)
 
     out = mapped[["title_id", "milestone_year", "notes"]].sort_values("title_id")
     out.to_csv(OUT_PATH, index=False)
