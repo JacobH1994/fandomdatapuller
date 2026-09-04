@@ -47,10 +47,21 @@ applies to config values too: an unverified Twitch category ID in
   `config/titles.yaml`, not a code change. It's version-controlled on
   purpose — "what were we tracking in March?" should be answerable from git
   history.
-- **`data/research.db` is derived and disposable.** It's gitignored and
-  rebuildable at any time via `python etl/load_snapshots.py --rebuild`,
-  which replays the entire `data/raw/` history — that raw history is the
-  permanent record and is never edited after the fact.
+- **`data/research.db` is derived and disposable — except its Liquipedia
+  data.** It's gitignored and rebuildable at any time via
+  `python etl/load_snapshots.py --rebuild`, which replays the entire
+  `data/raw/` history — that raw history is the permanent record and is
+  never edited after the fact. **But `--rebuild` only replays
+  `data/raw/twitch/`.** `collectors/liquipedia.py` writes tournament data
+  straight into `research.db` with no raw-file backup, so `--rebuild`
+  deletes it with no way to recover except a full re-crawl of every
+  tracked title. Never run `--rebuild` without confirming that's actually
+  wanted. A schema change (a new/renamed column) also does not
+  retroactively apply to an existing `research.db` — `get_connection()`
+  only runs `CREATE TABLE IF NOT EXISTS`, which is a no-op against a table
+  that already exists — so after editing `etl/schema.sql`, apply the
+  matching `ALTER TABLE` to the live database directly rather than
+  reaching for `--rebuild` to "pick up" the change.
 - **Every ingested table carries `source`/`confidence`** (PRD §14). Twitch
   and successfully-parsed Liquipedia fields are `verified` (measured or
   deterministically extracted, not inferred); anything Claude Code

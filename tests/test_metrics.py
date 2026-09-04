@@ -88,6 +88,137 @@ def test_viewership_check_is_explicitly_unevaluated(conn):
     assert result["viewership_check"] is None
 
 
+def test_qualifying_window_scale_breaks_prize_pool_out_by_currency(conn):
+    conn.execute(
+        """
+        INSERT INTO tournaments
+            (title_id, liquipedia_wiki, liquipedia_page, tier, start_date, region,
+             prize_pool, currency, team_number, fetched_at)
+        VALUES ('test_title', 'test', 'Event 2019 NA', '1', '2019-06-01', 'North America',
+                10000, 'USD', 8, '2026-01-01T00:00:00Z')
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO tournaments
+            (title_id, liquipedia_wiki, liquipedia_page, tier, start_date, region,
+             prize_pool, currency, team_number, fetched_at)
+        VALUES ('test_title', 'test', 'Event 2020 EU', '1', '2020-06-01', 'Europe',
+                500000000, 'KRW', 16, '2026-01-01T00:00:00Z')
+        """
+    )
+    conn.commit()
+
+    result = get_success_milestone(conn, "test_title")
+
+    scale = result["qualifying_window_scale"]
+    assert scale["tournament_count"] == 2
+    assert scale["avg_team_number"] == 12.0
+    assert scale["prize_pool_by_currency"] == {
+        "USD": {"count": 1, "total": 10000, "avg": 10000},
+        "KRW": {"count": 1, "total": 500000000, "avg": 500000000},
+    }
+
+
+def test_qualifying_window_scale_is_none_without_a_milestone(conn):
+    insert_tournament(conn, "Event 2019 NA", "1", "2019-06-01", "North America")
+
+    result = get_success_milestone(conn, "test_title")
+
+    assert result["qualifying_window_scale"] is None
+
+
+def test_viewership_check_uses_official_broadcast_twitch_data_when_present(conn):
+    insert_tournament(conn, "Event 2019 NA", "1", "2019-06-01", "North America")
+    insert_tournament(conn, "Event 2020 EU", "1", "2020-06-01", "Europe")
+
+    conn.execute(
+        """
+        INSERT INTO viewership_snapshots
+            (title_id, channel_id, captured_at, viewer_count, is_official_broadcast)
+        VALUES ('test_title', 'c1', '2019-06-01T00:00:00Z', 1000, 1)
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO viewership_snapshots
+            (title_id, channel_id, captured_at, viewer_count, is_official_broadcast)
+        VALUES ('test_title', 'c1', '2020-06-01T00:00:00Z', 2000, 1)
+        """
+    )
+    # A non-official stream in the window with a much higher count — must
+    # NOT be picked up, or the check would stop being esports-specific.
+    conn.execute(
+        """
+        INSERT INTO viewership_snapshots
+            (title_id, channel_id, captured_at, viewer_count, is_official_broadcast)
+        VALUES ('test_title', 'c2', '2019-06-02T00:00:00Z', 999999, 0)
+        """
+    )
+    conn.commit()
+
+    result = get_success_milestone(conn, "test_title")
+
+    check = result["viewership_check"]
+    assert check["flat_or_growing"] is True
+    assert check["source"] == "viewership_snapshots"
+    assert check["confidence"] == "verified"
+    assert check["esports_specific"] is True
+    assert check["first_year_avg_viewers"] == 1000
+    assert check["last_year_avg_viewers"] == 2000
+
+
+def test_viewership_check_falls_back_to_kaggle_when_no_twitch_data(conn):
+    insert_tournament(conn, "Event 2019 NA", "1", "2019-06-01", "North America")
+    insert_tournament(conn, "Event 2020 EU", "1", "2020-06-01", "Europe")
+
+    conn.execute(
+        """
+        INSERT INTO monthly_category_history (title_id, year_month, peak_viewers)
+        VALUES ('test_title', '2019-06', 5000)
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO monthly_category_history (title_id, year_month, peak_viewers)
+        VALUES ('test_title', '2020-06', 3000)
+        """
+    )
+    conn.commit()
+
+    result = get_success_milestone(conn, "test_title")
+
+    check = result["viewership_check"]
+    assert check["flat_or_growing"] is False
+    assert check["source"] == "monthly_category_history"
+    assert check["confidence"] == "proxy_estimate"
+    assert check["esports_specific"] is False
+
+
+def test_viewership_check_prefers_twitch_over_kaggle_when_both_present(conn):
+    insert_tournament(conn, "Event 2019 NA", "1", "2019-06-01", "North America")
+    insert_tournament(conn, "Event 2020 EU", "1", "2020-06-01", "Europe")
+
+    conn.execute(
+        """
+        INSERT INTO viewership_snapshots
+            (title_id, channel_id, captured_at, viewer_count, is_official_broadcast)
+        VALUES ('test_title', 'c1', '2019-06-01T00:00:00Z', 100, 1)
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO monthly_category_history (title_id, year_month, peak_viewers)
+        VALUES ('test_title', '2019-06', 999999)
+        """
+    )
+    conn.commit()
+
+    result = get_success_milestone(conn, "test_title")
+
+    assert result["viewership_check"]["source"] == "viewership_snapshots"
+
+
 def test_custom_thresholds_are_respected(conn):
     insert_tournament(conn, "Event 2019 NA", "1", "2019-06-01", "North America")
     insert_tournament(conn, "Event 2020 EU", "1", "2020-06-01", "Europe")

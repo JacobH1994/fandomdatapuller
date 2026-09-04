@@ -81,9 +81,13 @@ SQLite. All timestamps stored in **UTC, ISO 8601**, without exception — the da
 | `titles` | id, canonical_name, publisher, launch_date, is_active | Manual seed + Liquipedia/IGDB |
 | `title_aliases` | id, title_id, alias, platform, external_ids (Twitch category, Liquipedia page, IGDB id), valid_from, valid_to | Manual + connector mapping |
 | `tournaments` | id, title_id, tier, prize_pool, currency, start_date, end_date, region | Liquipedia |
-| `viewership_snapshots` | id, title_id, channel_id, captured_at, viewer_count, is_official_broadcast | Twitch (live), Esports Charts (event) |
+| `viewership_snapshots` | id, title_id, channel_id, captured_at, viewer_count, broadcast_tier | Twitch (live, curated channels only — see §9.1), Esports Charts (event) |
+| `category_totals_snapshots` | id, title_id, captured_at, total_viewer_count, total_channel_count | Twitch, aggregated across *all* live streams in a title's category (official and non-official) at capture time — individual non-official stream records are not persisted |
 | `platform_totals` | id, captured_at, platform, total_viewers, total_channels | Twitch |
-| `channels` | id, title_id, platform, external_channel_id, is_official, name | Manual + Twitch |
+| `monthly_category_history` | id, title_id, year_month, hours_watched, avg_viewers, peak_viewers, source, confidence | One-time Kaggle import (§9.6) — monthly pre-aggregated, **not** poll-derived; kept separate from `category_totals_snapshots` so the granularity difference stays explicit |
+| `channels` | id, title_id, platform, external_channel_id, name | Manual + Twitch |
+| `channel_broadcast_roles` | id, channel_id, tournament_id (nullable), broadcast_tier (`primary_official` / `detected_costream` / `general`), source, confidence, valid_from, valid_to | `primary_official` manually seeded once per title; `detected_costream` fully automated — see §9.1 |
+| `tournament_aliases` | id, tournament_id, alias, source, confidence | Rule-based extraction from the tournament name + one LLM call per tournament *series* for colloquial nicknames ("Champs," "Worlds," "MSI") |
 | `community_signals` | id, title_id, subreddit_type (main/esports), subscriber_count, captured_at | Reddit (optional) |
 | `demographic_snapshots` | id, title_id, age_bucket, gender, share, captured_at | Esports Charts enterprise (if pursued) |
 | `failed_challengers` | id, name, genre, platform, region, notes, source | Manual, qualitative |
@@ -112,6 +116,8 @@ A *niche* is a query across genre, platform and region, so refining any of the t
 
 **Derived, not stored raw:** `success_milestone_year` per title, computed from `tournaments` against the brief's definition (2+ years of A-tier-or-better competition across 2+ continents, viewership flat or growing). Implement it as a documented function with the definition's thresholds as named parameters, so a change to the definition re-derives rather than requiring re-entry. This is the centrepiece of Post 1 and the basis of the title list, so it needs to be reproducible rather than hand-maintained.
 
+**Tier is era-relative, not an absolute bar — confirmed from live data, not a bug.** Liquipedia's tier-1 label reflects a tournament's standing against its own title's contemporary competitive landscape, not a fixed dollar or prestige floor: the earliest tier-1 window for nearly every tracked title is dramatically smaller in prize pool and team scale than what tier-1 means once the scene matures. This is a plausible mechanism for Post 1's unexplained finding that newer successful titles run smaller in absolute scale than the classics — tier-1 only requires being the best version of a title's own scene, not the best thing in esports, so a small scene can sustain it indefinitely. Do not gate `get_success_milestone` on an absolute production-scale threshold: doing so would collapse "successful" (institutional durability) back into "scale," the two axes Post 1 kept deliberately separate. Instead, store the absolute prize-pool/team-scale figures for each title's qualifying window as a permanent companion metric next to the milestone flag, and finish implementing the viewership-flat-or-growing half of the original definition (not yet built) before considering whether any residual gap needs a different fix. Any published claim using "successful" states explicitly that it means era-relative institutional durability, not absolute scale, with the companion figure attached.
+
 **Uniqueness constraints** on every ingested table (e.g. `viewership_snapshots` unique on `(channel_id, captured_at)`), so re-running a load cannot duplicate rows. See §9.
 
 ## 7. Tracked-title configuration
@@ -129,12 +135,13 @@ The official-channel list is what makes the esports-vs-game-fandom distinction (
 | Dependency | Needed for | Cost | Notes |
 |---|---|---|---|
 | Twitch developer app | Live polling | Free | Client ID/secret via dev.twitch.tv; client-credentials flow |
-| Liquipedia API registration | Tournament, tier, prize-pool data | Free | Registration required; confirm current terms and rate limits at liquipedia.net/api |
+| Liquipedia — no account needed | Tournament, tier, prize-pool, date data via the open MediaWiki API | Free | Confirmed free and unauthenticated; rate-limited (1 req/2s, 1 req/30s for `action=parse`), needs a descriptive User-Agent. LPDB (the structured endpoint) requires separate approval and isn't assumed available — see §9.2 |
 | GitHub account + repo | Version control, scheduled ingestion, raw-data durability | Free (private: 2,000 Actions min/month) | See §11 on repo visibility |
 | Python 3.11+ | Everything | Free | `httpx`, `pandas`, `pyyaml`, `sqlite3` (stdlib), `plotly`/`matplotlib`, `jupyter`, `pytest` |
 | Esports Charts enterprise contact | Demographic data (H1) and country-level geography (§6, non-proxied region) — **capability unconfirmed, not just cost** | Paid; capability *and* cost both unconfirmed | Public marketing copy attributes geo/demo granularity to a "Twitch Extension" product, distinct from the real-time-viewer-count "Private API" — unclear whether either covers historical, per-event data, or is available to anyone other than the channel/event owner. Confirm what's actually queryable before assuming access. |
 | IGDB API key | Genre cross-reference | Free | Optional |
 | Reddit API access | Community signals | Free tier | Optional; confirm current terms |
+| YouTube Data API key | Official-channel live viewership | Free | Google Cloud project, enable YouTube Data API v3, generate an API key — no OAuth for public reads. Quota (10,000 units/day) is the real constraint, not access — see §9.7 |
 | Supabase account | Alternative landing zone (§9.3) | Free tier sufficient | Not the default |
 
 ## 9. Ingestion components
@@ -143,10 +150,20 @@ All connectors share the same contract: write to `collector_runs`; be idempotent
 
 **Idempotency is a hard requirement.** Scheduled jobs re-run, ETL scripts get run twice, a laptop loses power mid-load. Every load must use `INSERT ... ON CONFLICT DO NOTHING` (or equivalent) against the natural key. A research dataset that has silently double-counted an event is worse than one with a visible gap, because the gap is detectable and the duplication is not.
 
-**Rate limiting and etiquette.** Twitch enforces a token-bucket limit; exceeding it returns 429 until the bucket refills, so exponential backoff with jitter is required. Liquipedia is a volunteer-run project: cache aggressively, never re-request unchanged historical data, and send a descriptive user-agent identifying the project and a contact address. The standard applied to SullyGnome in §3 applies here too — being a good citizen of the sources is a project value, not an afterthought.
+**Rate limiting and etiquette.** Twitch enforces a token-bucket limit; exceeding it returns 429 until the bucket refills, so exponential backoff with jitter is required. Liquipedia's MediaWiki API (§9.2) is confirmed free but volunteer-run: hold to 1 request/2 seconds (1/30s for `action=parse`), cache aggressively, never re-request unchanged historical data, and send a descriptive user-agent identifying the project and a contact address. The standard applied to SullyGnome in §3 applies here too — being a good citizen of the sources is a project value, not an afterthought.
 
 ### 9.1 Twitch live collector (scheduled — Phase 1)
 GitHub Actions cron workflow polling `Get Streams` for every tracked title plus the platform-wide totals, appending each poll to `data/raw/` as a timestamped file committed back to the repo (the "git scraping" pattern). A separate local ETL (`etl/load_snapshots.py`) lands committed snapshots into SQLite on demand.
+
+**Capture scope — this is the setting that actually controls storage, not file format.** Three tiers, not two:
+
+1. **Channels in `config/channels.yaml`** — always full detail, regardless of viewer count.
+2. **Any other stream above a viewer-count threshold** — full detail *including title and tags*. This tier exists because co-stream detection (below) matches on title/tag text, and co-streamers by definition aren't on the curated list. Discarding their titles at capture time would permanently foreclose the detection, which §2 forbids.
+3. **Everything below the threshold** — no individual record. Sum viewer counts into `category_totals_snapshots` and roll languages into `language_mix_snapshots` (§6).
+
+Twitch viewership is heavily power-law distributed, so a threshold in the region of 50–100 viewers discards the large majority of *records* while retaining the large majority of *viewership*, and sits far below any co-stream worth counting. Set the exact value empirically rather than by guess: compute the record-count-vs-viewership retention curve from a real snapshot before fixing it, and record the chosen threshold in config so its effect on any time series is auditable later. Capturing the full untiered population instead inflates storage by roughly one to two orders of magnitude for records nothing in §6 uses. `thumbnail_url` and `type` are never worth keeping at any tier — the former is reconstructible from `user_login`, the latter is constant.
+
+**`config/channels.yaml` is not just the primary org channel — co-streamers are the harder and more important part.** Major tournaments routinely draw more combined viewership on co-streams than on the primary broadcast; treating co-streams as general content understates esports engagement specifically for the titles that co-stream most, which biases §12's official-broadcast-share metric in a non-random way. Whether a co-streamer was formally authorized by the publisher doesn't change whether their viewers are engaging with esports content rather than general game content, and it's not a question this research needs answered — so `broadcast_tier` doesn't distinguish authorized from unauthorized, only tournament-specific from general. That collapses the problem from "research every event's approved partner list" to something fully automatable: a stream is tagged `detected_costream` when it's live during a known tournament's broadcast window (`tournaments.start_date`/`end_date`) *and* its title or tags match that tournament's aliases (`tournament_aliases`, §6). No manual research and no human confirmation step — every match lands as `confidence=proxy_estimate` and is usable as-is. This will misclassify some streams in both directions (passing mentions get caught, co-streams that don't name-check the tournament get missed); that's an accepted trade for zero ongoing labor, and any published share number built on it should be described as detected/approximate rather than authoritative. `primary_official` is still the one thing seeded manually, once per title — that list is small and essentially static.
 
 - **Default cadence:** hourly, for tracked titles and platform totals. The research questions resolve at monthly and yearly granularity, so hourly loses little.
 - **Event mode:** manually-triggered 5–15 minute polling for specific titles during specific broadcast windows, where an accurate peak-viewer figure matters.
@@ -154,10 +171,14 @@ GitHub Actions cron workflow polling `Get Streams` for every tracked title plus 
 - **Bonus property:** because raw snapshots are committed to git, the collection history is automatically versioned, backed up off-machine, and independently auditable. This is a large part of why this pattern is preferred over a VPS.
 
 ### 9.2 Liquipedia connector (on-demand)
-Pulls tournament tier, prize pool, dates and region per title into `tournaments`. Historical data doesn't change on a clock; re-run when the title list changes or periodically to catch corrections. Cache responses locally and re-request only what's missing or stale.
+Liquipedia operates two separate APIs, confirmed directly from their API Terms of Use: **LPDB**, the structured tournament/match/prize-pool endpoint, requires an approved request and is not self-service — their own site currently lists even the paid tiers as unavailable, so this isn't a dependency to build around. Separately, Liquipedia provides free, unauthenticated access to the same underlying content through the **standard MediaWiki API** — no registration, just a rate limit (1 request/2s generally, 1 request/30s for `action=parse`) and a descriptive User-Agent identifying the project and a contact address.
+
+Build against the MediaWiki API: fetch each tournament page's wikitext and parse the "infobox" template parameters (date range, prize pool, tier, region) rather than querying LPDB directly — `mwparserfromhell` (Python) is built for exactly this. More parsing work than a clean structured endpoint, but zero access friction and officially sanctioned. Cache responses locally and re-request only what's missing or stale; historical tournament data doesn't change on a clock. If an LPDB request is later approved, it's a straightforward swap to a cleaner source for the same table — nothing else should be designed to depend on that outcome.
+
+**Tier conventions are not uniform across game wikis, and at least one gap is a candidate finding, not just a parsing bug.** Tekken, Street Fighter, Mortal Kombat and Guilty Gear all share Liquipedia's "fighters" wiki, which doesn't use the S/A/B tier convention the discovery logic was built against — those four titles were logged and skipped on the first crawl rather than guessed at, correctly. Before mapping the fighters wiki onto the existing tier scale, worth checking what it actually uses to rank events: fighting games plausibly organize around independent majors (EVO and similar) rather than publisher-run tiered circuits, which would be a structural difference relevant to §6's genre matrix — that cell was already flagged as possibly exclusion-resistant — not a data-quality problem to normalize away. Resolve by investigating the wiki's real structure before writing a mapping, and record whatever convention it turns out to use rather than forcing it into S/A/B.
 
 ### 9.3 Esports Charts connector (on-demand)
-Event and peak viewership per title. Populates `viewership_snapshots` with `source=esportscharts`, `is_official_broadcast=true`, since event data is esports-specific by construction.
+Event and peak viewership per title. Populates `viewership_snapshots` with `source=esportscharts`, `broadcast_tier=primary_official`, since event data is esports-specific by construction.
 
 **Alternative landing zone (both 9.1 and 9.3):** the scheduled job could write directly to hosted Postgres (Supabase free tier) instead of committing files. Free-tier projects pause after a week of inactivity, which is a non-issue given hourly writes. This buys remote queryability at the cost of an external dependency and the loss of git's automatic versioning of raw data. Recommend git-scraping as the default; revisit only if multi-device access becomes necessary.
 
@@ -166,6 +187,31 @@ Event and peak viewership per title. Populates `viewership_snapshots` with `sour
 
 ### 9.5 Optional
 Reddit main-vs-esports subreddit snapshots; IGDB genre cross-reference. Both on-demand, both deferrable past V1.
+
+### 9.6 Kaggle historical import (one-time)
+A public Kaggle dataset ("Evolution of Top Games on Twitch") carries monthly top-200 game figures — hours watched, average and peak viewers — from 2016 onward. It's the only available source for *general category* Twitch attention predating the collector's start date; Liquipedia covers tournaments and Esports Charts covers events, neither of which is the same thing. That makes it worth importing for the Classic and Console phases of the emergence story, which no other source in this plan reaches.
+
+Three constraints on how it lands:
+
+- **Separate table, deliberately.** It's monthly pre-aggregated data, not poll-derived, so it goes to `monthly_category_history` rather than `viewership_snapshots` or `category_totals_snapshots`. Merging it would leave a future query silently comparing monthly averages against hourly polls.
+- **Provenance is unverified.** The dataset page does not state its collection method, and datasets of this kind are frequently assembled by scraping a tracker — which would sit badly against the §3 non-goal. Import at `confidence=proxy_estimate` with `source=kaggle_import`, and check the dataset's discussion tab or contact the uploader before any published claim rests on it. If it turns out to be scraped from a tracker that prohibits it, drop it.
+- **Game fandom, not esports fandom.** Category-level figures include ranked play, guides and cosmetics content, exactly as §4 warns for raw Twitch category data. Never fold it into an esports-specific metric without labelling.
+
+One-time import, no scheduling, no ongoing maintenance.
+
+### 9.7 YouTube live collector (scheduled — mirrors §9.1)
+Auth is a plain API key against a Google Cloud project — no OAuth needed for public reads. The constraint is quota, not access, and it's sharply asymmetric: `videos.list` (viewer count for known video IDs) costs 1 unit and batches up to 50 IDs per call; `search.list` (the only way to discover which video a channel is *currently* live on) costs 100 units against a 10,000/day default — roughly 100 discovery checks a day, full stop.
+
+That rules out continuous discovery polling. Baseline: check the official-channel list for live status a few times a day. Event mode, same concept as §9.1: bump discovery to a tight cadence for the channels relevant to a specific tournament during its known window (`tournaments.start_date`/`end_date`), concentrating the expensive call where it matters most. Once a live video ID is known, monitor its viewer count with the cheap batched call at Twitch-equivalent cadence.
+
+Feeds the existing `channels` (`platform=youtube`) and `viewership_snapshots` tables — no schema change, since `platform` was already there for this. Real limitation, not a workaround: no affordable way to enumerate every live stream under a game the way `Get Streams` does, so YouTube populates the official-channel tier only, never `category_totals_snapshots` — no YouTube-side denominator. Optional, never required: if a tournament's YouTube stream URL is published in advance, noting the video ID directly skips a search call for that event — a free efficiency gain when convenient, not a dependency.
+
+### 9.8 Chinese platforms (Douyu, Huya, Bilibili) — investigated, not pursued
+Douyu runs an official Open Platform, but its developer agreement gates access behind "relevant legal qualifications" — in practice a registered business entity, not an individual researcher. What's reachable without that is unofficial, reverse-engineered endpoints built from captured mobile-app traffic — the same category of workaround already declined for SullyGnome and unofficial Liquipedia wrappers (§3), and not more defensible here for being harder to reach legitimately.
+
+Access aside, these platforms report a Heat Index, not a viewer count — a composite blending stream duration, traffic and virtual gifting, with no fixed conversion to actual viewers. Esports Charts, tracking dozens of platforms professionally, state that a directly comparable number is technically out of reach even for them.
+
+Realistic use of this market's data: cite published aggregate figures from firms tracking it professionally (Niko Partners, Streams Charts) as occasional `source=secondary_report` data points, not a connector. Not an open question — revisit only if a legitimate access route appears, not by default the next time China comes up.
 
 ## 10. Collector reliability & monitoring
 
@@ -190,7 +236,7 @@ Because collector downtime is unrecoverable (§2), reliability requirements are 
 - `get_niche_share(genre, platform, region, start, end)`
 - `get_concentration(niche, start, end)` — default to HHI (Herfindahl-Hirschman Index), the standard concentration measure and a direct fit for the coexistence-vs-exclusion question. Keep the measure swappable.
 - `get_official_broadcast_share(title, start, end)` — the esports-vs-game-fandom metric.
-- `get_success_milestone(title)` — the brief's definition, computed.
+- `get_success_milestone(title)` — the brief's definition, computed, always paired with the absolute-scale figure for that title's qualifying window (see §6) rather than returned alone.
 - `get_primary_region(title, start, end)` — Liquipedia tournament region where available, language mix (§6) as fallback/corroboration, tagged with which tier it rests on.
 
 **CSV export is a first-class output, not an afterthought.** `analysis/export.py` writes any metric result to CSV for manual work in Google Sheets. The platform removes the drudgery of *compiling* tables; it doesn't dictate where the thinking happens. Every chart produced should have a one-line path to the underlying CSV.
@@ -277,6 +323,7 @@ Phases 2 through 4 can overlap; Phase 1 should not wait for any of them.
 - **Repo visibility** (§11) — public (free unlimited Actions, public dataset) vs. private (private dataset, 2,000 free minutes). Recommend deciding before the first push rather than after.
 - **Git-scraping vs. Supabase** landing zone — recommend git-scraping; revisit if remote access becomes necessary.
 - **Esports Charts enterprise** — first confirm what's actually available (their public copy is ambiguous between a channel-owner-facing Twitch Extension and their historical API — see §8), then whether the demographic and geographic data justifies cost. It would be the only direct test of H1's cohort claim and the only non-proxied source for region, *if* it turns out to cover third-party historical queries at all.
-- **Liquipedia terms** — confirm current API terms, rate limits and attribution requirements before building against it.
+- ~~**Liquipedia terms** — confirm current API terms, rate limits and attribution requirements before building against it.~~ Resolved: MediaWiki API confirmed free/open (§8, §9.2); LPDB requires approval and isn't assumed available.
 - **IGDB and Reddit connectors** — V1 or deferred past the Post 2 deadline.
 - **Event-mode trigger list** — which broadcasts warrant 5–15 minute polling, and who maintains that calendar.
+- **Chat message volume as an interactivity metric** — a genuinely distinct signal from viewer count (active participation vs. passive attention), directly relevant to the digital-fandom framing. Not a Phase 1 addition: Twitch doesn't expose chat volume via `Get Streams`, so it needs a persistent connection (IRC or EventSub) rather than a periodic poll — a new component, not a new field. Naturally scoped to the official-channel list only, same as the rest of §9.1's curated capture. Worth its own phase once the core collector is stable.

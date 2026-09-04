@@ -145,6 +145,31 @@ CREATE TABLE IF NOT EXISTS language_mix_snapshots (
     UNIQUE (title_id, captured_at, language_code)
 );
 
+-- One-time Kaggle historical import (PRD §9.6) — the only source in this
+-- project reaching Twitch category-wide viewership before the collector's
+-- own start date (2026-08-31). Deliberately separate from
+-- viewership_snapshots, not merged into it: this is monthly
+-- pre-aggregated data, not poll-derived, and merging them would leave a
+-- future query silently comparing monthly averages against hourly polls.
+-- Category-wide, not esports-specific — "game fandom, not esports
+-- fandom" per §9.6, includes ranked play/guides/cosmetics content —
+-- never fold directly into an esports-specific metric without labelling
+-- (see analysis/metrics.py's use of it). Provenance is unverified (the
+-- dataset doesn't document its own collection method), hence
+-- confidence='proxy_estimate' by default rather than 'verified'. See
+-- collectors/kaggle_import.py.
+CREATE TABLE IF NOT EXISTS monthly_category_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    year_month TEXT NOT NULL, -- 'YYYY-MM'
+    hours_watched REAL,
+    avg_viewers REAL,
+    peak_viewers REAL,
+    source TEXT NOT NULL DEFAULT 'kaggle_import',
+    confidence TEXT NOT NULL DEFAULT 'proxy_estimate',
+    UNIQUE (title_id, year_month)
+);
+
 -- Official broadcast channels per title (PRD §6/§7), mirrors
 -- config/channels.yaml. Feeds is_official_broadcast and the
 -- esports-vs-game-fandom "% of category attention on official channels"

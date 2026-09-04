@@ -12,6 +12,11 @@
 # Connector caches (disposable, re-fetchable — not the permanent raw record)
 data/cache/
 
+# Kaggle historical import source file(s) — a stably-hosted external
+# dataset, re-downloadable anytime (unlike data/raw/twitch/, which can
+# never be recreated). See collectors/kaggle_import.py.
+data/kaggle/
+
 # Python
 __pycache__/
 *.pyc
