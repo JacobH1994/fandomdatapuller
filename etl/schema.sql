@@ -114,12 +114,49 @@ CREATE TABLE IF NOT EXISTS tournaments (
     UNIQUE (liquipedia_wiki, liquipedia_page)
 );
 
+-- Populated by etl/generate_tournament_aliases.py, per tournament (not per
+-- series) even though generation happens once per series and fans out --
+-- collectors/twitch_poll.py's/etl/classify_broadcast_tier.py's word-boundary
+-- alias match (PRD §9.1 condition 3) needs a specific tournament_id to
+-- attach a match to, so the same alias is inserted once per tournament
+-- sharing that series rather than stored once at a series level that
+-- doesn't otherwise exist as an entity in this schema.
+-- Two provenance shapes, per row: rule-based extraction (source=
+-- 'rule_based', confidence='verified' — a deterministic transform of
+-- already-verified tournament data, same reasoning as tier/prize_pool)
+-- and LLM-derived colloquial nicknames (source='ai_assisted',
+-- confidence='ai_assisted_unreviewed' per PRD §14/CLAUDE.md's provenance
+-- rule — never promoted without human review).
+CREATE TABLE IF NOT EXISTS tournament_aliases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tournament_id INTEGER NOT NULL REFERENCES tournaments(id),
+    alias TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'rule_based',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (tournament_id, alias)
+);
+
 -- One row per full-detail stream per poll (PRD §6). Below-capture-threshold
 -- streams (config/capture.yaml) never appear here individually — their
 -- viewer_count is folded into platform_totals/language_mix_snapshots
 -- instead. is_official_broadcast reflects config/channels.yaml *as of
 -- capture time* (persisted by the collector itself, not recomputed here
 -- from today's config) — see collectors/twitch_poll.py.
+--
+-- broadcast_tier/matched_tournament_id/matched_alias: set by
+-- etl/classify_broadcast_tier.py per PRD §9.1's three-condition detection.
+-- Deliberately columns here, not PRD §6's originally-sketched separate
+-- channel_broadcast_roles table (channel_id, tournament_id, valid_from/to)
+-- — a per-snapshot annotation is the right grain: a single channel can be
+-- primary_official during one event and general the rest of the time, and
+-- several tournaments for the same title can run concurrently, so "which
+-- tournament, if any, does THIS specific poll match" is a fact about the
+-- snapshot, not a durable validity-dated role assignment on the channel.
+-- matched_tournament_id/matched_alias store WHY a row was classified
+-- detected_costream, not just the verdict, so any classification is
+-- auditable rather than a bare label. NULL broadcast_tier means
+-- unclassified (this pass hasn't run on that row yet), not "general" —
+-- classify_broadcast_tier.py's incremental mode targets exactly these.
 CREATE TABLE IF NOT EXISTS viewership_snapshots (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title_id TEXT NOT NULL REFERENCES titles(id),
@@ -129,7 +166,12 @@ CREATE TABLE IF NOT EXISTS viewership_snapshots (
     viewer_count INTEGER NOT NULL,
     is_official_broadcast INTEGER NOT NULL DEFAULT 0,
     stream_title TEXT,
+    tags TEXT, -- comma-joined, as captured (collectors/twitch_poll.py's raw JSON has a tags array per stream) — NULL for rows loaded before this column existed, not "no tags"; etl/classify_broadcast_tier.py's alias match treats a NULL here as "nothing to search," not a failure
     language TEXT,
+    broadcast_tier TEXT, -- 'primary_official' | 'detected_costream' | 'general' | NULL (unclassified)
+    broadcast_tier_confidence TEXT, -- 'verified' (primary_official/general) | 'proxy_estimate' (detected_costream, PRD §9.1)
+    matched_tournament_id INTEGER REFERENCES tournaments(id),
+    matched_alias TEXT,
     source TEXT NOT NULL DEFAULT 'twitch_api',
     confidence TEXT NOT NULL DEFAULT 'verified',
     UNIQUE (channel_id, captured_at)
@@ -264,3 +306,6 @@ CREATE TABLE IF NOT EXISTS collector_runs (
 CREATE INDEX IF NOT EXISTS idx_viewership_title_captured ON viewership_snapshots (title_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_language_mix_title_captured ON language_mix_snapshots (title_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title ON tournaments (title_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_aliases_tournament ON tournament_aliases (tournament_id);
+CREATE INDEX IF NOT EXISTS idx_viewership_broadcast_tier ON viewership_snapshots (broadcast_tier);
+CREATE INDEX IF NOT EXISTS idx_tournaments_title_dates ON tournaments (title_id, start_date, end_date);
