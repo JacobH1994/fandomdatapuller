@@ -161,10 +161,25 @@ def main() -> int:
             f"NAME_TO_TITLE_ID maps to title_id(s) not in config/titles.yaml: {unknown_mapped_ids}"
         )
 
-    conn = get_connection()
     matched_counts: dict[str, int] = defaultdict(int)
-    rows_written = 0
     skipped_unmapped = 0
+
+    # Aggregate in memory, keyed by (title_id, year_month), before writing —
+    # NAME_TO_TITLE_ID sometimes maps more than one raw Kaggle "Game" name to
+    # the same title_id for the same month: confirmed live (2026-09-05) that
+    # a straight per-row upsert silently OVERWRITES in that case rather than
+    # combining, which corrupted counter_strike (a "Counter-Strike 2" beta-
+    # test category briefly coexisted with "Counter-Strike: Global
+    # Offensive"/"Counter-Strike" around the real CS2 launch, Sept 2023) and
+    # overwatch (same shape, the Overwatch 2 beta before its Oct 2022
+    # launch) with a near-zero value for several months — a fake "dip," not
+    # a real one. hours_watched/avg_viewers are additive (both categories'
+    # viewers are real, concurrent audience) so they're summed; peak_viewers
+    # is NOT summed — two categories' peaks likely didn't occur at the same
+    # instant, so the max of the two is the correct "highest concurrent
+    # viewership seen" reading, not their sum.
+    aggregated: dict[tuple[str, str], dict[str, float | None]] = {}
+    collisions: dict[tuple[str, str], int] = defaultdict(int)
 
     # cp1252, not utf-8: confirmed against the actual downloaded file
     # (2026-09-05) — it has non-ASCII punctuation (e.g. an en-dash) in some
@@ -191,27 +206,53 @@ def main() -> int:
                 raw = (row.get(cols[key]) or "").replace(",", "").strip()
                 return float(raw) if raw else None
 
-            conn.execute(
-                """
-                INSERT INTO monthly_category_history
-                    (title_id, year_month, hours_watched, avg_viewers, peak_viewers,
-                     source, confidence)
-                VALUES (?, ?, ?, ?, ?, 'kaggle_import', 'proxy_estimate')
-                ON CONFLICT (title_id, year_month) DO UPDATE SET
-                    hours_watched = excluded.hours_watched,
-                    avg_viewers = excluded.avg_viewers,
-                    peak_viewers = excluded.peak_viewers
-                """,
-                (title_id, year_month, to_float("hours_watched"), to_float("avg_viewers"), to_float("peak_viewers")),
+            hours_watched, avg_viewers, peak_viewers = (
+                to_float("hours_watched"), to_float("avg_viewers"), to_float("peak_viewers")
             )
-            matched_counts[title_id] += 1
-            rows_written += 1
+            key = (title_id, year_month)
+            existing = aggregated.get(key)
+            if existing is None:
+                aggregated[key] = {
+                    "hours_watched": hours_watched, "avg_viewers": avg_viewers, "peak_viewers": peak_viewers,
+                }
+            else:
+                collisions[key] += 1
 
+                def add(a, b):
+                    return a + b if a is not None and b is not None else (a if a is not None else b)
+
+                def take_max(a, b):
+                    return max(a, b) if a is not None and b is not None else (a if a is not None else b)
+
+                existing["hours_watched"] = add(existing["hours_watched"], hours_watched)
+                existing["avg_viewers"] = add(existing["avg_viewers"], avg_viewers)
+                existing["peak_viewers"] = take_max(existing["peak_viewers"], peak_viewers)
+            matched_counts[title_id] += 1
+
+    conn = get_connection()
+    for (title_id, year_month), vals in aggregated.items():
+        conn.execute(
+            """
+            INSERT INTO monthly_category_history
+                (title_id, year_month, hours_watched, avg_viewers, peak_viewers,
+                 source, confidence)
+            VALUES (?, ?, ?, ?, ?, 'kaggle_import', 'proxy_estimate')
+            ON CONFLICT (title_id, year_month) DO UPDATE SET
+                hours_watched = excluded.hours_watched,
+                avg_viewers = excluded.avg_viewers,
+                peak_viewers = excluded.peak_viewers
+            """,
+            (title_id, year_month, vals["hours_watched"], vals["avg_viewers"], vals["peak_viewers"]),
+        )
     conn.commit()
     conn.close()
 
-    print(f"wrote {rows_written} monthly_category_history row(s) across {len(matched_counts)} title(s)")
+    print(f"wrote {len(aggregated)} monthly_category_history row(s) across {len(matched_counts)} title(s)")
     print(f"skipped {skipped_unmapped} row(s) for games this project doesn't track")
+    if collisions:
+        print(f"[info] combined {len(collisions)} (title_id, year_month) collision(s) instead of overwriting:")
+        for (title_id, year_month), extra_rows in sorted(collisions.items()):
+            print(f"  {title_id} {year_month}: {extra_rows + 1} raw rows merged")
 
     unmatched_tracked = set(NAME_TO_TITLE_ID.values()) & tracked_ids - set(matched_counts)
     if unmatched_tracked:
