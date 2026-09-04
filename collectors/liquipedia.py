@@ -213,33 +213,44 @@ def category_members(client: httpx.Client, wiki: str, category: str, limiter: Ra
 
 
 def discover_tournament_pages(
-    client: httpx.Client, wiki: str, limiter: RateLimiter, category_filter: str | None = None
+    client: httpx.Client, wiki: str, limiter: RateLimiter, competitions_category: str | None = None
 ) -> tuple[list[str], str | None]:
     """Returns (page_titles, convention_used). convention_used is None if no
-    known tier convention had any members on this wiki (after filtering, if
-    category_filter is set).
+    known tier convention had any members on this wiki (after intersecting
+    with competitions_category, if set).
 
-    category_filter matters for a wiki shared by several games (confirmed:
-    Liquipedia's "fighters" wiki hosts Tekken, Street Fighter, Mortal Kombat,
-    Guilty Gear, and others together under the SAME wiki-wide tier
-    categories — there is no per-game split at the category level). Without
-    filtering, every title sharing that wiki would discover the identical
-    unfiltered page pool and each would attribute every other game's
-    tournaments to itself. category_filter, when given, keeps only pages
-    whose title contains it (case-insensitive substring match against the
-    page title — e.g. "Tekken" matches "Tekken 8 World Tour/2024 Finals").
-    This is a heuristic, not a verified per-page game tag, and is noted as
-    such wherever it's used. If filtering empties the result, that's treated
-    the same as "no convention found" — skipped, not silently widened back
-    to the unfiltered pool."""
+    competitions_category matters for a wiki shared by several games
+    (confirmed: Liquipedia's "fighters" wiki hosts Tekken, Street Fighter,
+    Mortal Kombat, Guilty Gear, and others together under the SAME
+    wiki-wide tier categories — there is no per-game split at the tier
+    category level). Without narrowing, every title sharing that wiki would
+    discover the identical unfiltered page pool and each would attribute
+    every other game's tournaments to itself.
+
+    Liquipedia tags every tournament page with a verified per-game category
+    of the form "Category:<Game> <Version> Competitions" (e.g. "Tekken 8
+    Competitions", "Guilty Gear -STRIVE- Competitions") — this is a real
+    page attribute, not a naming convention, so it also correctly separates
+    different versions of the same franchise (confirmed: "Tekken 7 UK
+    Championship/Birmingham" carries "Category:Tekken 7 Competitions", not
+    "Tekken 8", even though "Tekken" is a substring of both). An earlier
+    version of this function filtered by title-substring instead, which
+    both missed tournaments not named after the game (e.g. Guilty Gear
+    Strive's "ARC World Tour") and let prior-generation tournaments leak in
+    (e.g. Tekken 7 events under title_id="tekken", which tracks Tekken 8
+    only). competitions_category, when given, is intersected against the
+    tier-category pages rather than substring-matched. If that intersection
+    is empty, that's treated the same as "no convention found" — skipped,
+    not silently widened back to the unfiltered pool."""
     for top, second in TIER_CONVENTIONS:
         top_pages = category_members(client, wiki, top, limiter)
         second_pages = category_members(client, wiki, second, limiter)
-        combined = sorted(set(top_pages) | set(second_pages))
-        if category_filter:
-            combined = [p for p in combined if category_filter.lower() in p.lower()]
+        combined = set(top_pages) | set(second_pages)
+        if competitions_category:
+            game_pages = set(category_members(client, wiki, competitions_category, limiter))
+            combined = combined & game_pages
         if combined:
-            return combined, f"{top} + {second}"
+            return sorted(combined), f"{top} + {second}"
     return [], None
 
 
@@ -385,12 +396,12 @@ def main() -> int:
     with httpx.Client(headers={"User-Agent": USER_AGENT}) as client:
         for t in titles:
             wiki = t["liquipedia_wiki"]
-            category_filter = t.get("liquipedia_category")
-            pages, convention = discover_tournament_pages(client, wiki, limiter, category_filter)
+            competitions_category = t.get("liquipedia_category")
+            pages, convention = discover_tournament_pages(client, wiki, limiter, competitions_category)
             if convention is None:
                 reason = (
-                    f"no pages titled like '{category_filter}' in a recognized tier category"
-                    if category_filter
+                    f"no pages in Category:'{competitions_category}' overlapping a recognized tier category"
+                    if competitions_category
                     else "no recognized tier-category convention"
                 )
                 msg = f"{t['id']}: {reason} on wiki '{wiki}' — skipped"
@@ -400,7 +411,7 @@ def main() -> int:
 
             known = known_pages_by_wiki.get(wiki, set())
             to_fetch = [p for p in pages if p not in known]
-            filter_note = f", filtered to titles containing '{category_filter}'" if category_filter else ""
+            filter_note = f", intersected with Category:'{competitions_category}'" if competitions_category else ""
             print(
                 f"[info] {t['id']}: using '{convention}' on wiki '{wiki}'{filter_note} — {len(pages)} candidate pages, "
                 f"{len(to_fetch)} new (skipping {len(pages) - len(to_fetch)} already in research.db)",
