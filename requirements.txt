@@ -9,3 +9,16 @@ pandas>=2.2
 jupyter>=1.0
 matplotlib>=3.8
 scipy>=1.11
+
+# anthropic (LLM-derived tournament aliases, etl/generate_tournament_aliases.py)
+# is deliberately NOT listed here. This file is installed as-is by
+# .github/workflows/poll.yml's hourly Twitch collector run (CLAUDE.md's
+# "one rule": that workflow must never be put at risk) — confirmed live
+# (2026-09-09) that installing anthropic alongside httpx pulls in a
+# conflicting h11 version (pip flags it; a direct httpx request still
+# worked in this environment, but "probably fine" isn't the bar for a
+# shared file the collector's CI depends on). Install it separately,
+# on-demand, only where alias generation actually runs:
+#   pip install anthropic>=0.40
+# That script already degrades gracefully (rule-based aliases only, no
+# crash) if it's absent or ANTHROPIC_API_KEY is unset.
