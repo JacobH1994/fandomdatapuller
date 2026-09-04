@@ -13,12 +13,43 @@ from collections import defaultdict
 
 # The brief's definition (§4): "minimum 2-year history of A-tier-or-better
 # competition across at least 2 continents, with viewership flat or growing
-# over that period." tournaments.tier stores Liquipedia's raw numeric
-# `liquipediatier` infobox value ("1" = top tier, "2" = second, ...) —
-# confirmed empirically that this numbering is consistent across wikis even
-# though the *display* category labels aren't (S-Tier/A-Tier vs. Tier 1/
-# Tier 2 vs. others; see collectors/liquipedia.py). "A-tier-or-better" is
-# therefore tier 1 or 2, uniformly, with no per-wiki label mapping needed.
+# over that period."
+#
+# collectors/liquipedia.py's docstring previously claimed the infobox's raw
+# `liquipediatier` value is always a plain number ("1"/"2"), with S-Tier/
+# A-Tier vs. Tier 1/Tier 2 being purely a *display*-category difference over
+# the same underlying number. That claim was verified against exactly one
+# wiki (teamfight_tactics) and is false more broadly — confirmed live
+# 2026-09-05 directly against cached wikitext: counter_strike, valorant,
+# and (for some pages) age_of_empires_ii genuinely author
+# `|liquipediatier=S-Tier` / `A-Tier` / `A` as the literal field value, not
+# a number. Left unhandled, this silently zeroed out (or drastically
+# undercounted) qualifying tournaments for those titles — counter_strike
+# and valorant are not edge cases, they're two of this project's largest
+# tracked titles.
+#
+# _normalize_tier maps those label values onto the same "1"/"2" scale
+# rather than expanding DEFAULT_QUALIFYING_TIERS with letter variants, so
+# there's exactly one canonical "qualifying" definition to reason about.
+# The mapping (S~1, A~2) is not a fresh guess: it mirrors
+# collectors/liquipedia.py's own TIER_CONVENTIONS list, which already
+# treats "S-Tier Tournaments"/"A-Tier Tournaments" as equivalent to
+# "Tier 1 Tournaments"/"Tier 2 Tournaments" for tournament *discovery* — a
+# precedent already established elsewhere in this codebase, not invented
+# here. B-Tier/C-Tier and anything else pass through unchanged (i.e. don't
+# qualify), matching "A-tier-or-better."
+TIER_LABEL_NORMALIZATION: dict[str, str] = {
+    "S": "1", "S-Tier": "1",
+    "A": "2", "A-Tier": "2",
+}
+
+
+def _normalize_tier(raw: str | None) -> str | None:
+    if raw is None:
+        return None
+    return TIER_LABEL_NORMALIZATION.get(raw, raw)
+
+
 DEFAULT_QUALIFYING_TIERS = frozenset({"1", "2"})
 
 
@@ -76,7 +107,7 @@ def get_success_milestone(
     year_regions: dict[int, set[str]] = {}
     year_tournaments: dict[int, list[tuple]] = defaultdict(list)
     for start_date, region, tier, prize_pool, currency, team_number in rows:
-        if tier not in qualifying_tiers:
+        if _normalize_tier(tier) not in qualifying_tiers:
             continue
         try:
             year = int(str(start_date)[:4])

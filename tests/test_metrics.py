@@ -219,6 +219,26 @@ def test_viewership_check_prefers_twitch_over_kaggle_when_both_present(conn):
     assert result["viewership_check"]["source"] == "viewership_snapshots"
 
 
+def test_letter_tier_labels_are_normalized_to_qualifying(conn):
+    insert_tournament(conn, "Event 2019 NA", "S-Tier", "2019-06-01", "North America")
+    insert_tournament(conn, "Event 2020 EU", "A-Tier", "2020-06-01", "Europe")
+
+    result = get_success_milestone(conn, "test_title")
+
+    assert result["meets_tier_and_region_criteria"] is True
+    assert result["milestone_year"] == 2020
+
+
+def test_letter_tier_below_a_still_excluded(conn):
+    insert_tournament(conn, "Event 2019 NA", "B-Tier", "2019-06-01", "North America")
+    insert_tournament(conn, "Event 2020 EU", "C-Tier", "2020-06-01", "Europe")
+
+    result = get_success_milestone(conn, "test_title")
+
+    assert result["years_with_qualifying_competition"] == []
+    assert result["milestone_year"] is None
+
+
 def test_custom_thresholds_are_respected(conn):
     insert_tournament(conn, "Event 2019 NA", "1", "2019-06-01", "North America")
     insert_tournament(conn, "Event 2020 EU", "1", "2020-06-01", "Europe")
