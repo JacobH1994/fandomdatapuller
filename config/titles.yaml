@@ -343,7 +343,7 @@ titles:
     liquipedia_wiki: pubg
     liquipedia_category: null
     genre: battle_royale
-    platform: pc # PGC/PCS run on PC only; PC and console are permanently separate matchmaking pools, not crossplay
+    platform: pc_console # reclassified 2026-09-08, explicit override: PGC/PCS's premier tier does run PC-only (the original citation, kept for reference), but that reflects a competitive-format choice, not a genuine audience-market split the way the platform taxonomy is meant to capture — assessed as an artifact of how the tag was derived, not a real reason to isolate PUBG from Apex/Fortnite's battle_royale/pc_console cell
     is_active: true
 
   - id: pubg_mobile

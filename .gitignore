@@ -30,3 +30,7 @@ venv/
 
 # OS
 .DS_Store
+
+# Editor swap/lock files
+*.swp
+.*.kate-swp
