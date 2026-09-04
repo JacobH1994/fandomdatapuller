@@ -166,7 +166,10 @@ def main() -> int:
     rows_written = 0
     skipped_unmapped = 0
 
-    with open(input_path, newline="", encoding="utf-8-sig") as f:
+    # cp1252, not utf-8: confirmed against the actual downloaded file
+    # (2026-09-05) — it has non-ASCII punctuation (e.g. an en-dash) in some
+    # game names that isn't valid UTF-8, and decodes cleanly as cp1252.
+    with open(input_path, newline="", encoding="cp1252") as f:
         reader = csv.DictReader(f)
         cols = resolve_columns(reader.fieldnames or [])
 
