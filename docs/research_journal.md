@@ -23,3 +23,5 @@ category_trajectories/ipynb
  - i can't tell but it sort of looks like the YoY growth chart shows that variance year-on-year tapers. This could be interesting to explore further. It feels consistent with the idea that there is a hype cycle, a kind of pent-up energy around a game at release, at which point there is then drop off that tapers in terms of volatility towards a stable fanbase. This fanbase is then potentially disripted by the emergence of other titles in the space that are similar? Not clear from the data, and a little bit what we're trying to prove here in the first place.
  - presumably the bump in OW is OW2.
  - is it possible that the top performing titles are more stable over time?
+ - wonder if it's possible to add in reddit users targeting 
+ - need to sit with a lot of this now... i think there's actually a massive amount of data here to work with and that needs some time. Also, still need to build out co-streamer tracking mechanism and understand how to label primary broadcast channels across all titles
