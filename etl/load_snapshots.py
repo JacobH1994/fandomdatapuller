@@ -7,6 +7,14 @@ loaded in its own transaction and only recorded in collector_runs once
 fully loaded, so a file is either "not loaded yet" or "fully loaded," never
 partially. Already-loaded files (by relative path) are skipped on rerun.
 
+Also loads data/reference/{tournaments,tournament_aliases}.jsonl on every
+run (see etl/export_reference_data.py) — this is what makes `--rebuild`
+actually rebuild a *working* database rather than one with an empty
+tournaments table: collectors/liquipedia.py writes tournament data
+directly into research.db with no raw-file backup, so without this,
+--rebuild would silently discard it. Cheap and idempotent (natural-key
+upserts), so it runs unconditionally, not just under --rebuild.
+
 Usage:
     python etl/load_snapshots.py                 # incremental: only new files
     python etl/load_snapshots.py --rebuild        # delete research.db and reload everything
@@ -27,6 +35,85 @@ from etl.db import DB_PATH, get_connection, seed_titles_and_aliases  # noqa: E40
 
 TITLES_CONFIG = REPO_ROOT / "config" / "titles.yaml"
 RAW_DIR = REPO_ROOT / "data" / "raw" / "twitch"
+REFERENCE_DIR = REPO_ROOT / "data" / "reference"
+
+
+def load_reference_data(conn) -> tuple[int, int]:
+    """Loads data/reference/{tournaments,tournament_aliases}.jsonl (see
+    etl/export_reference_data.py) into research.db. Both files are
+    optional — a repo checkout that predates this mechanism, or one where
+    export hasn't been run yet, just skips silently (nothing to load is
+    not an error). Natural-key upserts throughout, so safe to call on
+    every run, not just --rebuild.
+
+    tournament_aliases rows carry the tournament's NATURAL KEY
+    (liquipedia_wiki + liquipedia_page) in the export, not a raw numeric
+    tournament_id — autoincrement ids aren't guaranteed to match across a
+    fresh rebuild, so the id is resolved here, after tournaments are
+    already loaded, rather than trusted from the file."""
+    tournaments_written = 0
+    tournaments_path = REFERENCE_DIR / "tournaments.jsonl"
+    if tournaments_path.is_file():
+        with open(tournaments_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                t = json.loads(line)
+                conn.execute(
+                    """
+                    INSERT INTO tournaments
+                        (title_id, liquipedia_wiki, liquipedia_page, name, tier, prize_pool,
+                         currency, start_date, end_date, country, region, region_confidence,
+                         team_number, fetched_at, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (liquipedia_wiki, liquipedia_page) DO UPDATE SET
+                        title_id=excluded.title_id, name=excluded.name, tier=excluded.tier,
+                        prize_pool=excluded.prize_pool, currency=excluded.currency,
+                        start_date=excluded.start_date, end_date=excluded.end_date,
+                        country=excluded.country, region=excluded.region,
+                        region_confidence=excluded.region_confidence,
+                        team_number=excluded.team_number, fetched_at=excluded.fetched_at,
+                        source=excluded.source, confidence=excluded.confidence
+                    """,
+                    (
+                        t["title_id"], t["liquipedia_wiki"], t["liquipedia_page"], t["name"], t["tier"],
+                        t["prize_pool"], t["currency"], t["start_date"], t["end_date"], t["country"],
+                        t["region"], t["region_confidence"], t["team_number"], t["fetched_at"],
+                        t["source"], t["confidence"],
+                    ),
+                )
+                tournaments_written += 1
+        conn.commit()
+
+    aliases_written = 0
+    aliases_path = REFERENCE_DIR / "tournament_aliases.jsonl"
+    if aliases_path.is_file():
+        with open(aliases_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                a = json.loads(line)
+                row = conn.execute(
+                    "SELECT id FROM tournaments WHERE liquipedia_wiki = ? AND liquipedia_page = ?",
+                    (a["liquipedia_wiki"], a["liquipedia_page"]),
+                ).fetchone()
+                if row is None:
+                    continue  # tournament not present (e.g. --titles-scoped export) — skip, don't guess
+                conn.execute(
+                    """
+                    INSERT INTO tournament_aliases (tournament_id, alias, source, confidence)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT (tournament_id, alias) DO UPDATE SET
+                        source=excluded.source, confidence=excluded.confidence
+                    """,
+                    (row[0], a["alias"], a["source"], a["confidence"]),
+                )
+                aliases_written += 1
+        conn.commit()
+
+    return tournaments_written, aliases_written
 
 
 def load_titles_config() -> list[dict]:
@@ -59,12 +146,13 @@ def load_one_file(conn, path: Path) -> int:
             for stream in streams:
                 language = stream.get("language") or "unknown"
                 lang_totals[language] += stream.get("viewer_count", 0)
+                tags = stream.get("tags") or []
                 conn.execute(
                     """
                     INSERT INTO viewership_snapshots
                         (title_id, channel_id, channel_login, captured_at, viewer_count,
-                         is_official_broadcast, stream_title, language, source, confidence)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'twitch_api', 'verified')
+                         is_official_broadcast, stream_title, tags, language, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'twitch_api', 'verified')
                     ON CONFLICT (channel_id, captured_at) DO NOTHING
                     """,
                     (
@@ -75,6 +163,7 @@ def load_one_file(conn, path: Path) -> int:
                         stream.get("viewer_count", 0),
                         1 if stream.get("is_official_broadcast") else 0,
                         stream.get("title"),
+                        ",".join(tags) if tags else None,
                         stream.get("language"),
                     ),
                 )
@@ -145,6 +234,9 @@ def main() -> int:
 
     conn = get_connection()
     seed_titles_and_aliases(conn, load_titles_config())
+
+    n_tournaments, n_aliases = load_reference_data(conn)
+    print(f"loaded {n_tournaments} tournament(s), {n_aliases} tournament alias(es) from data/reference/")
 
     loaded = already_loaded_files(conn)
     all_files = sorted(RAW_DIR.glob("**/*.json.gz"))
