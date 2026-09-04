@@ -47,21 +47,25 @@ applies to config values too: an unverified Twitch category ID in
   `config/titles.yaml`, not a code change. It's version-controlled on
   purpose — "what were we tracking in March?" should be answerable from git
   history.
-- **`data/research.db` is derived and disposable — except its Liquipedia
-  data.** It's gitignored and rebuildable at any time via
-  `python etl/load_snapshots.py --rebuild`, which replays the entire
-  `data/raw/` history — that raw history is the permanent record and is
-  never edited after the fact. **But `--rebuild` only replays
-  `data/raw/twitch/`.** `collectors/liquipedia.py` writes tournament data
-  straight into `research.db` with no raw-file backup, so `--rebuild`
-  deletes it with no way to recover except a full re-crawl of every
-  tracked title. Never run `--rebuild` without confirming that's actually
-  wanted. A schema change (a new/renamed column) also does not
-  retroactively apply to an existing `research.db` — `get_connection()`
-  only runs `CREATE TABLE IF NOT EXISTS`, which is a no-op against a table
-  that already exists — so after editing `etl/schema.sql`, apply the
-  matching `ALTER TABLE` to the live database directly rather than
-  reaching for `--rebuild` to "pick up" the change.
+- **`data/research.db` is derived and disposable, rebuildable from
+  committed repo contents alone** — `data/raw/` (Twitch snapshots) *and*
+  `data/reference/` (`tournaments`/`tournament_aliases`, exported by
+  `etl/export_reference_data.py`). `python etl/load_snapshots.py
+  --rebuild` replays both. This closes a real gap: `collectors/
+  liquipedia.py` writes tournament data straight into `research.db` with
+  no raw-file backup, so before `data/reference/` existed, `--rebuild`
+  silently discarded it with no way to recover except a full re-crawl.
+  **The safety net only covers what's actually been exported and
+  committed** — run `etl/export_reference_data.py` (part of
+  `scripts/local_refresh.sh`) after any Liquipedia crawl or alias
+  generation, or a `--rebuild` right after new crawling and before the
+  next export still loses that gap. Never run `--rebuild` without
+  confirming `data/reference/` is current. A schema change (a new/renamed
+  column) also does not retroactively apply to an existing `research.db`
+  — `get_connection()` only runs `CREATE TABLE IF NOT EXISTS`, a no-op
+  against a table that already exists — so after editing
+  `etl/schema.sql`, apply the matching `ALTER TABLE` to the live database
+  directly rather than reaching for `--rebuild` to "pick up" the change.
 - **Every ingested table carries `source`/`confidence`** (PRD §14). Twitch
   and successfully-parsed Liquipedia fields are `verified` (measured or
   deterministically extracted, not inferred); anything Claude Code
@@ -77,12 +81,15 @@ phases. `analysis/metrics.py` has only `get_success_milestone` so far — the
 rest (`get_niche_share`, `get_concentration`, `get_official_broadcast_share`,
 `get_primary_region`) is Phase 4.
 
-**Known gap:** the Liquipedia connector's tournament-tier categorization
-varies by wiki (see `collectors/liquipedia.py`'s docstring) and doesn't yet
-resolve for the four fighting-game titles (`tekken`, `street_fighter`,
-`mortal_kombat`, `guilty_gear`) — they're logged and skipped, not guessed.
-Needs follow-up research into that wiki's actual competition categorization
-before they'll get tournament data.
+Also built: Phase 3 genre/platform classification; `get_success_milestone`'s
+`qualifying_window_scale`/`viewership_check`; the Kaggle historical-viewership
+import; several analysis notebooks (`notebooks/`); `tournament_aliases`
+(rule-based + LLM-derived, `etl/generate_tournament_aliases.py`);
+`viewership_snapshots.broadcast_tier` co-stream detection
+(`etl/classify_broadcast_tier.py`); `data/reference/` exports. See
+`docs/milestone_reconciliation.md` and the PRD's changelog-style sections
+for the reasoning behind non-obvious calls in this area — not duplicated
+here.
 
 ## Common tasks
 
@@ -115,6 +122,24 @@ Pull tournament data from Liquipedia (on-demand, not scheduled; add
 
 ```
 python collectors/liquipedia.py
+```
+
+Run the full local refresh routine (fixed order, explicit — see the
+script's own header comment for what each step does and why the order
+matters):
+
+```
+scripts/local_refresh.sh                     # skips the Liquipedia crawl
+scripts/local_refresh.sh --with-crawl        # also crawls Liquipedia first
+scripts/local_refresh.sh --with-llm-aliases  # step 4 spends on ANTHROPIC_API_KEY
+```
+
+Its individual steps, runnable on their own too:
+
+```
+python etl/generate_tournament_aliases.py     # tournament_aliases; --skip-llm for rule-based only
+python etl/export_reference_data.py           # data/reference/*.jsonl, for commit
+python etl/classify_broadcast_tier.py         # viewership_snapshots.broadcast_tier; --full-reclassify to redo everything
 ```
 
 Run tests:
