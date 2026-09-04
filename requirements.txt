@@ -7,3 +7,4 @@ pytest>=8.0
 # notebooks/ (PRD §8) — reconciliation and other ad-hoc analysis notebooks.
 pandas>=2.2
 jupyter>=1.0
+matplotlib>=3.8
