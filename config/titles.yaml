@@ -25,7 +25,136 @@
 #                         fighting-game wiki, which hosts several games (and
 #                         several versions of each) under the same tier
 #                         categories with no other split available.
-#   genre / platform      reference tags (Phase 3 classification — leave null for now)
+#   genre / platform      reference tags (Phase 3 classification, PRD §18).
+#                         Claude-assisted first pass, ai_assisted_unreviewed
+#                         until a human reviews it (CLAUDE.md provenance
+#                         rule) — seeded into titles.genre_id/platform_id by
+#                         etl/db.py:seed_titles_and_aliases, which also
+#                         populates the genres/platforms reference tables.
+#
+#                         Genre taxonomy (10 values, coarser than a
+#                         per-title label but not so coarse it erases a real
+#                         audience-pool split — see brief §6's own genre
+#                         table, which this follows and extends):
+#                           moba            lane-based MOBA: LoL/Dota2 (PC)
+#                                           and their direct mobile ports
+#                                           (Wild Rift, ML:BB)
+#                           tac_fps         tactical/grounded shooter: CS,
+#                                           VALORANT, Siege ("arguably", per
+#                                           brief §6)
+#                           hero_shooter    ability/class-based shooter,
+#                                           kept split from tac_fps per
+#                                           brief §6 (Overwatch only —
+#                                           deliberately a singleton, the
+#                                           brief's own "cleanest single-
+#                                           niche case")
+#                           battle_royale   PUBG/Apex/Fortnite/PUBG
+#                                           Mobile/Free Fire
+#                           fighting        Tekken/SF/MK/Guilty Gear
+#                           rts             SC2, Age of Empires II
+#                           ccg             Hearthstone (singleton — no other
+#                                           card game tracked)
+#                           sports          Rocket League (singleton —
+#                                           vehicular sports, no other title
+#                                           of this kind tracked)
+#                           autobattler     Teamfight Tactics (singleton —
+#                                           round-based auto-battler,
+#                                           mechanically distinct from MOBA
+#                                           despite sharing League's IP/
+#                                           client; judgment call, see
+#                                           collectors/liquipedia.py comment
+#                                           header for a parallel case)
+#                           arena_brawler   Brawl Stars (singleton — judgment
+#                                           call: some sources describe it as
+#                                           MOBA-adjacent, but its actual
+#                                           esports format — short arcade
+#                                           matches, multiple game modes, no
+#                                           lanes/leveling — reads as
+#                                           structurally different from the
+#                                           moba entries above; flagged for
+#                                           human review, could reasonably
+#                                           move into moba instead)
+#                         Five singleton genres is intentional, not a
+#                         taxonomy failure: the brief's own framework treats
+#                         a single-title niche-cell as a real (if ambiguous)
+#                         analysis outcome, not something to paper over by
+#                         forcing unrelated titles together.
+#
+#                         Platform taxonomy (revised 2026-09-05 — see below;
+#                         the axis that matters here is which device(s) a
+#                         title's PREMIER COMPETITIVE TIER actually runs on,
+#                         not which devices the base game supports):
+#                           pc              premier competitive tier is
+#                                           PC-only, even when the base game
+#                                           supports console/mobile play
+#                                           (e.g. Overwatch: OWCS rules
+#                                           permit PC only; Rainbow Six
+#                                           Siege: every world championship
+#                                           since 2017 has been PC-only).
+#                                           Titles with a genuinely separate
+#                                           mobile scene get split into their
+#                                           own title_id instead (pubg vs.
+#                                           pubg_mobile, league_of_legends vs.
+#                                           wild_rift) and each half is
+#                                           tagged pc/mobile independently —
+#                                           platform is NOT 1:1 with genre
+#                                           here.
+#                           console         premier competitive tier is
+#                                           console-only, or runs on one
+#                                           tournament-organizer-provided
+#                                           hardware standard rather than a
+#                                           fragmented multi-platform pool
+#                                           (Mortal Kombat: MK1 Pro
+#                                           Kompetition is explicitly
+#                                           PS5-exclusive; Tekken/Street
+#                                           Fighter majors run offline on
+#                                           one TO-provided setup, not
+#                                           parallel per-platform circuits).
+#                           pc_console      premier tier genuinely spans PC
+#                                           and console in ONE unified
+#                                           competition — not just "the base
+#                                           game supports both" (Apex
+#                                           Legends: PC/console share the
+#                                           same ALGS lobbies, with
+#                                           controller aim-assist tuned
+#                                           specifically to keep it unified;
+#                                           Fortnite: FNCS is PC+console in
+#                                           one bracket, though Epic runs a
+#                                           *separate* Fortnite Mobile
+#                                           Series outside that bracket, so
+#                                           mobile is excluded here; Guilty
+#                                           Gear: ARC World Tour has both a
+#                                           PS5 and a separate PC
+#                                           qualification path feeding the
+#                                           same Finals).
+#                           mobile          mobile-only title, the mobile
+#                                           half of a title already split
+#                                           into its own title_id above, or
+#                                           (judgment call, user override)
+#                                           a PC+mobile title with one
+#                                           unified client/ladder and no
+#                                           separate title_id split
+#                                           (Hearthstone, Teamfight Tactics).
+#                         pc_mobile exists as a value in principle (same
+#                         logic as pc_console, for a title whose premier
+#                         tier genuinely spans PC+mobile in one unified
+#                         competition) but no currently-tracked title uses
+#                         it — Hearthstone/TFT were a judgment call toward
+#                         mobile instead, above.
+#
+#                         Dropped the earlier single `cross_platform` catch-
+#                         all (2026-09-05): it silently conflated different
+#                         audience-pool compositions (a PC+console title and
+#                         a PC+mobile title got the same tag), which
+#                         undermines platform as a niche-defining axis
+#                         (genre × platform × region, PRD §6) — the whole
+#                         point is identifying a discrete competitive
+#                         audience pool, and "cross_platform" didn't do
+#                         that. Reclassifications below are verified online
+#                         against each circuit's actual rules/format where
+#                         possible (cited inline); several are medium
+#                         confidence where explicit rule text couldn't be
+#                         found — flagged inline, not asserted as fact.
 #
 # Region is deliberately NOT configured here — see PRD §6: region is measured
 # from tournament data and broadcast-language mix, not set as a static tag.
@@ -61,8 +190,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: leagueoflegends
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: moba
+    platform: pc
     is_active: true
 
   - id: dota2
@@ -71,8 +200,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: dota2
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: moba
+    platform: pc
     is_active: true
 
   - id: counter_strike
@@ -81,8 +210,8 @@ titles:
     twitch_category_verified: true # Twitch's unified category is named "Counter-Strike", covers CS2
     liquipedia_wiki: counterstrike
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: tac_fps
+    platform: pc
     is_active: true
 
   - id: starcraft2
@@ -91,8 +220,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: starcraft2
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: rts
+    platform: pc
     is_active: true
 
   - id: hearthstone
@@ -101,8 +230,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: hearthstone
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: ccg
+    platform: mobile # judgment call (user override, 2026-09-05): PC + mobile, one client/ladder, no separate hearthstone_mobile title_id — categorized as mobile rather than pc_mobile or pc
     is_active: true
 
   # --- Console phase (2016-20) ---
@@ -112,8 +241,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: rocketleague
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: sports
+    platform: pc # verified 2026-09-05: no explicit rule found banning console at RLCS, but every source converges on PC dominating the pro tier in practice — no console pros at RLCS's top tier found. Medium confidence; re-verify against RLCS's own rules doc if this matters for a specific claim
     is_active: true
 
   - id: rainbow_six_siege
@@ -122,8 +251,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: rainbowsix
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: tac_fps # brief §6 says "arguably" — kept in with CS/VALORANT per the brief's own table
+    platform: pc # verified 2026-09-05: only the 2017 Six Invitational split PC/Xbox brackets; every edition since is a single PC-only world championship (https://en.wikipedia.org/wiki/Six_Invitational). User flagged skepticism (controller input being permitted isn't the same as a separate console competitive pool) — kept as pc pending stronger counter-evidence
     is_active: true
 
   - id: overwatch
@@ -132,8 +261,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: overwatch
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: hero_shooter
+    platform: pc # verified 2026-09-05: OWCS official rules state matches "may be played solely on PC" — console players aren't eligible for the premier circuit despite the base game supporting console play
     is_active: true
 
   - id: tekken
@@ -142,8 +271,8 @@ titles:
     twitch_category_verified: true # judgment call: current-gen entry (Twitch also has separate Tekken 7 / Tekken 3 / etc. categories)
     liquipedia_wiki: fighters # shared wiki, confirmed live — "Liquipedia Fighting Games Wiki"
     liquipedia_category: Tekken 8 Competitions # verified live 2026-09-03 (827 pages); Tekken 7 events carry a separate "Tekken 7 Competitions" category, correctly excluded
-    genre: null
-    platform: null
+    genre: fighting
+    platform: console # verified 2026-09-05, medium confidence: majors (EVO, Tekken World Tour) run offline on one TO-provided hardware standard, not fragmented platforms — one competitive pool, not cross_platform, though an explicit "console-only" rule text (unlike Mortal Kombat's) wasn't found
     is_active: true
 
   - id: street_fighter
@@ -152,8 +281,8 @@ titles:
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
     liquipedia_category: Street Fighter 6 Competitions # verified live 2026-09-03 (1,335 pages)
-    genre: null
-    platform: null
+    genre: fighting
+    platform: console # verified 2026-09-05, medium confidence: same reasoning as tekken above — one TO-provided hardware standard at majors (Capcom Pro Tour), not a fragmented multi-platform pool
     is_active: true
 
   - id: mortal_kombat
@@ -162,8 +291,8 @@ titles:
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
     liquipedia_category: Mortal Kombat 1 Competitions # verified live 2026-09-03 (183 pages)
-    genre: null
-    platform: null
+    genre: fighting
+    platform: console # verified 2026-09-05, high confidence: MK1 Pro Kompetition is explicitly PS5-exclusive ("the event is only for PlayStation 5 owners" — EventHubs, Dec 2023)
     is_active: true
 
   - id: guilty_gear
@@ -172,8 +301,8 @@ titles:
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
     liquipedia_category: Guilty Gear -STRIVE- Competitions # verified live 2026-09-03 (666 pages); note wiki's category capitalizes STRIVE, unlike this title's display_name
-    genre: null
-    platform: null
+    genre: fighting
+    platform: pc_console # verified 2026-09-05, medium confidence: unlike the other three fighting titles, ARC World Tour has both a PS5 qualification path (PlayStation Tournaments) and a separate PC qualifier feeding the same Finals — a real dual-platform circuit, not just a single-hardware LAN standard
     is_active: true
 
   # --- Second Coming phase (2021-24) ---
@@ -183,8 +312,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: valorant
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: tac_fps
+    platform: pc
     is_active: true
 
   - id: apex_legends
@@ -193,8 +322,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: apexlegends
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: battle_royale
+    platform: pc_console # verified 2026-09-05, high confidence: genuinely unified — PC and console players share the same lobbies at ALGS, with Respawn tuning controller aim-assist specifically to keep it one competition rather than segregated pools
     is_active: true
 
   - id: fortnite
@@ -203,8 +332,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: fortnite
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: battle_royale
+    platform: pc_console # verified 2026-09-05, medium-high confidence: FNCS (the main circuit) is PC+console in one bracket, but Epic runs a *separate* Fortnite Mobile Series with its own $1M prize pool — mobile isn't merged into the top tier, so it's excluded here rather than folded in as a third platform
     is_active: true
 
   - id: pubg
@@ -213,8 +342,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: pubg
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: battle_royale
+    platform: pc # PGC/PCS run on PC only; PC and console are permanently separate matchmaking pools, not crossplay
     is_active: true
 
   - id: pubg_mobile
@@ -223,8 +352,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: pubgmobile
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: battle_royale
+    platform: mobile
     is_active: true
 
   - id: free_fire
@@ -233,8 +362,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: freefire
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: battle_royale
+    platform: mobile
     is_active: true
 
   - id: mobile_legends_bb
@@ -243,8 +372,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: mobilelegends
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: moba
+    platform: mobile
     is_active: true
 
   - id: wild_rift
@@ -253,8 +382,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: wildrift
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: moba
+    platform: mobile
     is_active: true
 
   - id: teamfight_tactics
@@ -263,8 +392,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: tft
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: autobattler # judgment call: shares League's IP/client with moba above, but mechanically a round-based auto-battler, not a lane-based MOBA — kept as its own genre rather than folded in
+    platform: mobile # judgment call (user override, 2026-09-05): PC + mobile, one unified ranked ladder/client, same reasoning as hearthstone above — categorized as mobile rather than pc_mobile or pc
     is_active: true
 
   - id: brawl_stars
@@ -273,8 +402,8 @@ titles:
     twitch_category_verified: true
     liquipedia_wiki: brawlstars
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: arena_brawler # judgment call, flagged for human review — see taxonomy note in this file's header; could reasonably be reclassified as moba
+    platform: mobile
     is_active: true
 
   # --- RTS (referenced alongside StarCraft II in the niche table, §6) ---
@@ -284,6 +413,6 @@ titles:
     twitch_category_verified: true # judgment call: brief says "Age of Empires" without a version; AoE2 is the entry with an active competitive scene
     liquipedia_wiki: ageofempires
     liquipedia_category: null
-    genre: null
-    platform: null
+    genre: rts
+    platform: pc
     is_active: true

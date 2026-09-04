@@ -29,10 +29,26 @@ CREATE TABLE IF NOT EXISTS platforms (
 
 -- One row per tracked title. id is the same slug used in
 -- config/titles.yaml, so seeding this table from that config is a direct
--- key match. genre_id is nullable until Phase 3 classification.
--- success_milestone_year is NOT a column here — PRD §6 is explicit that
--- it's derived, not stored, so it stays reproducible if the definition's
--- thresholds change. See analysis/metrics.py:get_success_milestone.
+-- key match. genre_id/platform_id are nullable until Phase 3
+-- classification. success_milestone_year is NOT a column here — PRD §6 is
+-- explicit that it's derived, not stored, so it stays reproducible if the
+-- definition's thresholds change. See analysis/metrics.py:get_success_milestone.
+--
+-- genre_id/platform_id deliberately do NOT reuse the row-level
+-- source/confidence above: that pair describes the manually-seeded
+-- identity fields (canonical_name, is_active, ...), sourced from
+-- config/titles.yaml at 'manual'/'manual_judgment_call'. Genre and platform
+-- come from a different, later process (Claude's Phase 3 classification
+-- pass, config-driven per CLAUDE.md's provenance rule) and need their own
+-- source/confidence so reusing the row-level pair doesn't misrepresent
+-- canonical_name etc. as ai_assisted — same reasoning as tournaments.
+-- region_confidence below, extended to a full source+confidence pair
+-- (rather than confidence alone) because unlike region, genre/platform's
+-- *source* value ('ai_assisted') also differs from the row default, not
+-- just its confidence. NULL until seeded; set to
+-- ('ai_assisted', 'ai_assisted_unreviewed') by seed_titles_and_aliases
+-- (etl/db.py) from config/titles.yaml's genre/platform fields, promoted to
+-- 'verified' only by explicit human review (CLAUDE.md).
 CREATE TABLE IF NOT EXISTS titles (
     id TEXT PRIMARY KEY,
     canonical_name TEXT NOT NULL,
@@ -40,6 +56,11 @@ CREATE TABLE IF NOT EXISTS titles (
     launch_date TEXT,
     is_active INTEGER NOT NULL DEFAULT 1,
     genre_id INTEGER REFERENCES genres(id),
+    genre_source TEXT,
+    genre_confidence TEXT,
+    platform_id INTEGER REFERENCES platforms(id),
+    platform_source TEXT,
+    platform_confidence TEXT,
     source TEXT NOT NULL DEFAULT 'manual',
     confidence TEXT NOT NULL DEFAULT 'manual_judgment_call'
 );

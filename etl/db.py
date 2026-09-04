@@ -32,12 +32,35 @@ def get_connection(db_path: Path = DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+def _seed_reference_value(conn: sqlite3.Connection, table: str, name: str) -> int:
+    """INSERT OR IGNORE a genres/platforms row by name, return its id.
+    genres/platforms are reference tables (PRD §6) — a table you add rows
+    to as the Phase 3 taxonomy is populated, not a hardcoded enum, so new
+    names showing up in config/titles.yaml just get appended here."""
+    conn.execute(f"INSERT OR IGNORE INTO {table} (name) VALUES (?)", (name,))
+    row = conn.execute(f"SELECT id FROM {table} WHERE name = ?", (name,)).fetchone()
+    return row[0]
+
+
 def seed_titles_and_aliases(conn: sqlite3.Connection, titles: list[dict]) -> None:
     """Idempotently seeds `titles` and `title_aliases` from config/titles.yaml.
     Safe to call on every run: does nothing for a title/alias already
     present. Does not handle a category ID *changing* under an existing
     title (that would need the old alias's valid_to set) — out of scope
-    until title_aliases actually needs to track a real rename."""
+    until title_aliases actually needs to track a real rename.
+
+    Also seeds genre_id/platform_id (Phase 3 classification, PRD §18) from
+    the same config's genre/platform fields, populating the genres/platforms
+    reference tables as a side effect. Config is the source of truth here
+    (CLAUDE.md's config-driven convention), so every call re-applies it —
+    a title whose genre/platform is edited in config gets re-classified on
+    the next run, same as canonical_name/is_active above. Always written as
+    ('ai_assisted', 'ai_assisted_unreviewed') per CLAUDE.md's provenance
+    rule; this function never promotes to 'verified' — that's a human-review
+    step, done directly against research.db, not something a config re-seed
+    should silently overwrite. To avoid clobbering a reviewed row, this only
+    writes genre_id/platform_id when the title's current genre_confidence
+    (or platform_confidence) is NOT already 'verified'."""
     today = utcnow_iso()[:10]
     for t in titles:
         conn.execute(
@@ -67,4 +90,28 @@ def seed_titles_and_aliases(conn: sqlite3.Connection, titles: list[dict]) -> Non
                     """,
                     (t["id"], t["display_name"], category_id, t.get("liquipedia_wiki"), today),
                 )
+
+        genre = t.get("genre")
+        if genre:
+            genre_id = _seed_reference_value(conn, "genres", genre)
+            conn.execute(
+                """
+                UPDATE titles SET genre_id = ?, genre_source = 'ai_assisted',
+                    genre_confidence = 'ai_assisted_unreviewed'
+                WHERE id = ? AND (genre_confidence IS NULL OR genre_confidence != 'verified')
+                """,
+                (genre_id, t["id"]),
+            )
+
+        platform = t.get("platform")
+        if platform:
+            platform_id = _seed_reference_value(conn, "platforms", platform)
+            conn.execute(
+                """
+                UPDATE titles SET platform_id = ?, platform_source = 'ai_assisted',
+                    platform_confidence = 'ai_assisted_unreviewed'
+                WHERE id = ? AND (platform_confidence IS NULL OR platform_confidence != 'verified')
+                """,
+                (platform_id, t["id"]),
+            )
     conn.commit()
