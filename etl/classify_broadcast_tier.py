@@ -9,10 +9,15 @@ annotation pass, per PRD §9.1's three-condition detection:
   - detected_costream: ALL THREE of (a) the stream's title_id equals a
     tournament's title_id, (b) `captured_at` falls within that
     tournament's [start_date, end_date], (c) the stream's title or tags
-    contain one of that tournament's `tournament_aliases`, matched with
-    word-boundary regex (e.g. `\\bmsi\\b`), not substring. Matched against
-    ANY qualifying tournament — several can run concurrently for one
-    title (parallel regional splits).
+    contain one of that tournament's SERIES's `tournament_aliases`
+    (looked up via `tournaments.series_key`, not `tournament_id` — an
+    alias identifies a recurring series, not one edition; this condition
+    is what disambiguates which edition it is), matched with word-boundary
+    regex (e.g. `\\bmsi\\b`), case-insensitive unless the alias's
+    `case_sensitive` flag is set (aliases under 4 characters, e.g. "TI" —
+    see etl/generate_tournament_aliases.py). Matched against ANY
+    qualifying tournament — several can run concurrently for one title
+    (parallel regional splits).
   - general: everything else. Every row in viewership_snapshots is
     already tier-1/tier-2 by construction (tier-3 streams never get an
     individual row at all — collectors/twitch_poll.py), so no further
@@ -57,7 +62,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from etl.db import get_connection, utcnow_iso  # noqa: E402
 
 
-def compile_alias_pattern(alias: str) -> re.Pattern:
+def compile_alias_pattern(alias: str, case_sensitive: bool = False) -> re.Pattern:
     """Word-boundary match (PRD §9.1 condition 3) — but `\\b` itself breaks
     when the alias starts or ends with a non-word character, which real
     aliases do (e.g. the game's own name, "Guilty Gear -STRIVE-"): `\\b`
@@ -66,9 +71,16 @@ def compile_alias_pattern(alias: str) -> re.Pattern:
     transition and `\\b` silently fails to match text it obviously should.
     `(?<!\\w)`/`(?!\\w)` check the character outside the match instead,
     which is what "word boundary" actually needs to mean here — confirmed
-    by a failing test on exactly this alias before this fix."""
+    by a failing test on exactly this alias before this fix.
+
+    case_sensitive=True (tournament_aliases.case_sensitive, set for
+    aliases under 4 characters — see etl/generate_tournament_aliases.py)
+    drops the default IGNORECASE: "TI" or "MSI" matched case-insensitively
+    would false-positive constantly against unrelated text even with word
+    boundaries enforced."""
     escaped = re.escape(alias)
-    return re.compile(r"(?<!\w)" + escaped + r"(?!\w)", re.IGNORECASE)
+    flags = 0 if case_sensitive else re.IGNORECASE
+    return re.compile(r"(?<!\w)" + escaped + r"(?!\w)", flags)
 
 
 def main() -> int:
@@ -115,13 +127,13 @@ def main() -> int:
     print(f"{len(distinct_keys)} distinct (title_id, captured_at) combination(s) to resolve tournament candidates for")
 
     candidates_by_key: dict[tuple[str, str], list[tuple[int, list[tuple[str, re.Pattern]]]]] = {}
-    alias_cache: dict[int, list[tuple[str, re.Pattern]]] = {}
+    alias_cache: dict[tuple[str, str], list[tuple[str, re.Pattern]]] = {}
 
     for title_id, captured_at in distinct_keys:
         date_ = captured_at[:10]
         tournament_rows = conn.execute(
             """
-            SELECT id FROM tournaments
+            SELECT id, series_key FROM tournaments
             WHERE title_id = ? AND start_date IS NOT NULL AND end_date IS NOT NULL
               AND date(start_date) <= date(?) AND date(end_date) >= date(?)
             """,
@@ -129,14 +141,20 @@ def main() -> int:
         ).fetchall()
 
         candidates = []
-        for (tournament_id,) in tournament_rows:
-            if tournament_id not in alias_cache:
+        for tournament_id, series_key in tournament_rows:
+            if series_key is None:
+                continue  # not tier-1/2, or predates generate_tournament_aliases.py — no aliases possible
+            cache_key = (title_id, series_key)
+            if cache_key not in alias_cache:
                 alias_rows = conn.execute(
-                    "SELECT alias FROM tournament_aliases WHERE tournament_id = ?", (tournament_id,)
+                    "SELECT alias, case_sensitive FROM tournament_aliases WHERE title_id = ? AND series_key = ?",
+                    (title_id, series_key),
                 ).fetchall()
-                alias_cache[tournament_id] = [(a, compile_alias_pattern(a)) for (a,) in alias_rows if a]
-            if alias_cache[tournament_id]:
-                candidates.append((tournament_id, alias_cache[tournament_id]))
+                alias_cache[cache_key] = [
+                    (a, compile_alias_pattern(a, bool(cs))) for (a, cs) in alias_rows if a
+                ]
+            if alias_cache[cache_key]:
+                candidates.append((tournament_id, alias_cache[cache_key]))
         candidates_by_key[(title_id, captured_at)] = candidates
 
     now = utcnow_iso()

@@ -30,3 +30,15 @@ def test_word_boundary_matches_multi_word_alias_as_a_phrase():
 def test_alias_with_regex_special_characters_is_escaped():
     pattern = compile_alias_pattern("Guilty Gear -STRIVE-")
     assert pattern.search("watching Guilty Gear -STRIVE- ranked")
+
+
+def test_case_sensitive_short_alias_matches_exact_case_only():
+    pattern = compile_alias_pattern("TI", case_sensitive=True)
+    assert pattern.search("hyped for TI finals")
+    assert not pattern.search("ti amo, great match")
+    assert not pattern.search("multi tier ranked ladder")
+
+
+def test_case_insensitive_by_default_for_short_alias():
+    pattern = compile_alias_pattern("TI")
+    assert pattern.search("hyped for ti finals")
