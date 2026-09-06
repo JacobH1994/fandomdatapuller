@@ -24,14 +24,12 @@ even at current scale) that a full rewrite is simplest-correct, and
 avoids ever reconciling a partial diff against what the DB currently
 holds.
 
-**tournament_aliases exports the tournament's NATURAL KEY
-(liquipedia_wiki + liquipedia_page), not its raw numeric tournament_id.**
-Autoincrement ids are not guaranteed to match across a fresh rebuild —
-tournaments could be re-inserted in a different order and get different
-ids on a from-scratch database. Resolving the id at LOAD time (see
-etl/load_snapshots.py's load_reference_data()) via the natural key is
-what makes this safe to reload into a database that doesn't already have
-matching ids.
+**tournament_aliases is keyed on (title_id, series_key), not a raw
+numeric tournament_id** (etl/generate_tournament_aliases.py) — series_key
+is itself a stable string derived from liquipedia_page, so unlike the
+tournament_id-keyed scheme this replaced, no autoincrement-id resolution
+at load time is needed; the export/import round-trip is a direct
+natural-key upsert.
 
 Usage:
     python etl/export_reference_data.py
@@ -53,10 +51,10 @@ REFERENCE_DIR = REPO_ROOT / "data" / "reference"
 TOURNAMENT_COLUMNS = [
     "title_id", "liquipedia_wiki", "liquipedia_page", "name", "tier", "prize_pool",
     "currency", "start_date", "end_date", "country", "region", "region_confidence",
-    "team_number", "fetched_at", "source", "confidence",
+    "team_number", "series_key", "fetched_at", "source", "confidence",
 ]
 
-ALIAS_COLUMNS = ["alias", "source", "confidence"]
+ALIAS_COLUMNS = ["title_id", "series_key", "alias", "case_sensitive", "source", "confidence"]
 
 
 def main() -> int:
@@ -75,15 +73,10 @@ def main() -> int:
     aliases_path = REFERENCE_DIR / "tournament_aliases.jsonl"
     with open(aliases_path, "w") as f:
         rows = conn.execute(
-            f"""
-            SELECT t.liquipedia_wiki, t.liquipedia_page, {', '.join('ta.' + c for c in ALIAS_COLUMNS)}
-            FROM tournament_aliases ta JOIN tournaments t ON ta.tournament_id = t.id
-            ORDER BY t.liquipedia_wiki, t.liquipedia_page, ta.alias
-            """
+            f"SELECT {', '.join(ALIAS_COLUMNS)} FROM tournament_aliases ORDER BY title_id, series_key, alias"
         ).fetchall()
         for row in rows:
-            record = dict(zip(["liquipedia_wiki", "liquipedia_page"] + ALIAS_COLUMNS, row))
-            f.write(json.dumps(record) + "\n")
+            f.write(json.dumps(dict(zip(ALIAS_COLUMNS, row))) + "\n")
     print(f"wrote {len(rows)} tournament alias(es) to {aliases_path}")
 
     conn.close()

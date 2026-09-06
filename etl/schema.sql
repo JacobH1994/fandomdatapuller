@@ -93,6 +93,16 @@ CREATE TABLE IF NOT EXISTS title_aliases (
 -- Kept simple as one confidence value per row for now (the row-level
 -- convention PRD §14 describes); region_confidence exists because region
 -- specifically is a step removed from the source field.
+-- series_key groups tournaments belonging to the same recurring series
+-- (e.g. every "VCT/<year>/Champions" edition) — a Liquipedia-naming-
+-- convention judgment call, not a native field, derived rule-based by
+-- etl/generate_tournament_aliases.py from liquipedia_page (stripping
+-- years and, for a small set of bare-organizer-acronym prefixes like
+-- "ESL"/"PGL"/"MPL", folding in the next segment too so distinct branded
+-- sub-events don't collapse together — see that script's docstring for
+-- the full derivation and the real cases it was calibrated against).
+-- Only ever populated for tier-1/tier-2 tournaments (co-streaming is a
+-- top-tier phenomenon) — NULL here means "not aliased," not "unknown."
 CREATE TABLE IF NOT EXISTS tournaments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title_id TEXT NOT NULL REFERENCES titles(id),
@@ -108,19 +118,29 @@ CREATE TABLE IF NOT EXISTS tournaments (
     region TEXT,
     region_confidence TEXT DEFAULT 'manual_judgment_call',
     team_number INTEGER,
+    series_key TEXT,
     fetched_at TEXT NOT NULL,
     source TEXT NOT NULL DEFAULT 'liquipedia',
     confidence TEXT NOT NULL DEFAULT 'verified',
     UNIQUE (liquipedia_wiki, liquipedia_page)
 );
 
--- Populated by etl/generate_tournament_aliases.py, per tournament (not per
--- series) even though generation happens once per series and fans out --
--- collectors/twitch_poll.py's/etl/classify_broadcast_tier.py's word-boundary
--- alias match (PRD §9.1 condition 3) needs a specific tournament_id to
--- attach a match to, so the same alias is inserted once per tournament
--- sharing that series rather than stored once at a series level that
--- doesn't otherwise exist as an entity in this schema.
+-- Populated by etl/generate_tournament_aliases.py, keyed on (title_id,
+-- series_key) rather than a specific tournament_id: an alias identifies a
+-- recurring SERIES ("The International", "TI"), not one edition — the
+-- temporal join in etl/classify_broadcast_tier.py (condition 2, against
+-- tournaments.start_date/end_date) is what disambiguates which edition a
+-- stream actually refers to, so the alias set itself doesn't need to be
+-- edition-specific. title_id is part of the key (not derivable from
+-- series_key alone) because the same organizer/series name recurs across
+-- unrelated games (e.g. "ESL/Snapdragon Pro Series" exists separately for
+-- pubg_mobile, free_fire, mobile_legends_bb, wild_rift, brawl_stars).
+--
+-- case_sensitive: aliases under 4 characters (e.g. "TI", "MSI") collide
+-- with unrelated text even under word-boundary matching if matched
+-- case-insensitively, so those rows carry case_sensitive=1 and
+-- etl/classify_broadcast_tier.py's compile_alias_pattern() honors it.
+--
 -- Two provenance shapes, per row: rule-based extraction (source=
 -- 'rule_based', confidence='verified' — a deterministic transform of
 -- already-verified tournament data, same reasoning as tier/prize_pool)
@@ -129,11 +149,13 @@ CREATE TABLE IF NOT EXISTS tournaments (
 -- rule — never promoted without human review).
 CREATE TABLE IF NOT EXISTS tournament_aliases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tournament_id INTEGER NOT NULL REFERENCES tournaments(id),
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    series_key TEXT NOT NULL,
     alias TEXT NOT NULL,
+    case_sensitive INTEGER NOT NULL DEFAULT 0,
     source TEXT NOT NULL DEFAULT 'rule_based',
     confidence TEXT NOT NULL DEFAULT 'verified',
-    UNIQUE (tournament_id, alias)
+    UNIQUE (title_id, series_key, alias)
 );
 
 -- One row per full-detail stream per poll (PRD §6). Below-capture-threshold
@@ -306,6 +328,6 @@ CREATE TABLE IF NOT EXISTS collector_runs (
 CREATE INDEX IF NOT EXISTS idx_viewership_title_captured ON viewership_snapshots (title_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_language_mix_title_captured ON language_mix_snapshots (title_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title ON tournaments (title_id);
-CREATE INDEX IF NOT EXISTS idx_tournament_aliases_tournament ON tournament_aliases (tournament_id);
+CREATE INDEX IF NOT EXISTS idx_tournament_aliases_series ON tournament_aliases (title_id, series_key);
 CREATE INDEX IF NOT EXISTS idx_viewership_broadcast_tier ON viewership_snapshots (broadcast_tier);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title_dates ON tournaments (title_id, start_date, end_date);

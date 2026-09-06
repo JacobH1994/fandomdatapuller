@@ -46,11 +46,10 @@ def load_reference_data(conn) -> tuple[int, int]:
     not an error). Natural-key upserts throughout, so safe to call on
     every run, not just --rebuild.
 
-    tournament_aliases rows carry the tournament's NATURAL KEY
-    (liquipedia_wiki + liquipedia_page) in the export, not a raw numeric
-    tournament_id — autoincrement ids aren't guaranteed to match across a
-    fresh rebuild, so the id is resolved here, after tournaments are
-    already loaded, rather than trusted from the file."""
+    tournament_aliases rows are keyed on (title_id, series_key) in the
+    export, not a raw numeric tournament_id — series_key is itself a
+    stable string (etl/generate_tournament_aliases.py), so this is a
+    direct natural-key upsert, no id resolution needed."""
     tournaments_written = 0
     tournaments_path = REFERENCE_DIR / "tournaments.jsonl"
     if tournaments_path.is_file():
@@ -65,22 +64,23 @@ def load_reference_data(conn) -> tuple[int, int]:
                     INSERT INTO tournaments
                         (title_id, liquipedia_wiki, liquipedia_page, name, tier, prize_pool,
                          currency, start_date, end_date, country, region, region_confidence,
-                         team_number, fetched_at, source, confidence)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         team_number, series_key, fetched_at, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT (liquipedia_wiki, liquipedia_page) DO UPDATE SET
                         title_id=excluded.title_id, name=excluded.name, tier=excluded.tier,
                         prize_pool=excluded.prize_pool, currency=excluded.currency,
                         start_date=excluded.start_date, end_date=excluded.end_date,
                         country=excluded.country, region=excluded.region,
                         region_confidence=excluded.region_confidence,
-                        team_number=excluded.team_number, fetched_at=excluded.fetched_at,
+                        team_number=excluded.team_number, series_key=excluded.series_key,
+                        fetched_at=excluded.fetched_at,
                         source=excluded.source, confidence=excluded.confidence
                     """,
                     (
                         t["title_id"], t["liquipedia_wiki"], t["liquipedia_page"], t["name"], t["tier"],
                         t["prize_pool"], t["currency"], t["start_date"], t["end_date"], t["country"],
-                        t["region"], t["region_confidence"], t["team_number"], t["fetched_at"],
-                        t["source"], t["confidence"],
+                        t["region"], t["region_confidence"], t["team_number"], t.get("series_key"),
+                        t["fetched_at"], t["source"], t["confidence"],
                     ),
                 )
                 tournaments_written += 1
@@ -95,20 +95,15 @@ def load_reference_data(conn) -> tuple[int, int]:
                 if not line:
                     continue
                 a = json.loads(line)
-                row = conn.execute(
-                    "SELECT id FROM tournaments WHERE liquipedia_wiki = ? AND liquipedia_page = ?",
-                    (a["liquipedia_wiki"], a["liquipedia_page"]),
-                ).fetchone()
-                if row is None:
-                    continue  # tournament not present (e.g. --titles-scoped export) — skip, don't guess
                 conn.execute(
                     """
-                    INSERT INTO tournament_aliases (tournament_id, alias, source, confidence)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT (tournament_id, alias) DO UPDATE SET
-                        source=excluded.source, confidence=excluded.confidence
+                    INSERT INTO tournament_aliases (title_id, series_key, alias, case_sensitive, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (title_id, series_key, alias) DO UPDATE SET
+                        case_sensitive=excluded.case_sensitive, source=excluded.source,
+                        confidence=excluded.confidence
                     """,
-                    (row[0], a["alias"], a["source"], a["confidence"]),
+                    (a["title_id"], a["series_key"], a["alias"], a["case_sensitive"], a["source"], a["confidence"]),
                 )
                 aliases_written += 1
         conn.commit()
