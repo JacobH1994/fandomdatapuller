@@ -6,6 +6,11 @@ competitive exclusion sort esports titles within a niche?) and designed so
 future questions mostly need new queries, not new pipelines. Full spec:
 `docs/esports_fandom_platform_prd_v2.md`.
 
+`docs/system_reference.md` describes present state (what's actually
+built, wired up, populated, or broken, read straight from the code and
+data) — the PRD describes intent and decisions. When it drifts,
+regenerate it rather than hand-editing it.
+
 ## The one rule that overrides everything else
 
 **Live Twitch viewership data cannot be backfilled.** Twitch's API only
