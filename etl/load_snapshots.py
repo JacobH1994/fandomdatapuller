@@ -7,13 +7,16 @@ loaded in its own transaction and only recorded in collector_runs once
 fully loaded, so a file is either "not loaded yet" or "fully loaded," never
 partially. Already-loaded files (by relative path) are skipped on rerun.
 
-Also loads data/reference/{tournaments,tournament_aliases}.jsonl on every
-run (see etl/export_reference_data.py) — this is what makes `--rebuild`
-actually rebuild a *working* database rather than one with an empty
-tournaments table: collectors/liquipedia.py writes tournament data
-directly into research.db with no raw-file backup, so without this,
---rebuild would silently discard it. Cheap and idempotent (natural-key
-upserts), so it runs unconditionally, not just under --rebuild.
+Also loads data/reference/{tournaments,tournament_aliases,
+tournament_alias_llm_checked}.jsonl on every run (see
+etl/export_reference_data.py) — this is what makes `--rebuild` actually
+rebuild a *working* database rather than one with an empty tournaments
+table: collectors/liquipedia.py writes tournament data directly into
+research.db with no raw-file backup, so without this, --rebuild would
+silently discard it (and, for the LLM-checked marker, silently re-spend
+already-spent API budget re-asking questions already answered). Cheap
+and idempotent (natural-key upserts), so it runs unconditionally, not
+just under --rebuild.
 
 Usage:
     python etl/load_snapshots.py                 # incremental: only new files
@@ -38,7 +41,7 @@ RAW_DIR = REPO_ROOT / "data" / "raw" / "twitch"
 REFERENCE_DIR = REPO_ROOT / "data" / "reference"
 
 
-def load_reference_data(conn) -> tuple[int, int]:
+def load_reference_data(conn) -> tuple[int, int, int]:
     """Loads data/reference/{tournaments,tournament_aliases}.jsonl (see
     etl/export_reference_data.py) into research.db. Both files are
     optional — a repo checkout that predates this mechanism, or one where
@@ -108,7 +111,28 @@ def load_reference_data(conn) -> tuple[int, int]:
                 aliases_written += 1
         conn.commit()
 
-    return tournaments_written, aliases_written
+    llm_checked_written = 0
+    llm_checked_path = REFERENCE_DIR / "tournament_alias_llm_checked.jsonl"
+    if llm_checked_path.is_file():
+        with open(llm_checked_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                c = json.loads(line)
+                conn.execute(
+                    """
+                    INSERT INTO tournament_alias_llm_checked (title_id, series_key, checked_at, nickname_count)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT (title_id, series_key) DO UPDATE SET
+                        checked_at=excluded.checked_at, nickname_count=excluded.nickname_count
+                    """,
+                    (c["title_id"], c["series_key"], c["checked_at"], c["nickname_count"]),
+                )
+                llm_checked_written += 1
+        conn.commit()
+
+    return tournaments_written, aliases_written, llm_checked_written
 
 
 def load_titles_config() -> list[dict]:
@@ -230,8 +254,9 @@ def main() -> int:
     conn = get_connection()
     seed_titles_and_aliases(conn, load_titles_config())
 
-    n_tournaments, n_aliases = load_reference_data(conn)
-    print(f"loaded {n_tournaments} tournament(s), {n_aliases} tournament alias(es) from data/reference/")
+    n_tournaments, n_aliases, n_llm_checked = load_reference_data(conn)
+    print(f"loaded {n_tournaments} tournament(s), {n_aliases} tournament alias(es), "
+          f"{n_llm_checked} LLM-checked series marker(s) from data/reference/")
 
     loaded = already_loaded_files(conn)
     all_files = sorted(RAW_DIR.glob("**/*.json.gz"))
