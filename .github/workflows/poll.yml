@@ -19,9 +19,9 @@ on:
         required: false
         default: "5"
       skip_platform_totals:
-        description: "Skip the platform-wide total pagination (recommended for tight event-mode intervals)"
+        description: "Skip the platform-wide total pagination (recommended for tight event-mode intervals, e.g. interval_minutes below ~10 — a full pagination run takes several minutes on its own). Leave false for a normal single poll."
         required: false
-        default: "true"
+        default: "false"
         type: choice
         options:
           - "true"
@@ -62,7 +62,21 @@ jobs:
           SKIP_TOTALS="${{ github.event.inputs.skip_platform_totals }}"
           DURATION="${DURATION:-0}"
           INTERVAL="${INTERVAL:-5}"
-          SKIP_TOTALS="${SKIP_TOTALS:-true}"
+          # github.event.inputs is only populated for workflow_dispatch —
+          # a schedule-triggered run (the hourly cron this workflow exists
+          # for) has no inputs object at all, so SKIP_TOTALS is always
+          # empty here and this fallback is what actually governs it.
+          # Was ":-true" until 2026-09-07: that silently skipped the
+          # whole-platform pagination on every single scheduled run since
+          # collection began, so platform_totals had essentially one real
+          # data point despite the collector running hourly for a week —
+          # a real, unrecoverable Phase 1 collection gap (that denominator
+          # can't be backfilled any more than viewership_snapshots can).
+          # Confirmed live before flipping this: a full pagination run
+          # (~815 pages at current channel counts) takes under 5 minutes,
+          # comfortably inside the hourly window — not a collector-cadence
+          # risk. See docs/system_reference.md for what this fed into.
+          SKIP_TOTALS="${SKIP_TOTALS:-false}"
 
           ARGS=()
           if [ -n "$TITLES" ]; then
