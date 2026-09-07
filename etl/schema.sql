@@ -158,6 +158,21 @@ CREATE TABLE IF NOT EXISTS tournament_aliases (
     UNIQUE (title_id, series_key, alias)
 );
 
+-- Marks a series as "the LLM nickname pass has been attempted," separate
+-- from tournament_aliases itself — a genuinely-empty LLM result (no
+-- well-known nickname exists) writes zero alias rows, so checking
+-- tournament_aliases alone for "already done" would retry that series
+-- forever, burning API budget on the same negative answer every run.
+-- Rule-based-only series (no ANTHROPIC_API_KEY, or --skip-llm) correctly
+-- have NO row here, so a later run with the LLM enabled still checks them.
+CREATE TABLE IF NOT EXISTS tournament_alias_llm_checked (
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    series_key TEXT NOT NULL,
+    checked_at TEXT NOT NULL,
+    nickname_count INTEGER NOT NULL,
+    PRIMARY KEY (title_id, series_key)
+);
+
 -- One row per full-detail stream per poll (PRD §6). Below-capture-threshold
 -- streams (config/capture.yaml) never appear here individually — their
 -- viewer_count is folded into platform_totals/language_mix_snapshots

@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
-"""Exports `tournaments` and `tournament_aliases` to committed JSONL files
-under `data/reference/`, so `research.db` is rebuildable from committed
-repo contents ALONE (`data/raw/` + `data/reference/`), not just
-`data/raw/`.
+"""Exports `tournaments`, `tournament_aliases`, and
+`tournament_alias_llm_checked` to committed JSONL files under
+`data/reference/`, so `research.db` is rebuildable from committed repo
+contents ALONE (`data/raw/` + `data/reference/`), not just `data/raw/`.
+
+`tournament_alias_llm_checked` matters for the same reason as the other
+two: `etl/generate_tournament_aliases.py`'s LLM nickname pass costs real
+money, and without exporting which series have already been checked, a
+`--rebuild` would silently forget that and re-spend the budget re-asking
+questions already answered (including the negative answers — "checked,
+no nickname exists" — which write zero alias rows and would otherwise
+look identical to "never checked").
 
 This closes a real gap: PRD §9.6b's weekly Action (scheduled
 `niche_similarity_history`/`creator_crossover_history` computation) runs
@@ -56,6 +64,8 @@ TOURNAMENT_COLUMNS = [
 
 ALIAS_COLUMNS = ["title_id", "series_key", "alias", "case_sensitive", "source", "confidence"]
 
+LLM_CHECKED_COLUMNS = ["title_id", "series_key", "checked_at", "nickname_count"]
+
 
 def main() -> int:
     REFERENCE_DIR.mkdir(parents=True, exist_ok=True)
@@ -78,6 +88,15 @@ def main() -> int:
         for row in rows:
             f.write(json.dumps(dict(zip(ALIAS_COLUMNS, row))) + "\n")
     print(f"wrote {len(rows)} tournament alias(es) to {aliases_path}")
+
+    llm_checked_path = REFERENCE_DIR / "tournament_alias_llm_checked.jsonl"
+    with open(llm_checked_path, "w") as f:
+        rows = conn.execute(
+            f"SELECT {', '.join(LLM_CHECKED_COLUMNS)} FROM tournament_alias_llm_checked ORDER BY title_id, series_key"
+        ).fetchall()
+        for row in rows:
+            f.write(json.dumps(dict(zip(LLM_CHECKED_COLUMNS, row))) + "\n")
+    print(f"wrote {len(rows)} LLM-checked series marker(s) to {llm_checked_path}")
 
     conn.close()
     return 0

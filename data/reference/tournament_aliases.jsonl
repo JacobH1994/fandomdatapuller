@@ -1,6 +1,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "1st From China Tournament", "alias": "1FCT", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "1st From China Tournament", "alias": "1st From China Tournament", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "2v2 World Cup", "alias": "2WC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "2v2 World Cup", "alias": "2v2 WC", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "2v2 World Cup", "alias": "2v2 World Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "2v2 World Cup", "alias": "2v2 World Cup 2020", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "AOElympics", "alias": "AOElympics", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -8,6 +9,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "Age of Strike", "alias": "AOS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Age of Strike", "alias": "Age of Strike", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Age of Strike", "alias": "Age of Strike 2vs2 RM", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Age of Strike", "alias": "AoS", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "All-In Cup", "alias": "AIC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "All-In Cup", "alias": "All-In Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Alliance Cup", "alias": "AC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -17,20 +19,27 @@
 {"title_id": "age_of_empires_ii", "series_key": "AoC Champions League", "alias": "ACL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "AoC Champions League", "alias": "AoC Champions League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "AoC Champions League", "alias": "AoC Champions League 2016", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "AoC Champions League", "alias": "CCL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "AoC Euro Cup", "alias": "AEC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "AoC Euro Cup", "alias": "AoC Euro Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "AoC Euro Cup", "alias": "AoC Euro Cup 2002 1v1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "AoC Euro Cup", "alias": "Euro Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "AoE2 Admirals League", "alias": "AAL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "AoE2 Admirals League", "alias": "AL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "age_of_empires_ii", "series_key": "AoE2 Admirals League", "alias": "Admirals", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "AoE2 Admirals League", "alias": "AoE2 Admirals League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "AoE2 Middle East Tournament", "alias": "AMET", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "AoE2 Middle East Tournament", "alias": "AoE2 Middle East Tournament", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia 16 1v1s Tournament", "alias": "A11T", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Arabia 16 1v1s Tournament", "alias": "Arabia 16", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia 16 1v1s Tournament", "alias": "Arabia 16 1v1s Tournament", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Arabia 1v1 Invitational", "alias": "A1", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia 1v1 Invitational", "alias": "A1I", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia 1v1 Invitational", "alias": "Arabia 1v1 Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia Deathmatch Tournament", "alias": "ADT", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia Deathmatch Tournament", "alias": "Arabia Deathmatch Tournament", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia Invitational", "alias": "AI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Arabia Invitational", "alias": "AoE2 Arabia Invitational", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia Invitational", "alias": "Arabia Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia Invitational", "alias": "Arabia Invitational 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Arabia Masters", "alias": "AM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -50,13 +59,17 @@
 {"title_id": "age_of_empires_ii", "series_key": "Back to Almaty", "alias": "Back to Almaty", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Balance of Power", "alias": "BOP", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Balance of Power", "alias": "Balance of Power", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Balance of Power", "alias": "BoP", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Battle For Supremacy", "alias": "BFS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Battle For Supremacy", "alias": "Battle For Supremacy", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Battle for Angkor", "alias": "BFA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Battle for Angkor", "alias": "Battle for Angkor", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Battle for Angkor", "alias": "BfA", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Battle of Africa", "alias": "BOA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Battle of Africa", "alias": "Battle of Africa", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Battle of Africa", "alias": "Battle of Africa 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Battle of Africa", "alias": "BoA", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "age_of_empires_ii", "series_key": "Black Forest Tournament (by The Legion Clan)", "alias": "BFT", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Black Forest Tournament (by The Legion Clan)", "alias": "BFTBTLC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Black Forest Tournament (by The Legion Clan)", "alias": "Black Forest Tournament (by The Legion Clan)", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Black Forest Tournament (by The Legion Clan)", "alias": "Black Forest Tournament (by The Legion Clan) High", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -75,6 +88,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "Clash of the Hippo", "alias": "COTH", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Clash of the Hippo", "alias": "Clash of the Hippo", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Clash of the Hippo", "alias": "Clash of the Hippo 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Clash of the Hippo", "alias": "Hippo", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Clash of the Titans", "alias": "COTT", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Clash of the Titans", "alias": "Clash of the Titans", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Clash of the Titans", "alias": "Clash of the Titans 2013", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -102,7 +116,9 @@
 {"title_id": "age_of_empires_ii", "series_key": "Drunken Forest", "alias": "Drunken Forest", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Drunken Forest", "alias": "Drunken Forest Scotch League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Elimination Draft", "alias": "ED", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Elimination Draft", "alias": "Elim Draft", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Elimination Draft", "alias": "Elimination Draft", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Ellie's Charity Invitational", "alias": "ECI", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Ellie's Charity Invitational", "alias": "ESCI", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Ellie's Charity Invitational", "alias": "Ellie's Charity Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Ellie's Charity Invitational", "alias": "Ellie's Charity Invitational 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -126,7 +142,9 @@
 {"title_id": "age_of_empires_ii", "series_key": "Exiled Heroes", "alias": "Exiled Heroes", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Eyes Wide Open Tourney", "alias": "EWOT", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Eyes Wide Open Tourney", "alias": "Eyes Wide Open Tourney", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "FOPT - Anniversary Cup (AoE2)", "alias": "Anniversary Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "FOPT - Anniversary Cup (AoE2)", "alias": "FACA", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "FOPT - Anniversary Cup (AoE2)", "alias": "FOPT", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "FOPT - Anniversary Cup (AoE2)", "alias": "FOPT - Anniversary Cup (AoE2)", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "FOPT - Birthday Event", "alias": "FBE", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "FOPT - Birthday Event", "alias": "FOPT - Birthday Event", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -137,11 +155,14 @@
 {"title_id": "age_of_empires_ii", "series_key": "Friendship Cup", "alias": "Friendship Cup 2 1v1 Blind Random", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Gemini Cup", "alias": "GC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Gemini Cup", "alias": "Gemini Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "German Championship", "alias": "DM", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "age_of_empires_ii", "series_key": "German Championship", "alias": "Deutscher Meisterschaft", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "German Championship", "alias": "GC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "German Championship", "alias": "German Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "German Championship", "alias": "German Championship 2021", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Gladiators of the Arena", "alias": "GOTA", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Gladiators of the Arena", "alias": "Gladiators of the Arena", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Gladiators of the Arena", "alias": "GotA", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Global Gaming League", "alias": "GGL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Global Gaming League", "alias": "Global Gaming League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Global Gaming League", "alias": "Global Gaming League 2004 AoE2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -165,16 +186,20 @@
 {"title_id": "age_of_empires_ii", "series_key": "Jiangxi Cup of Conquerors", "alias": "Jiangxi Cup of Conquerors", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Jiangxi Cup of Conquerors", "alias": "Jiangxi Cup of Conquerors 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "JuNo Cup", "alias": "JC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "JuNo Cup", "alias": "JuNo", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "JuNo Cup", "alias": "JuNo Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "JuNo Cup", "alias": "JuNo Cup 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "KillerB's Arabia Cup", "alias": "Arabia Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "KillerB's Arabia Cup", "alias": "KSAC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "KillerB's Arabia Cup", "alias": "KillerB's Arabia Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "King of Americas", "alias": "KOA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "King of Americas", "alias": "King of Americas", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "King of Americas", "alias": "King of Americas 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "King of Americas", "alias": "KoA", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "King of the Desert", "alias": "KOTD", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "King of the Desert", "alias": "King of the Desert", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "King of the Desert", "alias": "King of the Desert 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "King of the Desert", "alias": "KotD", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Korean Nationals", "alias": "KN", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Korean Nationals", "alias": "Korean Nationals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Korean Nationals", "alias": "Korean Nationals 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -185,6 +210,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "Legion Cup", "alias": "LC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Legion Cup", "alias": "Legion Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Legion Cup", "alias": "Legion Cup 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Let your teammate die!", "alias": "LYMD", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Let your teammate die!", "alias": "LYTD", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Let your teammate die!", "alias": "Let your teammate die!", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "LingHe Asian Duo Invitational 2v2", "alias": "LADI2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -192,7 +218,9 @@
 {"title_id": "age_of_empires_ii", "series_key": "LingYuan Cup", "alias": "LC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "LingYuan Cup", "alias": "LingYuan Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Lord of Maps", "alias": "LOM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Lord of Maps", "alias": "LoM", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Lord of Maps", "alias": "Lord of Maps", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Lunar New Year Cup", "alias": "LNC", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Lunar New Year Cup", "alias": "LNYC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Lunar New Year Cup", "alias": "Lunar New Year Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "MEGA LAN", "alias": "MEGA LAN", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -207,25 +235,34 @@
 {"title_id": "age_of_empires_ii", "series_key": "Master of HyperRandom", "alias": "MOH", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Master of HyperRandom", "alias": "Master of HyperRandom", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Master of HyperRandom", "alias": "Master of HyperRandom 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Master of HyperRandom", "alias": "MoHR", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Master of Socotra", "alias": "MOS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Master of Socotra", "alias": "Master of Socotra", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Master of Socotra", "alias": "Master of Socotra 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Master of Socotra", "alias": "MoS", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Master of the Huns: Season 1", "alias": "MOTHS1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Master of the Huns: Season 1", "alias": "Master of the Huns: Season 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Master of the Huns: Season 1", "alias": "MotH", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of AoC", "alias": "MOA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of AoC", "alias": "Masters of AoC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of AoC", "alias": "Masters of AoC 1v1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Masters of AoC", "alias": "MoAoC", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia", "alias": "MOA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia", "alias": "Masters of Arabia", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia", "alias": "Masters of Arabia 2012", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia", "alias": "MoA", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia 2v2", "alias": "MOA2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia 2v2", "alias": "Masters of Arabia", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia 2v2", "alias": "Masters of Arabia 2v2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia 2v2", "alias": "Masters of Arabia 2v2 2016", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Masters of Arabia 2v2", "alias": "MoA", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arena", "alias": "MOA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arena", "alias": "Masters of Arena", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of Arena", "alias": "Masters of Arena 7", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Masters of Arena", "alias": "MoA", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of MegaRandom", "alias": "MOM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Masters of MegaRandom", "alias": "Masters of MegaRandom", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Masters of MegaRandom", "alias": "MoM", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Medieval Masters", "alias": "MM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Medieval Masters", "alias": "Medieval Masters", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "MembTV Event - TBA", "alias": "MET", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -240,9 +277,11 @@
 {"title_id": "age_of_empires_ii", "series_key": "Nations Cup", "alias": "NC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Nations Cup", "alias": "Nations Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Nations Cup", "alias": "Nations Cup 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Nili's Apartment Cup", "alias": "NAC", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Nili's Apartment Cup", "alias": "NSAC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Nili's Apartment Cup", "alias": "Nili's Apartment Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Nili's Apartment Cup", "alias": "Nili's Apartment Cup 4", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Nili's Apartment Cup", "alias": "Nili's Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Noble Apartment Cup", "alias": "NAC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Noble Apartment Cup", "alias": "Noble Apartment Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Nomad Battlegrounds", "alias": "NB", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -255,6 +294,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "OnlyBans", "alias": "OnlyBans", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Out of Sync Cup", "alias": "OOSC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Out of Sync Cup", "alias": "Out of Sync Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Paladin's 1v1 Cup", "alias": "P1C", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Paladin's 1v1 Cup", "alias": "PS1C", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Paladin's 1v1 Cup", "alias": "Paladin's 1v1 Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Path of the Conqueror", "alias": "POTC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -275,6 +315,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "Rage Forest", "alias": "Rage Forest 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Rage of Empires", "alias": "ROE", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Rage of Empires", "alias": "Rage of Empires", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Rage of Empires", "alias": "RoE", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Rakeshty", "alias": "Rakeshty", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Rakeshty", "alias": "Rakeshty 2004", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "ReFF's Rumble Cup", "alias": "RSRC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -282,9 +323,12 @@
 {"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo", "alias": "RBW", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo", "alias": "Red Bull Wololo", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo", "alias": "Red Bull Wololo 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo", "alias": "Wololo", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo Legacy", "alias": "RBWL", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo Legacy", "alias": "Red Bull Wololo", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo Legacy", "alias": "Red Bull Wololo Legacy", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo Legacy", "alias": "Red Bull Wololo Legacy 2022 AoE2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Red Bull Wololo Legacy", "alias": "Wololo", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Regicide Rumble", "alias": "RR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Regicide Rumble", "alias": "Regicide Rumble", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Regicide Rumble", "alias": "Regicide Rumble 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -302,11 +346,13 @@
 {"title_id": "age_of_empires_ii", "series_key": "Rusaoc Cup", "alias": "RC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Rusaoc Cup", "alias": "Rusaoc Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Rusaoc Cup", "alias": "Rusaoc Cup 77", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "SAX Nations Cup", "alias": "SAX", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "SAX Nations Cup", "alias": "SAX Nations Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "SAX Nations Cup", "alias": "SNC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "SY-Cup", "alias": "SC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "SY-Cup", "alias": "SY-Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "SY-Cup", "alias": "SY-Cup 2012", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "SY/Nations Cup", "alias": "Nations Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "SY/Nations Cup", "alias": "SNC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "SY/Nations Cup", "alias": "SY Nations Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "SY/Nations Cup", "alias": "SY Nations Cup 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -318,12 +364,15 @@
 {"title_id": "age_of_empires_ii", "series_key": "Simply the Best", "alias": "Simply the Best", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Sudden Dessaster", "alias": "SD", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Sudden Dessaster", "alias": "Sudden Dessaster", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "T90 Titans League", "alias": "T90 Titans", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "T90 Titans League", "alias": "T90 Titans League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "T90 Titans League", "alias": "T90 Titans League 6 Platinum League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "T90 Titans League", "alias": "TTL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "T90 Titans League", "alias": "Titans League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "TCGL Yimei Black Cup", "alias": "TCGL Yimei Black Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "TCGL Yimei Black Cup", "alias": "TYBC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "TeTe Invitational", "alias": "TI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "TeTe Invitational", "alias": "TeTe", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "TeTe Invitational", "alias": "TeTe Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Terra Nova", "alias": "TN", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Terra Nova", "alias": "Terra Nova", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -332,6 +381,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "Thalassocracy", "alias": "Thalassocracy", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Thalassocracy", "alias": "Thalassocracy 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Thalassocracy Cup", "alias": "TC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Thalassocracy Cup", "alias": "Thalassocracy", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "Thalassocracy Cup", "alias": "Thalassocracy Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Arabian Conquest", "alias": "TAC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Arabian Conquest", "alias": "The Arabian Conquest", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -362,6 +412,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "The Best Legionary of October", "alias": "The Best Legionary of October", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Best Legionary of September", "alias": "TBLOS", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Best Legionary of September", "alias": "The Best Legionary of September", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "The Best Legionary of Year", "alias": "BOLY", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "The Best Legionary of Year", "alias": "TBLOY", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Best Legionary of Year", "alias": "The Best Legionary of Year", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Brain Champion Cup", "alias": "TBCC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -371,21 +422,26 @@
 {"title_id": "age_of_empires_ii", "series_key": "The Cartographers", "alias": "The Cartographers", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Conquering Hero", "alias": "TCH", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Conquering Hero", "alias": "The Conquering Hero", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "The Empire Collective Cup", "alias": "ECC", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "The Empire Collective Cup", "alias": "TECC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Empire Collective Cup", "alias": "The Empire Collective Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Empire Collective Cup", "alias": "The Empire Collective Cup Platinum League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Garrison", "alias": "TG", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Garrison", "alias": "The Garrison", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "The Grand Melee", "alias": "GM", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "age_of_empires_ii", "series_key": "The Grand Melee", "alias": "Grand Melee", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "The Grand Melee", "alias": "TGM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Grand Melee", "alias": "The Grand Melee", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The League", "alias": "TL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The League", "alias": "The League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "The Legacy Cup", "alias": "Legacy Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "The Legacy Cup", "alias": "TLC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Legacy Cup", "alias": "The Legacy Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Legacy Cup", "alias": "The Legacy Cup 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Medieval Wars", "alias": "TMW", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Medieval Wars", "alias": "The Medieval Wars", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Medieval Wars", "alias": "The Medieval Wars 2013", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "The Money Cup", "alias": "Money Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "The Money Cup", "alias": "TMC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Money Cup", "alias": "The Money Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Open Classic", "alias": "TOC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -398,6 +454,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "The Tribal Wars", "alias": "TTW", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Tribal Wars", "alias": "The Tribal Wars", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Tribal Wars", "alias": "The Tribal Wars 2012", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "The Tribal Wars", "alias": "Tribal Wars", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "The Uprising", "alias": "TU", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "The Uprising", "alias": "The Uprising", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Titans of Arina", "alias": "TOA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -423,6 +480,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "Visible Cup", "alias": "VC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Visible Cup", "alias": "Visible Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Visible Cup", "alias": "Visible Cup 4", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Visible Cup", "alias": "VisibleCup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "WWP Cup", "alias": "WC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "WWP Cup", "alias": "WWP Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Wallhalla", "alias": "Wallhalla", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -440,8 +498,11 @@
 {"title_id": "age_of_empires_ii", "series_key": "World Clan League", "alias": "WCL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Clan League", "alias": "World Clan League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Clan League", "alias": "World Clan League 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "World Clan War 2vs2", "alias": "Clan War", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "age_of_empires_ii", "series_key": "World Clan War 2vs2", "alias": "WCW", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "World Clan War 2vs2", "alias": "WCW2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Clan War 2vs2", "alias": "World Clan War 2vs2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "World Cup 2v2", "alias": "WC 2v2", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "World Cup 2v2", "alias": "WC2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Cup 2v2", "alias": "World Cup 2v2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Cyber Games", "alias": "WCG", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -453,6 +514,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "World Rumble", "alias": "WR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Rumble", "alias": "World Rumble", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Series of Video Games", "alias": "WSOVG", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "World Series of Video Games", "alias": "WSVG", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "age_of_empires_ii", "series_key": "World Series of Video Games", "alias": "World Series of Video Games", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "World Series of Video Games", "alias": "World Series of Video Games World Championship Maldives 2015", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Wrang of Fire", "alias": "WOF", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -466,6 +528,7 @@
 {"title_id": "apex_legends", "series_key": "Apex Legends Global Series", "alias": "ALGS", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Apex Legends Global Series", "alias": "Apex Legends Global Series", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Apex Legends Global Series", "alias": "Apex Legends Global Series Major 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "Apex Legends Global Series", "alias": "Champs", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "Apex Legends Invitational", "alias": "ALI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Apex Legends Invitational", "alias": "Apex Legends Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Apex Legends Invitational", "alias": "Apex Legends Invitational Preseason", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -486,9 +549,11 @@
 {"title_id": "apex_legends", "series_key": "Code Red", "alias": "CR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Code Red", "alias": "Code Red", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Code Red", "alias": "Code Red 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "Disguised Toast's", "alias": "DT", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "Disguised Toast's", "alias": "DTS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Disguised Toast's", "alias": "Disguised Toast's", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Disguised Toast's", "alias": "Disguised Toast's Hide and Seek Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "Disguised Toast's", "alias": "Toast", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "ERENA Charity Tournament", "alias": "ECT", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "ERENA Charity Tournament", "alias": "ERENA Charity Tournament", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "EURAT/Legacy Showdown", "alias": "ELS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -496,6 +561,7 @@
 {"title_id": "apex_legends", "series_key": "EXP/Invitational", "alias": "EI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "EXP/Invitational", "alias": "EXP Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "EXP/Invitational", "alias": "EXP Invitational Apex Legends at X Games Minneapolis", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "EXP/Invitational", "alias": "X Games", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "Esports Nations Cup", "alias": "ENC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Esports Nations Cup", "alias": "Esports Nations Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Esports Nations Cup", "alias": "Esports Nations Cup 2026", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -553,10 +619,15 @@
 {"title_id": "apex_legends", "series_key": "Mogul", "alias": "Mogul Australian Apex Open", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Nickmercs Gauntlet", "alias": "NG", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Nickmercs Gauntlet", "alias": "Nickmercs Gauntlet", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "Nickmercs Gauntlet 2", "alias": "Gauntlet", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "Nickmercs Gauntlet 2", "alias": "NG2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "Nickmercs Gauntlet 2", "alias": "NMG", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "Nickmercs Gauntlet 2", "alias": "Nickmercs Gauntlet 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "OTK Apex Invitational", "alias": "OAI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "OTK Apex Invitational", "alias": "OTK Apex Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "OTK Apex Invitational", "alias": "OTK Invitational", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "apex_legends", "series_key": "PGL/Premier", "alias": "PGL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "apex_legends", "series_key": "PGL/Premier", "alias": "PGL Bucharest", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "PGL/Premier", "alias": "PGL Premier", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "PGL/Premier", "alias": "PGL Premier Bucharest", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "PGL/Premier", "alias": "PP", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -587,14 +658,19 @@
 {"title_id": "apex_legends", "series_key": "TSM Invitational", "alias": "TI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "TSM Invitational", "alias": "TSM 2022 Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "TSM Invitational", "alias": "TSM Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "TSM Invitational", "alias": "TSMI", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "apex_legends", "series_key": "TSM Summer Invitational", "alias": "Summer Invitational", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "TSM Summer Invitational", "alias": "TSI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "TSM Summer Invitational", "alias": "TSM 2023 Summer Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "TSM Summer Invitational", "alias": "TSM Summer", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "TSM Summer Invitational", "alias": "TSM Summer Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "TSM Winter Royale", "alias": "TSM 2022 Winter Royale", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "TSM Winter Royale", "alias": "TSM Winter Royale", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "TSM Winter Royale", "alias": "TWR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "Twitch", "alias": "ASC", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "Twitch", "alias": "Twitch", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Twitch", "alias": "Twitch Apex Streamers Challenge Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "apex_legends", "series_key": "Twitch", "alias": "Twitch Rivals", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "apex_legends", "series_key": "Twitch Rivals", "alias": "TR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Twitch Rivals", "alias": "Twitch Rivals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "apex_legends", "series_key": "Twitch Rivals", "alias": "Twitch Rivals TDM Drop In", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -623,12 +699,16 @@
 {"title_id": "brawl_stars", "series_key": "Brawl Stars Championship", "alias": "BSC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars Championship", "alias": "Brawl Stars Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars Championship", "alias": "Brawl Stars Championship 2022 Mid Season Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "brawl_stars", "series_key": "Brawl Stars Championship", "alias": "MSI", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars Open", "alias": "BSO", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars Open", "alias": "Brawl Stars Open", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars Open", "alias": "Brawl Stars Open 2019 Brazil vs LATAM", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars World Finals", "alias": "BSWF", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "brawl_stars", "series_key": "Brawl Stars World Finals", "alias": "BSWFs", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars World Finals", "alias": "Brawl Stars World Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Brawl Stars World Finals", "alias": "Brawl Stars World Finals 2020", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "brawl_stars", "series_key": "Brawl Stars World Finals", "alias": "World Finals", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "brawl_stars", "series_key": "Brawl Stars World Finals", "alias": "Worlds", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "brawl_stars", "series_key": "Copa Awards", "alias": "CA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Copa Awards", "alias": "Copa Awards", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "DreamHack", "alias": "DreamHack", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -657,11 +737,14 @@
 {"title_id": "brawl_stars", "series_key": "RAGE/No.1 Battle", "alias": "RAGE No.1 Battle", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "RAGE/No.1 Battle", "alias": "RAGE No.1 Battle 2019 Grand Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "RAGE/No.1 Battle", "alias": "RN1B", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "brawl_stars", "series_key": "Red Bull M.E.O.", "alias": "M.E.O", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "brawl_stars", "series_key": "Red Bull M.E.O.", "alias": "MEO", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "brawl_stars", "series_key": "Red Bull M.E.O.", "alias": "RBMEO", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Red Bull M.E.O.", "alias": "Red Bull M.E.O.", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Red Bull M.E.O.", "alias": "Red Bull M.E.O. Season 1 World Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Superverse", "alias": "Superverse", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Superverse", "alias": "Superverse Brawl Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "brawl_stars", "series_key": "Teleperformance PXP Invitational", "alias": "PXP", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "brawl_stars", "series_key": "Teleperformance PXP Invitational", "alias": "TPI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Teleperformance PXP Invitational", "alias": "Teleperformance PXP Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Teleperformance PXP Invitational", "alias": "Teleperformance PXP Invitational 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -715,26 +798,43 @@
 {"title_id": "counter_strike", "series_key": "Arctic Invitational", "alias": "Arctic Invitational 2019", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Assembly", "alias": "Assembly", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Assembly", "alias": "Assembly 2015 Winter", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Assembly", "alias": "Assembly Winter", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Azubu", "alias": "Azubu", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Azubu", "alias": "Azubu Showmatch 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Bounty", "alias": "BB", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Bounty", "alias": "BLAST", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "BLAST/Bounty", "alias": "BLAST Bounty", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Bounty", "alias": "BLAST Bounty 2026 Winter", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Bounty", "alias": "BLAST Premier", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Bounty", "alias": "Bounty", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Major", "alias": "Austin Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "BLAST/Major", "alias": "BLAST Major", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Major", "alias": "BLAST Major 2023 Paris", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Major", "alias": "BM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Major", "alias": "Paris Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Open", "alias": "BLAST Fall", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "BLAST/Open", "alias": "BLAST Open", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Open", "alias": "BLAST Open 2026 Fall", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Open", "alias": "BLAST Spring", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Open", "alias": "BLAST Summer", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "BLAST/Open", "alias": "BO", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Premier", "alias": "BLAST", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Premier", "alias": "BLAST Final", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Premier", "alias": "BLAST Global Final", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "BLAST/Premier", "alias": "BLAST Premier", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Premier", "alias": "BLAST Premier 2025 Frequent Flyers", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Premier", "alias": "BLAST World Final", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "BLAST/Premier", "alias": "BP", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Pro Series", "alias": "BLAST", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Pro Series", "alias": "BLAST Final", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "BLAST/Pro Series", "alias": "BLAST Global Final", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "BLAST/Pro Series", "alias": "BLAST Pro Series", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Pro Series", "alias": "BLAST Pro Series 2019 Global Final", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Pro Series", "alias": "BPS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Rivals", "alias": "BLAST Rivals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Rivals", "alias": "BLAST Rivals 2027", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "BLAST/Rivals", "alias": "BR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "BLAST/Rivals", "alias": "Rivals", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Battle of Betway", "alias": "BOB", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Battle of Betway", "alias": "Battle of Betway", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Battle of Betway", "alias": "Battle of Betway 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -751,13 +851,17 @@
 {"title_id": "counter_strike", "series_key": "Born To Be Brave", "alias": "Born To Be Brave 2022", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Brazy Party", "alias": "BP", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Brazy Party", "alias": "Brazy Party", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CCT/Season 1", "alias": "CCT", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CCT/Season 1", "alias": "CCT Season 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CCT/Season 1", "alias": "CCT Season 1 Global Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CCT/Season 1", "alias": "CS1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CCT/Season 2", "alias": "CCT", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "CCT/Season 2", "alias": "CCT S2", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CCT/Season 2", "alias": "CCT Season 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CCT/Season 2", "alias": "CCT Season 2 Global Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CCT/Season 2", "alias": "CS2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/CSS", "alias": "CC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CEVO/CSS", "alias": "CEVO", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CEVO/CSS", "alias": "CEVO CSS", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/CSS", "alias": "CEVO CSS Professional 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Professional", "alias": "CEVO Professional", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -766,6 +870,7 @@
 {"title_id": "counter_strike", "series_key": "CEVO/Season 4", "alias": "CEVO Season 4", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 4", "alias": "CEVO Season 4 Professional", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 4", "alias": "CS4", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CEVO/Season 5", "alias": "CEVO", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 5", "alias": "CEVO Season 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 5", "alias": "CEVO Season 5 Professional", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 5", "alias": "CS5", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -775,9 +880,13 @@
 {"title_id": "counter_strike", "series_key": "CEVO/Season 7", "alias": "CEVO Season 7", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 7", "alias": "CEVO Season 7 Professional", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 7", "alias": "CS7", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CEVO/Season 8", "alias": "CEVO", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "CEVO/Season 8", "alias": "CEVO Pro", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 8", "alias": "CEVO Season 8", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 8", "alias": "CEVO Season 8 Professional", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 8", "alias": "CS8", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CEVO/Season 9", "alias": "CEVO", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "CEVO/Season 9", "alias": "CEVO S9", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 9", "alias": "CEVO Season 9", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 9", "alias": "CEVO Season 9 Professional", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CEVO/Season 9", "alias": "CS9", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -796,6 +905,9 @@
 {"title_id": "counter_strike", "series_key": "CPL Europe Cannes", "alias": "CEC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Europe Cannes", "alias": "CPL Europe Cannes", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Europe Cologne", "alias": "CEC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CPL Europe Cologne", "alias": "CPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "CPL Europe Cologne", "alias": "CPL Cologne", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "CPL Europe Cologne", "alias": "CPL Europe", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CPL Europe Cologne", "alias": "CPL Europe Cologne", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Europe Cologne", "alias": "CPL Europe Cologne 2002", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Europe Copenhagen", "alias": "2003 CPL Europe Copenhagen", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -823,6 +935,7 @@
 {"title_id": "counter_strike", "series_key": "CPL Summer", "alias": "CPL Summer 2007", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Summer", "alias": "CS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Summer Championship", "alias": "2003 CPL Summer Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CPL Summer Championship", "alias": "CPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CPL Summer Championship", "alias": "CPL Summer Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Summer Championship", "alias": "CSC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Turkey", "alias": "2005 CPL Turkey", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -832,17 +945,23 @@
 {"title_id": "counter_strike", "series_key": "CPL UK", "alias": "CPL UK", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL UK", "alias": "CU", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Winter Championship", "alias": "2002 CPL Winter Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CPL Winter Championship", "alias": "CPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CPL Winter Championship", "alias": "CPL Winter Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL Winter Championship", "alias": "CWC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CPL/Winter", "alias": "CPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CPL/Winter", "alias": "CPL Winter", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL/Winter", "alias": "CPL Winter 2001", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CPL/Winter", "alias": "CW", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CS Asia Championships", "alias": "CAC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CS Asia Championships", "alias": "CS Asia Championships", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CS Asia Championships", "alias": "CS Asia Championships 2026", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CS Asia Championships", "alias": "CSAC", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "CS:GO Asia Championships", "alias": "Asia Champs", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CS:GO Asia Championships", "alias": "CGAC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CS:GO Asia Championships", "alias": "CS:GO Asia Championships", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CS:GO Asia Championships", "alias": "CS:GO Asia Championships 2019", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "CS:GO Asia Championships", "alias": "CSA", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "CS:GO Champions League", "alias": "CCL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "CS:GO Champions League", "alias": "CGCL", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CS:GO Champions League", "alias": "CS:GO Champions League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "CS:GO Champions League", "alias": "CS:GO Champions League Season 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -851,6 +970,8 @@
 {"title_id": "counter_strike", "series_key": "Caseking of the Hill", "alias": "COTH", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Caseking of the Hill", "alias": "Caseking of the Hill", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Caseking of the Hill", "alias": "Caseking of the Hill King of Kings", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Caseking of the Hill", "alias": "KOTH", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "Caseking of the Hill", "alias": "King of the Hill", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Championship Gaming Invitational", "alias": "CGI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Championship Gaming Invitational", "alias": "Championship Gaming Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Championship Gaming Invitational", "alias": "Championship Gaming Invitational 2006", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -865,11 +986,13 @@
 {"title_id": "counter_strike", "series_key": "China Top", "alias": "China Top 2017 Shenzhen", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ClanBase", "alias": "ClanBase", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ClanBase", "alias": "ClanBase EuroCup XII", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ClanBase", "alias": "EuroCup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Clickarena", "alias": "Clickarena", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Clutch Con", "alias": "CC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Clutch Con", "alias": "Clutch Con", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Clutch Con", "alias": "Clutch Con 2015", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Copenhagen Games", "alias": "CG", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Copenhagen Games", "alias": "CPH Games", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Copenhagen Games", "alias": "Copenhagen Games", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Copenhagen Games", "alias": "Copenhagen Games 2020", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Copenhagen Gaming Week", "alias": "CGW", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -880,6 +1003,7 @@
 {"title_id": "counter_strike", "series_key": "Crown Invitational", "alias": "CI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Crown Invitational", "alias": "Crown Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Cs summit", "alias": "CS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Cs summit", "alias": "CS Summit", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Cs summit", "alias": "Cs summit", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Cs summit", "alias": "Cs summit 7", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Cyber X Games", "alias": "CXG", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -894,6 +1018,7 @@
 {"title_id": "counter_strike", "series_key": "DigiLAB", "alias": "DigiLAB 2006", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "DigitalLife", "alias": "DigitalLife", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "DigitalLife", "alias": "DigitalLife 2007", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "DouyuTV", "alias": "ACS", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "DouyuTV", "alias": "DouyuTV", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "DouyuTV", "alias": "DouyuTV Asian Challenge Series", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "DreamHack", "alias": "DreamHack", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -911,57 +1036,80 @@
 {"title_id": "counter_strike", "series_key": "EPICENTER", "alias": "EPICENTER", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "EPICENTER", "alias": "EPICENTER 2019", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 10", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 10", "alias": "ESEA", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 10", "alias": "ESEA S10", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 10", "alias": "ESEA Season 10", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 10", "alias": "ESEA Season 10 Counter-Strike Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 11", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 11", "alias": "ESEA", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 11", "alias": "ESEA Season 11", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 11", "alias": "ESEA Season 11 Counter-Strike Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 12", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 12", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 12", "alias": "ESEA S12", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 12", "alias": "ESEA Season 12", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 12", "alias": "ESEA Season 12 Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 13", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 13", "alias": "ESEA Season 13", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 13", "alias": "ESEA Season 13 Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 14", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 14", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 14", "alias": "ESEA S14", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 14", "alias": "ESEA Season 14", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 14", "alias": "ESEA Season 14 Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 15", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 15", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 15", "alias": "ESEA S15", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 15", "alias": "ESEA Season 15", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 15", "alias": "ESEA Season 15 Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 16", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 16", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 16", "alias": "ESEA S16", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 16", "alias": "ESEA Season 16", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 16", "alias": "ESEA Season 16 Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 17", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 17", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 17", "alias": "ESEA S17", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 17", "alias": "ESEA Season 17", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 17", "alias": "ESEA Season 17 Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 18", "alias": "ES1", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 18", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 18", "alias": "ESEA S18", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 18", "alias": "ESEA Season 18", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 18", "alias": "ESEA Season 18 Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 2", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 2", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 2", "alias": "ESEA S2", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 2", "alias": "ESEA Season 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 2", "alias": "ESEA Season 2 Invite Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 21", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 21", "alias": "ESEA Premier", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 21", "alias": "ESEA S21", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 21", "alias": "ESEA Season 21", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 21", "alias": "ESEA Season 21 Premier Europe Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 22", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 22", "alias": "ESEA Season 22", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 22", "alias": "ESEA Season 22 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 23", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 23", "alias": "ESEA S23", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 23", "alias": "ESEA Season 23", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 23", "alias": "ESEA Season 23 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 24", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 24", "alias": "ESEA S24", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 24", "alias": "ESEA Season 24", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 24", "alias": "ESEA Season 24 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 25", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 25", "alias": "ESEA Season 25", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 25", "alias": "ESEA Season 25 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 26", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 26", "alias": "ESEA S26", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 26", "alias": "ESEA Season 26", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 26", "alias": "ESEA Season 26 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 27", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 27", "alias": "ESEA Season 27", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 27", "alias": "ESEA Season 27 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 29", "alias": "ES2", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 29", "alias": "ESEA S29", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 29", "alias": "ESEA Season 29", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 29", "alias": "ESEA Season 29 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 3", "alias": "ES3", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -971,67 +1119,107 @@
 {"title_id": "counter_strike", "series_key": "ESEA/Season 31", "alias": "ESEA Season 31", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 31", "alias": "ESEA Season 31 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 32", "alias": "ES3", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 32", "alias": "ESEA S32", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 32", "alias": "ESEA Season 32", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 32", "alias": "ESEA Season 32 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 33", "alias": "ES3", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 33", "alias": "ESEA S33", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 33", "alias": "ESEA Season 33", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 33", "alias": "ESEA Season 33 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 35", "alias": "ES3", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 35", "alias": "ESEA S35", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 35", "alias": "ESEA Season 35", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 35", "alias": "ESEA Season 35 Global Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 35", "alias": "Global Challenge", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 4", "alias": "ES4", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 4", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 4", "alias": "ESEA S4", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 4", "alias": "ESEA Season 4", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 4", "alias": "ESEA Season 4 Invite Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 5", "alias": "ES5", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 5", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 5", "alias": "ESEA S5", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 5", "alias": "ESEA Season 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 5", "alias": "ESEA Season 5 Invite Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 6", "alias": "ES6", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 6", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 6", "alias": "ESEA S6", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 6", "alias": "ESEA Season 6", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 6", "alias": "ESEA Season 6 Invite Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 7", "alias": "ES7", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 7", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 7", "alias": "ESEA S7", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 7", "alias": "ESEA Season 7", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 7", "alias": "ESEA Season 7 Invite Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 8", "alias": "ES8", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 8", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 8", "alias": "ESEA S8", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 8", "alias": "ESEA Season 8", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 8", "alias": "ESEA Season 8 Invite Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 9", "alias": "ES9", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 9", "alias": "ESEA Invite", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESEA/Season 9", "alias": "ESEA S9", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 9", "alias": "ESEA Season 9", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESEA/Season 9", "alias": "ESEA Season 9 Counter-Strike Invite", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESG Tour", "alias": "ESG Tour", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESG Tour", "alias": "ESG Tour 2017 Mykonos", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESG Tour", "alias": "ET", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL ESEA", "alias": "EE", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL ESEA", "alias": "ESEA Pro League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL ESEA", "alias": "ESL ESEA", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL ESEA", "alias": "ESL ESEA Pro League Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL ESEA", "alias": "ESL Pro League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL ESEA", "alias": "Pro League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL Major Series One", "alias": "EMSO", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL Major Series One", "alias": "ESL Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL Major Series One", "alias": "ESL Major Series One", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL Major Series One", "alias": "ESL Major Series One Fall Main Event", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL Major Series One", "alias": "Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/Challenger", "alias": "Challengers", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Challenger", "alias": "EC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Challenger", "alias": "ESL Challenger", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Challenger", "alias": "ESL Challenger 48", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/Counter-Strike Champions League", "alias": "CCL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/Counter-Strike Champions League", "alias": "CS2 Champions League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/Counter-Strike Champions League", "alias": "CSGO Champions League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Counter-Strike Champions League", "alias": "ECSCL", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Counter-Strike Champions League", "alias": "ESL Counter-Strike Champions League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Counter-Strike Champions League", "alias": "ESL Counter-Strike Champions League Season 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/ENC", "alias": "EE", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/ENC", "alias": "EPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/ENC", "alias": "ESL ENC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/ENC", "alias": "ESL ENC Season 2006", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/ENC", "alias": "ESL Pro League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Expo Barcelona", "alias": "EEB", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Expo Barcelona", "alias": "ESL Expo Barcelona", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/Expo Barcelona", "alias": "Expo Barcelona", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/Expo Barcelona", "alias": "IEM", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/Expo Barcelona", "alias": "IEM Barcelona", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Grand Slam", "alias": "EGS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Grand Slam", "alias": "ESL Grand Slam", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Grand Slam", "alias": "ESL Grand Slam 5", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/Grand Slam", "alias": "Grand Slam", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Impact League", "alias": "EIL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Impact League", "alias": "ESL Impact League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Impact League", "alias": "ESL Impact League Season 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/League", "alias": "EL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/League", "alias": "EPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/League", "alias": "ESL League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/League", "alias": "ESL League Pro 2015 Winter", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/League", "alias": "ESL Pro League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Major Series One", "alias": "EMSO", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/Major Series One", "alias": "EPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/Major Series One", "alias": "ESL Katowice", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Major Series One", "alias": "ESL Major Series One", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Major Series One", "alias": "ESL Major Series One Summer 2013", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/Major Series One", "alias": "ESL Pro League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/Major Series One", "alias": "Katowice", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/One", "alias": "EO", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/One", "alias": "EPL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/One", "alias": "ESL One", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/One", "alias": "ESL One 2020 Rio", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ESL/One", "alias": "ESL Pro League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "ESL/One", "alias": "Road to Rio", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "ESL/Pro League", "alias": "EPL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Pro League", "alias": "ESL Pro League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESL/Pro League", "alias": "ESL Pro League Season 24", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1045,6 +1233,7 @@
 {"title_id": "counter_strike", "series_key": "ESports World Convention", "alias": "ESports World Convention", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESports World Convention", "alias": "ESports World Convention 2016", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ESports World Convention", "alias": "EWC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "EXTREMESLAND", "alias": "ESL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "EXTREMESLAND", "alias": "EXTREMESLAND", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "EXTREMESLAND", "alias": "EXTREMESLAND 2016", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Eastide", "alias": "Eastide", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1078,12 +1267,15 @@
 {"title_id": "counter_strike", "series_key": "EverLAN", "alias": "EverLAN 2004 Summer", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "FACEIT", "alias": "FACEIT", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "FACEIT", "alias": "FACEIT 2018 Major", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "FACEIT", "alias": "FACEIT League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "FACEIT", "alias": "FACEIT Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "FISSURE", "alias": "FISSURE", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "FISSURE", "alias": "FISSURE Playground 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "FiReLEAGUE", "alias": "FiReLEAGUE", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "FiReLEAGUE", "alias": "FiReLEAGUE 2022", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "FiReSPORTS", "alias": "FiReSPORTS", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "FiReSPORTS", "alias": "FiReSPORTS Major 2027 Buenos Aires", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Flashpoint", "alias": "FP", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Flashpoint", "alias": "Flashpoint", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Flashpoint", "alias": "Flashpoint Season 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Forge of Legends", "alias": "FOL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1094,6 +1286,7 @@
 {"title_id": "counter_strike", "series_key": "Fragbite Masters", "alias": "Fragbite Masters Season 4", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Funspark", "alias": "Funspark", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Funspark", "alias": "Funspark ULTI 2020", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Funspark", "alias": "ULTI", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "GG.Bet Ice Challenge", "alias": "GBIC", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "GG.Bet Ice Challenge", "alias": "GG.Bet Ice Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "GG.Bet Ice Challenge", "alias": "GG.Bet Ice Challenge 2019", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1103,8 +1296,10 @@
 {"title_id": "counter_strike", "series_key": "GOAT League", "alias": "GOAT League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "GOAT League", "alias": "GOAT League 2023 Summer VACation", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Game Show", "alias": "GS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Game Show", "alias": "GSC", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Game Show", "alias": "Game Show", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Game Show", "alias": "Game Show Global eSports Cup Season 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Game Show", "alias": "Global eSports Cup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "GameGune", "alias": "GameGune", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "GameGune", "alias": "GameGune 2008", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "GamePlayTV showmatch", "alias": "GS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1126,11 +1321,14 @@
 {"title_id": "counter_strike", "series_key": "Gfinity", "alias": "Gfinity", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Gfinity", "alias": "Gfinity CS:GO Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Global Esports Tour", "alias": "GET", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Global Esports Tour", "alias": "GET Dubai", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "Global Esports Tour", "alias": "GET Rio", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Global Esports Tour", "alias": "Global Esports Tour", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Global Esports Tour", "alias": "Global Esports Tour 2022 Dubai", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Good Game League", "alias": "GGL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Good Game League", "alias": "Good Game League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Good Game League", "alias": "Good Game League 2019 Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Hero Esports", "alias": "ACL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Hero Esports", "alias": "HE", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Hero Esports", "alias": "Hero Esports", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Hero Esports", "alias": "Hero Esports Asian Champions League 2025", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1139,6 +1337,7 @@
 {"title_id": "counter_strike", "series_key": "Hussar Cup", "alias": "HC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Hussar Cup", "alias": "Hussar Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Hussar Cup", "alias": "Hussar Cup 2023", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "IBUYPOWER", "alias": "IBP", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "IBUYPOWER", "alias": "IBUYPOWER", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "IBUYPOWER", "alias": "IBUYPOWER Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ICE Challenge", "alias": "IC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1149,6 +1348,7 @@
 {"title_id": "counter_strike", "series_key": "IOS Pantamera", "alias": "IOS Pantamera", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "IOS Pantamera", "alias": "IP", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Intel", "alias": "Intel", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Intel", "alias": "Intel Grand Slam", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Intel", "alias": "Intel Grand Slam 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Intel Challenge Cup", "alias": "ICC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Intel Challenge Cup", "alias": "Intel Challenge Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1157,6 +1357,8 @@
 {"title_id": "counter_strike", "series_key": "Intel Challenge Super Cup", "alias": "Intel Challenge Super Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Intel Challenge Super Cup", "alias": "Intel Challenge Super Cup 7", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Intel Extreme Masters", "alias": "IEM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Intel Extreme Masters", "alias": "IEM Cologne", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "Intel Extreme Masters", "alias": "IEM Katowice", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Intel Extreme Masters", "alias": "Intel Extreme Masters", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Intel Extreme Masters", "alias": "Intel Extreme Masters 2022 Rio", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Intel Summer Championship", "alias": "2006 Intel Summer Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1167,6 +1369,7 @@
 {"title_id": "counter_strike", "series_key": "International Gaming League", "alias": "International Gaming League 2016 Grand Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "IronGaming", "alias": "IronGaming", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "IronGaming", "alias": "IronGaming Season 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "K1 League", "alias": "K1", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "K1 League", "alias": "K1 League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "K1 League", "alias": "K1 League 2013 Season 3", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "K1 League", "alias": "KL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1174,6 +1377,7 @@
 {"title_id": "counter_strike", "series_key": "KODE5", "alias": "KODE5 2006", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "King of Majors", "alias": "KOM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "King of Majors", "alias": "King of Majors", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "King of Majors", "alias": "KoM", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Komplett Gamer Challenge", "alias": "KGC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Komplett Gamer Challenge", "alias": "Komplett Gamer Challenge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "LAN Arena 7", "alias": "LA7", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1190,29 +1394,41 @@
 {"title_id": "counter_strike", "series_key": "MESA/Nomadic Masters", "alias": "MESA Nomadic Masters", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "MESA/Nomadic Masters", "alias": "MESA Nomadic Masters 2025 Fall", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "MESA/Nomadic Masters", "alias": "MNM", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "MLG", "alias": "Columbus", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "MLG", "alias": "MLG", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "MLG", "alias": "MLG 2016 Columbus", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "MLG", "alias": "MLG Columbus", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "MLG/Aspen Invitational", "alias": "Aspen", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "MLG/Aspen Invitational", "alias": "MAI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "MLG/Aspen Invitational", "alias": "MLG Aspen", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "MLG/Aspen Invitational", "alias": "MLG Aspen Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "MSI Beat IT", "alias": "MBI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "MSI Beat IT", "alias": "MSI Beat IT", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "MSI Beat IT", "alias": "MSI Beat IT 2010", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Majors", "alias": "CS Majors", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "Majors", "alias": "CS2 Majors", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Majors", "alias": "Majors", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Majors", "alias": "Majors 2027 Winter", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Match of LeGGends", "alias": "MOL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Match of LeGGends", "alias": "Match of LeGGends", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Minor Championship", "alias": "MC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Minor Championship", "alias": "Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "Minor Championship", "alias": "Majors", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Minor Championship", "alias": "Minor Championship", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Minor Championship", "alias": "Minor Championship 2016 Cologne Americas", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Moche XL Esports", "alias": "MXE", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Moche XL Esports", "alias": "Moche XL", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Moche XL Esports", "alias": "Moche XL Esports", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Moche XL Esports", "alias": "Moche XL Esports 2020", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Multiplay", "alias": "Insomnia", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Multiplay", "alias": "Multiplay", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Multiplay", "alias": "Multiplay Insomnia 33", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Multiplay", "alias": "i-Series", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "NGL-One", "alias": "NGL-One", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "NGL-One", "alias": "NGL-One Season I", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "NGL-One", "alias": "NO", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "National Professional Cybersport League", "alias": "NPCL", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "National Professional Cybersport League", "alias": "NPCSL", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "National Professional Cybersport League", "alias": "National Professional Cybersport League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "National Professional Cybersport League", "alias": "National Professional Cybersport League 2007", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "NationsCup", "alias": "NationsCup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1239,13 +1455,18 @@
 {"title_id": "counter_strike", "series_key": "PC Gamer Showdown", "alias": "PGS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PGL", "alias": "PGL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PGL", "alias": "PGL 2021 Stockholm", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "PGL", "alias": "PGL Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "PGL/Championship Series", "alias": "PCS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "PGL/Championship Series", "alias": "PGL CS2", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "PGL/Championship Series", "alias": "PGL Championship", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "PGL/Championship Series", "alias": "PGL Championship Series", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PGL/Championship Series", "alias": "PGL Championship Series Kick-Off Season", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "PGL/Championship Series", "alias": "PGL Major", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "PGL/HTC 1vs1 Invitational", "alias": "PGL HTC 1vs1 Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PGL/HTC 1vs1 Invitational", "alias": "PH1I", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PGL/HTC 2v2 Invitational", "alias": "PGL HTC 2v2 Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PGL/HTC 2v2 Invitational", "alias": "PH2I", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "PLG Grand Slam", "alias": "Grand Slam", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "PLG Grand Slam", "alias": "PGS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PLG Grand Slam", "alias": "PLG Grand Slam", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "PLG Grand Slam", "alias": "PLG Grand Slam 2018", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1306,17 +1527,29 @@
 {"title_id": "counter_strike", "series_key": "Stake Ranked", "alias": "SR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Stake Ranked", "alias": "Stake Ranked", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Stake Ranked", "alias": "Stake Ranked Episode 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "StarLadder", "alias": "RMR", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "StarLadder", "alias": "SL", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "StarLadder", "alias": "StarLadder", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "StarLadder", "alias": "StarLadder 2025 Major", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "StarLadder", "alias": "StarSeries", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "StarLadder", "alias": "i-League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "StarLadder ImbaTV", "alias": "ImbaTV", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "StarLadder ImbaTV", "alias": "SI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "StarLadder ImbaTV", "alias": "SL ImbaTV", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "StarLadder ImbaTV", "alias": "StarLadder", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "StarLadder ImbaTV", "alias": "StarLadder ImbaTV", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "StarLadder ImbaTV", "alias": "StarLadder ImbaTV Invitational 2018 Chongqing", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "StarLadder i-League", "alias": "SIL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "StarLadder i-League", "alias": "StarLadder i-League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "StarLadder i-League", "alias": "StarLadder i-League StarSeries Season 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "StarLadder i-League", "alias": "StarSeries", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "StarLadder i-League", "alias": "i-League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "StarSeries i-League", "alias": "SIL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "StarSeries i-League", "alias": "SS", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "StarSeries i-League", "alias": "StarSeries", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "StarSeries i-League", "alias": "StarSeries i-League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "StarSeries i-League", "alias": "StarSeries i-League Season 7", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "StarSeries i-League", "alias": "i-League", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "SteelSeries", "alias": "SteelSeries", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "SteelSeries", "alias": "SteelSeries CS2 Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "SteelSeries Invitational", "alias": "SI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1335,6 +1568,7 @@
 {"title_id": "counter_strike", "series_key": "TOYOTA Master", "alias": "TOYOTA Master 2018 Bangkok", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "TaKeTV", "alias": "TaKeTV", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "TaKeTV", "alias": "TaKeTV A-Split Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "Teleperformance PXP Invitational", "alias": "PXP", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "Teleperformance PXP Invitational", "alias": "TPI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Teleperformance PXP Invitational", "alias": "Teleperformance PXP Invitational", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "The eXperience", "alias": "TE", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1375,6 +1609,9 @@
 {"title_id": "counter_strike", "series_key": "WEM", "alias": "WEM 2010", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "WSVG", "alias": "WSVG", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "WSVG", "alias": "WSVG 2006 New York", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "WePlay!", "alias": "FoM", "case_sensitive": 1, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "WePlay!", "alias": "Forge of Masters", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
+{"title_id": "counter_strike", "series_key": "WePlay!", "alias": "WePlay", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "counter_strike", "series_key": "WePlay!", "alias": "WePlay!", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "WePlay!", "alias": "WePlay! Clutch Island", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "Wild Wild Bootcamp", "alias": "WWB", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -1405,6 +1642,7 @@
 {"title_id": "counter_strike", "series_key": "ZOTAC Cup", "alias": "ZC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ZOTAC Cup", "alias": "ZOTAC Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "counter_strike", "series_key": "ZOTAC Cup", "alias": "ZOTAC Cup Masters 2018", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "counter_strike", "series_key": "ZOTAC Cup", "alias": "ZotacCup", "case_sensitive": 0, "source": "ai_assisted", "confidence": "ai_assisted_unreviewed"}
 {"title_id": "dota2", "series_key": "1win Essence", "alias": "1E", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "dota2", "series_key": "1win Essence", "alias": "1win Essence", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "dota2", "series_key": "1win Essence", "alias": "1win Essence 2", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}

@@ -43,7 +43,17 @@ disambiguates which edition/region a given stream refers to for
 matching purposes even when several distinct real-world regional splits
 share one series_key.
 
-Per NEW series (no existing aliases for that (title_id, series_key)):
+**Incremental on two independent tracks, not one**: a series needs
+rule-based generation if it has no `source='rule_based'` row yet, and
+independently needs an LLM check if it has no
+`tournament_alias_llm_checked` row yet — checking "any alias exists at
+all" would be wrong, because a `--skip-llm` run (or one that ran out of
+`--max-llm-calls`) leaves rule-based rows behind with no LLM attempt yet,
+and a genuinely-empty LLM result (no well-known nickname exists) writes
+zero alias rows, which would otherwise look identical to "never tried"
+and get retried — and re-billed — every run.
+
+Per series:
   - Three rule-based aliases: the "full name" (one representative/
     shallowest member's full liquipedia_page, spaces for slashes, WITH
     its year — e.g. "The International 2011"), "name minus year" (the
@@ -256,18 +266,29 @@ def main() -> int:
     for title_id in sorted(per_title_counts):
         print(f"  {title_id:20} {per_title_counts[title_id]:5} series")
 
-    already_aliased = {
+    already_rule_based = {
         (title_id, series_key)
         for (title_id, series_key) in conn.execute(
-            "SELECT DISTINCT title_id, series_key FROM tournament_aliases"
+            "SELECT DISTINCT title_id, series_key FROM tournament_aliases WHERE source = 'rule_based'"
         ).fetchall()
     }
-    new_series = sorted(k for k in series_members if k not in already_aliased)
-    print(f"{len(already_aliased)} series already aliased, {len(new_series)} new")
+    already_llm_checked = {
+        (title_id, series_key)
+        for (title_id, series_key) in conn.execute(
+            "SELECT title_id, series_key FROM tournament_alias_llm_checked"
+        ).fetchall()
+    }
+    needs_rule_based = sorted(k for k in series_members if k not in already_rule_based)
+    needs_llm = sorted(k for k in series_members if k not in already_llm_checked)
+    print(f"{len(already_rule_based)} series already have rule-based aliases, "
+          f"{len(needs_rule_based)} need them")
+    print(f"{len(already_llm_checked)} series already LLM-checked (nickname found or confirmed "
+          f"none exists), {len(needs_llm)} still need an LLM check")
 
     display_name_by_title: dict[str, str] = {}
-    if new_series:
-        title_ids_needed = {title_id for title_id, _ in new_series}
+    all_touched = sorted(set(needs_rule_based) | set(needs_llm))
+    if all_touched:
+        title_ids_needed = {title_id for title_id, _ in all_touched}
         for row in conn.execute(
             f"SELECT id, canonical_name FROM titles WHERE id IN ({','.join('?' for _ in title_ids_needed)})",
             tuple(title_ids_needed),
@@ -299,24 +320,26 @@ def main() -> int:
         )
         return cur.rowcount > 0
 
+    needs_rule_based_set = set(needs_rule_based)
+    needs_llm_set = set(needs_llm)
     rule_based_rows_written = 0
     llm_rows_written = 0
     llm_calls_made = 0
     llm_errors = 0
 
-    for title_id, key in new_series:
+    for title_id, key in all_touched:
         members = series_members[(title_id, key)]
         depth = depth_by_series[(title_id, key)]
 
-        # Exemplar: shallowest page (most "top-level"), tie-broken by prize_pool desc.
-        exemplar = min(members, key=lambda m: (m[1].count("/"), -(m[2] or 0)))
-        exemplar_page = exemplar[1]
+        if (title_id, key) in needs_rule_based_set:
+            # Exemplar: shallowest page (most "top-level"), tie-broken by prize_pool desc.
+            exemplar = min(members, key=lambda m: (m[1].count("/"), -(m[2] or 0)))
+            exemplar_page = exemplar[1]
+            for alias in rule_based_aliases(key, exemplar_page):
+                if insert_alias(title_id, key, alias, "rule_based", "verified"):
+                    rule_based_rows_written += 1
 
-        for alias in rule_based_aliases(key, exemplar_page):
-            if insert_alias(title_id, key, alias, "rule_based", "verified"):
-                rule_based_rows_written += 1
-
-        if client is not None and llm_calls_made < args.max_llm_calls:
+        if client is not None and (title_id, key) in needs_llm_set and llm_calls_made < args.max_llm_calls:
             # Sub-events, deduped, prioritized by prize_pool desc, capped.
             ranked_members = sorted(members, key=lambda m: -(m[2] or 0))
             sub_events: list[str] = []
@@ -336,16 +359,30 @@ def main() -> int:
             except Exception as exc:  # one bad call shouldn't abort the whole run
                 print(f"[error] LLM call failed for series {key!r} ({title_id}): {exc}", file=sys.stderr)
                 llm_errors += 1
-                nicknames = []
+                conn.commit()
+                continue  # don't mark as checked — a failed call should be retried, not treated as "confirmed none"
 
             for alias in nicknames:
                 if insert_alias(title_id, key, alias, "ai_assisted", "ai_assisted_unreviewed"):
                     llm_rows_written += 1
 
+            # Recorded even when nicknames is empty — that's a real "checked,
+            # none exist" answer (see schema.sql), not a failure to retry.
+            conn.execute(
+                """
+                INSERT INTO tournament_alias_llm_checked (title_id, series_key, checked_at, nickname_count)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT (title_id, series_key) DO UPDATE SET
+                    checked_at=excluded.checked_at, nickname_count=excluded.nickname_count
+                """,
+                (title_id, key, utcnow_iso(), len(nicknames)),
+            )
+
         conn.commit()
 
     finished_at = utcnow_iso()
-    llm_skipped = max(0, len(new_series) - llm_calls_made) if client is not None else len(new_series)
+    llm_still_needed = len(needs_llm_set) - llm_calls_made if client is not None else len(needs_llm_set)
+    llm_skipped = max(0, llm_still_needed)
     conn.execute(
         """
         INSERT INTO collector_runs (collector, raw_file, started_at, finished_at, status, rows_written, error)
