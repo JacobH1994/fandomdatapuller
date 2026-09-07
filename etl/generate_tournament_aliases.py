@@ -171,7 +171,21 @@ def rule_based_aliases(series_key: str, exemplar_page: str) -> set[str]:
     if full_name and full_name != name_minus_year:
         aliases.add(full_name)
 
-    words = [w for w in re.findall(r"[A-Za-z0-9]+", name_minus_year)]
+    # Unicode-aware ([^\W_]+, not [A-Za-z0-9]+): the ASCII-only version
+    # fragmented any accented word at the accent (e.g. "Brasileirão" ->
+    # ["Brasileir", "o"], since "ã" isn't in [A-Za-z0-9]), which both
+    # spuriously enabled acronym generation for single-word series names
+    # that should have been skipped, and produced a wrong acronym for
+    # multi-word ones — confirmed live: this generated "BO" for the
+    # single-word "Brasileirão" series (both an incorrect acronym, and
+    # incorrectly enabled at all), which then case-sensitive-matched the
+    # unrelated Polish word "bo" ("because") in unrelated CS2 stream
+    # titles. [^\W_]+ (not bare \w+, which also matches "_") keeps
+    # Unicode letters together while still splitting on real
+    # word-boundaries, and still treats digits as part of a token
+    # (confirmed: "AoE2"/"1st"/"T90" stay single tokens, unlike a
+    # letters-only Unicode class would give).
+    words = [w for w in re.findall(r"[^\W_]+", name_minus_year, re.UNICODE)]
     if len(words) >= 2:
         acronym = "".join(w[0].upper() for w in words)
         if len(acronym) >= 2:
