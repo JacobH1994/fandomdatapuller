@@ -9,6 +9,7 @@ pandas>=2.2
 jupyter>=1.0
 matplotlib>=3.8
 scipy>=1.11
+ruptures>=1.1
 
 # anthropic (LLM-derived tournament aliases, etl/generate_tournament_aliases.py)
 # is deliberately NOT listed here. This file is installed as-is by
