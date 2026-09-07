@@ -13,7 +13,7 @@ revisiting: `[FOLLOW UP]`. Not a rule, just a habit worth having.
 
 ---
 
-## 2026-09-07
+## 2026-09-04
 
 category_trajectories/ipynb
  - Free fire with a strong peak through '21 and then trough. Could this be driven by competition with niche? Also is FF beneficiary of COVID boost?
@@ -25,3 +25,11 @@ category_trajectories/ipynb
  - is it possible that the top performing titles are more stable over time?
  - wonder if it's possible to add in reddit users targeting 
  - need to sit with a lot of this now... i think there's actually a massive amount of data here to work with and that needs some time. Also, still need to build out co-streamer tracking mechanism and understand how to label primary broadcast channels across all titles
+
+ ## 2026-09-07
+ 
+ Working with esport_share_of_twitch a few thoughts come to light. First, the drop in share is predictable but still large. more than 50% of hours-watched was for esports titles in 2016, now it's less than 28% and this is presumbaly WITH the addition of incremental titles. WE could refine this to show the proportion of viewership sare accruing to the phase 1 titles that are available in 2016.
+ 
+ We also might look at how just chatting / creator content wave has had differing impacts on the differing phased titles. If there is a quantifiably different impact now, then it would perhaps direct us towards the hypothesis that the original success of the original titles was historically contingent. What is less clear is whether there is a difference in story for VAL as well. Does VAL buck the trend (if there is one) for late arriving titles?
+ 
+ So we need to look into the trajectory of late arriving titles

@@ -5,6 +5,20 @@
 # Fields:
 #   id                    canonical slug, stable identifier used across the project
 #   display_name          human-readable name
+#   publisher              current publisher/owner (not necessarily original
+#                         developer — e.g. Rocket League: Epic Games, not
+#                         Psyonix; Mortal Kombat: Warner Bros. Games, not
+#                         NetherRealm). Added 2026-09-07 for
+#                         notebooks/esports_share_of_twitch.ipynb's
+#                         publisher-grouped growth breakdown. Public,
+#                         well-known ownership facts, not a judgment call
+#                         the way genre/platform are — but Claude-added and
+#                         not independently re-verified against each
+#                         company's own materials the way twitch_category_id
+#                         is, so still spot-check before treating as gospel
+#                         for anything higher-stakes than this one notebook.
+#                         No downstream code reads this yet (not seeded into
+#                         `titles` by etl/db.py) — notebook-only for now.
 #   twitch_category_id    Twitch Helix game_id for `Get Streams`. REQUIRED for polling.
 #   twitch_category_verified
 #                         false until a human has confirmed this ID against the
@@ -186,6 +200,7 @@ titles:
   # --- Classic phase (2013-15) ---
   - id: league_of_legends
     display_name: League of Legends
+    publisher: Riot Games
     twitch_category_id: "21779"
     twitch_category_verified: true
     liquipedia_wiki: leagueoflegends
@@ -196,6 +211,7 @@ titles:
 
   - id: dota2
     display_name: Dota 2
+    publisher: Valve
     twitch_category_id: "29595"
     twitch_category_verified: true
     liquipedia_wiki: dota2
@@ -206,6 +222,7 @@ titles:
 
   - id: counter_strike
     display_name: Counter-Strike 2
+    publisher: Valve
     twitch_category_id: "32399"
     twitch_category_verified: true # Twitch's unified category is named "Counter-Strike", covers CS2
     liquipedia_wiki: counterstrike
@@ -216,6 +233,7 @@ titles:
 
   - id: starcraft2
     display_name: StarCraft II
+    publisher: Blizzard Entertainment
     twitch_category_id: "490422"
     twitch_category_verified: true
     liquipedia_wiki: starcraft2
@@ -226,6 +244,7 @@ titles:
 
   - id: hearthstone
     display_name: Hearthstone
+    publisher: Blizzard Entertainment
     twitch_category_id: "138585"
     twitch_category_verified: true
     liquipedia_wiki: hearthstone
@@ -237,6 +256,7 @@ titles:
   # --- Console phase (2016-20) ---
   - id: rocket_league
     display_name: Rocket League
+    publisher: Epic Games
     twitch_category_id: "30921"
     twitch_category_verified: true
     liquipedia_wiki: rocketleague
@@ -247,6 +267,7 @@ titles:
 
   - id: rainbow_six_siege
     display_name: Rainbow Six Siege
+    publisher: Ubisoft
     twitch_category_id: "460630"
     twitch_category_verified: true
     liquipedia_wiki: rainbowsix
@@ -257,6 +278,7 @@ titles:
 
   - id: overwatch
     display_name: Overwatch
+    publisher: Blizzard Entertainment
     twitch_category_id: "515025"
     twitch_category_verified: true
     liquipedia_wiki: overwatch
@@ -267,6 +289,7 @@ titles:
 
   - id: tekken
     display_name: Tekken 8
+    publisher: Bandai Namco Entertainment
     twitch_category_id: "538054672"
     twitch_category_verified: true # judgment call: current-gen entry (Twitch also has separate Tekken 7 / Tekken 3 / etc. categories)
     liquipedia_wiki: fighters # shared wiki, confirmed live — "Liquipedia Fighting Games Wiki"
@@ -277,6 +300,7 @@ titles:
 
   - id: street_fighter
     display_name: Street Fighter 6
+    publisher: Capcom
     twitch_category_id: "55453844"
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
@@ -287,6 +311,7 @@ titles:
 
   - id: mortal_kombat
     display_name: Mortal Kombat 1
+    publisher: Warner Bros. Games
     twitch_category_id: "904864974"
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
@@ -297,6 +322,7 @@ titles:
 
   - id: guilty_gear
     display_name: Guilty Gear -Strive-
+    publisher: Arc System Works
     twitch_category_id: "517159"
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
@@ -308,6 +334,7 @@ titles:
   # --- Second Coming phase (2021-24) ---
   - id: valorant
     display_name: VALORANT
+    publisher: Riot Games
     twitch_category_id: "516575"
     twitch_category_verified: true
     liquipedia_wiki: valorant
@@ -318,6 +345,7 @@ titles:
 
   - id: apex_legends
     display_name: Apex Legends
+    publisher: Electronic Arts
     twitch_category_id: "511224"
     twitch_category_verified: true
     liquipedia_wiki: apexlegends
@@ -328,6 +356,7 @@ titles:
 
   - id: fortnite
     display_name: Fortnite
+    publisher: Epic Games
     twitch_category_id: "33214"
     twitch_category_verified: true
     liquipedia_wiki: fortnite
@@ -338,6 +367,7 @@ titles:
 
   - id: pubg
     display_name: "PUBG: BATTLEGROUNDS"
+    publisher: Krafton
     twitch_category_id: "493057"
     twitch_category_verified: true
     liquipedia_wiki: pubg
@@ -348,6 +378,7 @@ titles:
 
   - id: pubg_mobile
     display_name: PUBG Mobile
+    publisher: Tencent Games
     twitch_category_id: "505884"
     twitch_category_verified: true
     liquipedia_wiki: pubgmobile
@@ -358,6 +389,7 @@ titles:
 
   - id: free_fire
     display_name: Free Fire
+    publisher: Garena
     twitch_category_id: "502732"
     twitch_category_verified: true
     liquipedia_wiki: freefire
@@ -368,6 +400,7 @@ titles:
 
   - id: mobile_legends_bb
     display_name: "Mobile Legends: Bang Bang"
+    publisher: Moonton
     twitch_category_id: "494184"
     twitch_category_verified: true
     liquipedia_wiki: mobilelegends
@@ -378,6 +411,7 @@ titles:
 
   - id: wild_rift
     display_name: "League of Legends: Wild Rift"
+    publisher: Riot Games
     twitch_category_id: "514858"
     twitch_category_verified: true
     liquipedia_wiki: wildrift
@@ -388,6 +422,7 @@ titles:
 
   - id: teamfight_tactics
     display_name: Teamfight Tactics
+    publisher: Riot Games
     twitch_category_id: "513143"
     twitch_category_verified: true
     liquipedia_wiki: tft
@@ -398,6 +433,7 @@ titles:
 
   - id: brawl_stars
     display_name: Brawl Stars
+    publisher: Supercell
     twitch_category_id: "497497"
     twitch_category_verified: true
     liquipedia_wiki: brawlstars
@@ -409,6 +445,7 @@ titles:
   # --- RTS (referenced alongside StarCraft II in the niche table, §6) ---
   - id: age_of_empires_ii
     display_name: Age of Empires II
+    publisher: Xbox Game Studios
     twitch_category_id: "13389"
     twitch_category_verified: true # judgment call: brief says "Age of Empires" without a version; AoE2 is the entry with an active competitive scene
     liquipedia_wiki: ageofempires
