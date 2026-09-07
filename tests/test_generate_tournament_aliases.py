@@ -72,3 +72,18 @@ def test_rule_based_aliases_skips_acronym_for_single_word_series():
     assert "DreamLeague" in aliases
     assert "DreamLeague 27" in aliases
     assert not any(len(a) <= 2 and a.isupper() for a in aliases)
+
+
+def test_rule_based_aliases_treats_accented_word_as_one_word():
+    # Regression: an ASCII-only word regex fragmented "Brasileirão" at the
+    # "ã" into ["Brasileir", "o"], spuriously producing a 2-letter acronym
+    # ("BO") for what is actually a single-word series name — which then
+    # collided with the unrelated Polish word "bo" in real stream titles.
+    aliases = rule_based_aliases("Brasileirão", "Brasileirão/Grand Final")
+    assert "BO" not in aliases
+    assert not any(len(a) <= 2 and a.isupper() for a in aliases)
+
+
+def test_rule_based_aliases_acronym_from_multi_word_accented_name():
+    aliases = rule_based_aliases("Copa América", "Copa América/2023")
+    assert "CA" in aliases

@@ -99,7 +99,7 @@
 {"title_id": "age_of_empires_ii", "series_key": "Collection Cup", "alias": "Collection Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Copa 3k Libertadores", "alias": "C3L", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Copa 3k Libertadores", "alias": "Copa 3k Libertadores", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "age_of_empires_ii", "series_key": "Copa Am\u00e9rica", "alias": "CAR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "age_of_empires_ii", "series_key": "Copa Am\u00e9rica", "alias": "CA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Copa Am\u00e9rica", "alias": "Copa Am\u00e9rica", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Copa Am\u00e9rica", "alias": "Copa Am\u00e9rica 2025", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "age_of_empires_ii", "series_key": "Copa Latino Americana", "alias": "CLA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -729,7 +729,7 @@
 {"title_id": "brawl_stars", "series_key": "Master League", "alias": "ML", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Master League", "alias": "Master League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Master League", "alias": "Master League 2021", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "brawl_stars", "series_key": "Pr\u00eamio eSports Brasil Awards", "alias": "PMEBA", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "brawl_stars", "series_key": "Pr\u00eamio eSports Brasil Awards", "alias": "PEBA", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Pr\u00eamio eSports Brasil Awards", "alias": "Pr\u00eamio eSports Brasil Awards", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Queso Cup", "alias": "QC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "brawl_stars", "series_key": "Queso Cup", "alias": "Queso Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -1861,7 +1861,7 @@
 {"title_id": "dota2", "series_key": "EPIC League", "alias": "EPIC League 2 Division 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "dota2", "series_key": "EPICENTER", "alias": "EPICENTER", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "dota2", "series_key": "EPICENTER", "alias": "EPICENTER 2018", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "dota2", "series_key": "ESB/El Cl\u00e1sico", "alias": "EECS", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "dota2", "series_key": "ESB/El Cl\u00e1sico", "alias": "EEC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "dota2", "series_key": "ESB/El Cl\u00e1sico", "alias": "ESB El Cl\u00e1sico", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "dota2", "series_key": "ESL Major Series", "alias": "EMS", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "dota2", "series_key": "ESL Major Series", "alias": "ESL Major Series", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -2447,7 +2447,6 @@
 {"title_id": "fortnite", "series_key": "Benjyfishy Cup", "alias": "Benjyfishy Cup", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "fortnite", "series_key": "BoomTV", "alias": "BoomTV", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "fortnite", "series_key": "BoomTV", "alias": "BoomTV DrDisrespect Hot Shot Duo Drop", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "fortnite", "series_key": "Brasileir\u00e3o", "alias": "BO", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "fortnite", "series_key": "Brasileir\u00e3o", "alias": "Brasileir\u00e3o", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "fortnite", "series_key": "Brasileir\u00e3o", "alias": "Brasileir\u00e3o Grand Final", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "fortnite", "series_key": "Bugha Throwback Cup", "alias": "BTC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -3411,7 +3410,7 @@
 {"title_id": "hearthstone", "series_key": "Masters Tour Ironforge", "alias": "MTI", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "hearthstone", "series_key": "Masters Tour Ironforge", "alias": "Masters Tour 2021 Ironforge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "hearthstone", "series_key": "Masters Tour Ironforge", "alias": "Masters Tour Ironforge", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "hearthstone", "series_key": "Masters Tour J\u00f6nk\u00f6ping", "alias": "MTJNP", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "hearthstone", "series_key": "Masters Tour J\u00f6nk\u00f6ping", "alias": "MTJ", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "hearthstone", "series_key": "Masters Tour J\u00f6nk\u00f6ping", "alias": "Masters Tour 2020 J\u00f6nk\u00f6ping", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "hearthstone", "series_key": "Masters Tour J\u00f6nk\u00f6ping", "alias": "Masters Tour J\u00f6nk\u00f6ping", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "hearthstone", "series_key": "Masters Tour Las Vegas", "alias": "MTLV", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -3930,7 +3929,7 @@
 {"title_id": "league_of_legends", "series_key": "PGL/Legends of The Rift", "alias": "PGL Legends of The Rift", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "league_of_legends", "series_key": "PGL/Legends of The Rift", "alias": "PGL Legends of The Rift Season 1", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "league_of_legends", "series_key": "PGL/Legends of The Rift", "alias": "PLOTR", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "league_of_legends", "series_key": "Pr\u00eamio CBLOL", "alias": "PMC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
+{"title_id": "league_of_legends", "series_key": "Pr\u00eamio CBLOL", "alias": "PC", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "league_of_legends", "series_key": "Pr\u00eamio CBLOL", "alias": "Pr\u00eamio CBLOL", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "league_of_legends", "series_key": "Pr\u00eamio CBLOL", "alias": "Pr\u00eamio CBLOL 2022", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "league_of_legends", "series_key": "Red Bull League of Its Own", "alias": "RBLOIO", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -4920,7 +4919,6 @@
 {"title_id": "rainbow_six_siege", "series_key": "Brasil Awards", "alias": "BA", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Brasil Awards", "alias": "Brasil Awards", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Brasil Awards", "alias": "Brasil Awards 2020", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "rainbow_six_siege", "series_key": "Brasileir\u00e3o", "alias": "BO", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Brasileir\u00e3o", "alias": "Brasileir\u00e3o", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Brasileir\u00e3o", "alias": "Brasileir\u00e3o 2022", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Brazil League", "alias": "BL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
@@ -5014,7 +5012,7 @@
 {"title_id": "rainbow_six_siege", "series_key": "Pro League", "alias": "PL", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Pro League", "alias": "Pro League", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Pro League", "alias": "Pro League Season 10 Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "rainbow_six_siege", "series_key": "Pr\u00eamio eSports Brasil Awards", "alias": "PMEBA", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "rainbow_six_siege", "series_key": "Pr\u00eamio eSports Brasil Awards", "alias": "PEBA", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "Pr\u00eamio eSports Brasil Awards", "alias": "Pr\u00eamio eSports Brasil Awards", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "R6S DREAM SHOWDOWN", "alias": "R6S DREAM SHOWDOWN", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "rainbow_six_siege", "series_key": "R6S DREAM SHOWDOWN", "alias": "R6S DREAM SHOWDOWN 2023", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -6072,7 +6070,6 @@
 {"title_id": "starcraft2", "series_key": "Svenska E-sportcupen", "alias": "SES", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "Svenska E-sportcupen", "alias": "Svenska E-sportcupen", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "Svenska E-sportcupen", "alias": "Svenska E-sportcupen 2013 Grand Final", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "starcraft2", "series_key": "S\u00f8rlanet", "alias": "SR", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "S\u00f8rlanet", "alias": "S\u00f8rlanet", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "S\u00f8rlanet", "alias": "S\u00f8rlanet 2013", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "TCL4", "alias": "TCL4", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
@@ -6168,7 +6165,7 @@
 {"title_id": "starcraft2", "series_key": "WCS Global Playoffs and Finals", "alias": "WGPAF", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "WCS J\u00f6nk\u00f6ping", "alias": "2017 WCS J\u00f6nk\u00f6ping", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "WCS J\u00f6nk\u00f6ping", "alias": "WCS J\u00f6nk\u00f6ping", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
-{"title_id": "starcraft2", "series_key": "WCS J\u00f6nk\u00f6ping", "alias": "WJNP", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
+{"title_id": "starcraft2", "series_key": "WCS J\u00f6nk\u00f6ping", "alias": "WJ", "case_sensitive": 1, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "WCS Korea Season 1 Cross Finals", "alias": "2016 WCS Korea Season 1 Cross Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "WCS Korea Season 1 Cross Finals", "alias": "WCS Korea Season 1 Cross Finals", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
 {"title_id": "starcraft2", "series_key": "WCS Korea Season 1 Cross Finals", "alias": "WKS1CF", "case_sensitive": 0, "source": "rule_based", "confidence": "verified"}
