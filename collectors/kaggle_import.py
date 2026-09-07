@@ -40,16 +40,23 @@ CLAUDE.md "one rule" reason to keep a permanent copy in git). To get it:
 One-time, no scheduling. Re-run only if the dataset changes — it's an
 UPSERT on (title_id, year_month), so re-running is safe and idempotent.
 
-Deliberately excludes the four fighting-game titles (tekken, street_fighter,
-mortal_kombat, guilty_gear). This project's title_ids track one current
-generation per franchise only (config/titles.yaml's own judgment-call
-comments: Tekken 8, not 7; Street Fighter 6, not V; ...). The Kaggle
-dataset's "Game" column won't carry that generational split (a raw Twitch
-category name like "Tekken 7" predates our tracked title entirely), and
-guessing which generation a given month's figures belong to is exactly the
-kind of silent misattribution collectors/liquipedia.py's own docstring
-already flags as a past mistake for this same wiki/title group. Left out
-rather than guessed; add explicit per-generation handling later if needed.
+The four fighting-game titles (tekken, street_fighter, mortal_kombat,
+guilty_gear) map ONLY via their exact, unambiguous current-generation
+Kaggle names ("TEKKEN 8", "Street Fighter 6", "Mortal Kombat 1", "Guilty
+Gear: Strive" — see NAME_TO_TITLE_ID). Bare/older-generation names the
+dataset also carries ("Tekken 7", "Street Fighter V", "Mortal Kombat 11",
+"Mortal Kombat X", "Guilty Gear Xrd: Revelator", "Guilty Gear Xrd Rev 2",
+"Ultra Street Fighter IV", "Street Fighter III: 3rd Strike") stay
+unmapped, same reasoning as every other franchise here: this project's
+title_ids track one current generation per franchise only
+(config/titles.yaml's own judgment-call comments), a raw generation-
+ambiguous name predates our tracked title entirely, and guessing which
+generation a given month's figures belong to is exactly the kind of
+silent misattribution collectors/liquipedia.py's own docstring already
+flags as a past mistake for this same wiki/title group. 2026-09-07: found
+live in notebooks/esports_share_of_twitch.ipynb that "Street Fighter 6"
+was being excluded entirely even though it's unambiguous — fixed, and the
+other three checked at the same time.
 """
 
 from __future__ import annotations
@@ -109,6 +116,10 @@ NAME_TO_TITLE_ID = {
     "brawl stars": "brawl_stars",
     "age of empires ii": "age_of_empires_ii",
     "age of empires ii: definitive edition": "age_of_empires_ii",
+    "tekken 8": "tekken",
+    "street fighter 6": "street_fighter",
+    "mortal kombat 1": "mortal_kombat",
+    "guilty gear: strive": "guilty_gear",
 }
 
 # Column-name candidates per field, checked case-insensitively in order.
