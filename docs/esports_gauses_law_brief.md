@@ -66,6 +66,15 @@ Longer-tenured fanbases should be more resilient to shocks (a bad season, scanda
 
 **Test (future post, not this one):** compare relative viewership drawdown of older titles (LoL, CS) during their own past rough patches against newer titles under comparable stress. Needs multi-year, per-title volatility data not yet in hand.
 
+### H3 — Attention concentrates even as production fragments (named 2026-09-09, formalizing research question 3 in §2)
+
+Two things happening at once, not one: the Twitch work already found platform *attention* concentrating hard within esports (esports' own share of top-200 Twitch attention nearly halved 2016-2024, and Just Chatting/GTA V drove most of the platform's growth — `notebooks/esports_share_of_twitch.ipynb`). H3 asks whether *production* is doing the opposite at the same time — more titles being made, a longer tail, even as the audience's attention concentrates onto fewer winners within any given niche. If both are true simultaneously, that's the emergence-and-consolidation pattern Post 1 already found for esports specifically (rising emergence rate, smaller individual scale) showing up one level up, as a general property of digital-fandom production and attention rather than something specific to esports.
+
+**Tests, two independent sub-tests on different datasets, not the same claim measured twice:**
+
+- *Supply side — Steam production composition* (PRD §9.12a): indie vs. core (AAA) release volume and lifecycle-shape comparison, drawn from a full historical Steam catalog backfill (`collectors/steam_catalog_backfill.py`, in progress as of 2026-09-08). Tests whether game *production* is fragmenting (more indie, more studios, longer tail) using the same "does sustained investment predict durability" logic H2 already names, just on a dataset entirely outside esports.
+- *Demand side — championship-viewership concentration within esports itself* (PRD §9.3a): for each tracked title, its highest-prize-pool tier-1 tournament per year (`analysis/metrics.py:get_championship_windows`, built and run 2026-09-08 — 248 windows across all 23 titles) as an objective "world championship window," with peak viewership pooled across titles per year to compute HHI/top-3 share and a power-law-vs-log-normal fit over time. **Paused, not built**: the peak-viewership figure this needs was meant to come from Esports Charts, and automated access there is now confirmed blocked (checked directly 2026-09-09, PRD §9.3) — this sub-test has no confirmed data source yet, only the window-identification half.
+
 ## 6. What the existing title list already shows
 
 Genre/platform categorization below is inferred from Post 1's prose — not yet a formal data column.

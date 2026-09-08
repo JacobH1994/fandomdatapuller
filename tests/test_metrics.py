@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from analysis.metrics import get_success_milestone
+from analysis.metrics import get_championship_windows, get_concentration, get_success_milestone
 
 SCHEMA_PATH = Path(__file__).resolve().parent.parent / "etl" / "schema.sql"
 
@@ -248,3 +248,110 @@ def test_custom_thresholds_are_respected(conn):
 
     assert result["meets_tier_and_region_criteria"] is True
     assert result["milestone_year"] == 2021
+
+
+def insert_tournament_with_prize(conn, page, tier, start_date, prize_pool, title_id="test_title"):
+    conn.execute(
+        """
+        INSERT INTO tournaments
+            (title_id, liquipedia_wiki, liquipedia_page, name, tier, start_date, prize_pool, currency, fetched_at)
+        VALUES (?, 'test', ?, ?, ?, ?, ?, 'USD', '2026-01-01T00:00:00Z')
+        """,
+        (title_id, page, page, tier, start_date, prize_pool),
+    )
+
+
+def test_championship_window_picks_highest_prize_pool_tier1(conn):
+    insert_tournament_with_prize(conn, "TI 2019", "1", "2019-08-15", 34_000_000)
+    insert_tournament_with_prize(conn, "Major A 2019", "1", "2019-01-01", 1_000_000)
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert len(windows) == 1
+    assert windows[0]["year"] == 2019
+    assert windows[0]["liquipedia_page"] == "TI 2019"
+    assert windows[0]["prize_pool"] == 34_000_000
+
+
+def test_championship_window_tier1_only_not_tier2(conn):
+    # A tier-2 event with a much larger prize pool must NOT win over a
+    # smaller tier-1 event -- "tier-1 only", not "highest prize pool
+    # regardless of tier".
+    insert_tournament_with_prize(conn, "Big Tier 2", "2", "2021-01-01", 5_000_000)
+    insert_tournament_with_prize(conn, "Small Tier 1", "1", "2021-05-01", 200_000)
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert len(windows) == 1
+    assert windows[0]["liquipedia_page"] == "Small Tier 1"
+
+
+def test_championship_window_null_prize_pool_excluded_from_candidacy(conn):
+    # The only tier-1 event that year has no prize_pool at all -- must
+    # produce NO window for that year, not a guessed/fallback one.
+    insert_tournament_with_prize(conn, "No Prize Tier 1", "1", "2022-01-01", None)
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert windows == []
+
+
+def test_championship_window_tie_broken_by_earliest_start_date(conn):
+    insert_tournament_with_prize(conn, "Tie Late", "1", "2020-06-01", 500_000)
+    insert_tournament_with_prize(conn, "Tie Early", "1", "2020-03-01", 500_000)
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert len(windows) == 1
+    assert windows[0]["liquipedia_page"] == "Tie Early"
+
+
+def test_championship_window_letter_tier_normalized(conn):
+    insert_tournament_with_prize(conn, "S-Tier Event", "S-Tier", "2023-01-01", 2_000_000)
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert len(windows) == 1
+    assert windows[0]["liquipedia_page"] == "S-Tier Event"
+
+
+def test_championship_window_across_multiple_titles(conn):
+    conn.execute("INSERT INTO titles (id, canonical_name) VALUES ('other_title', 'Other Title')")
+    insert_tournament_with_prize(conn, "Test Title Event", "1", "2020-01-01", 1_000_000, title_id="test_title")
+    insert_tournament_with_prize(conn, "Other Title Event", "1", "2020-01-01", 2_000_000, title_id="other_title")
+
+    all_windows = get_championship_windows(conn)  # no title_id filter -> all titles
+
+    assert {w["title_id"] for w in all_windows} == {"test_title", "other_title"}
+    only_test = get_championship_windows(conn, "test_title")
+    assert len(only_test) == 1 and only_test[0]["title_id"] == "test_title"
+
+
+def test_concentration_hhi_and_top3_share():
+    result = get_concentration([50.0, 30.0, 10.0, 10.0])
+
+    assert result["n"] == 4
+    # shares: 0.5, 0.3, 0.1, 0.1 -> HHI = 0.25 + 0.09 + 0.01 + 0.01 = 0.36
+    assert result["hhi"] == pytest.approx(0.36)
+    assert result["top3_share"] == pytest.approx(0.9)
+
+
+def test_concentration_single_value_is_maximally_concentrated():
+    result = get_concentration([100.0])
+
+    assert result["hhi"] == pytest.approx(1.0)
+    assert result["top3_share"] == pytest.approx(1.0)
+
+
+def test_concentration_empty_input_returns_none_not_zero():
+    result = get_concentration([])
+
+    assert result["hhi"] is None
+    assert result["top3_share"] is None
+    assert result["n"] == 0
+
+
+def test_concentration_all_zero_values_returns_none():
+    result = get_concentration([0.0, 0.0])
+
+    assert result["hhi"] is None

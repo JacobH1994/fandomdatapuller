@@ -249,6 +249,125 @@ def _viewership_trend(conn: sqlite3.Connection, title_id: str, start_year: int, 
     )
 
 
+def get_championship_windows(conn: sqlite3.Connection, title_id: str | None = None) -> list[dict]:
+    """Brief H3's championship-concentration test (docs/esports_gauses_law_brief.md),
+    added 2026-09-08: for each (title, calendar year), the tier-1
+    tournament with the highest prize_pool — the "world championship
+    window" for that title-year. Deliberately objective, no name-matching
+    against "World Championship"/"Worlds"/"TI"/etc., since those vary per
+    title and some tier-1 events that function as a de facto world
+    championship don't literally carry that name — reuses exactly the
+    same tier-normalization and year-grouping approach
+    get_success_milestone/_qualifying_window_scale already depend on
+    (_normalize_tier, start_date's year), not a new convention.
+
+    **Tier-1 only, not tier-1-or-2** — deliberately narrower than
+    get_success_milestone's DEFAULT_QUALIFYING_TIERS, since "the biggest
+    event of the year" is a tier-1-specific claim; a title whose highest-
+    prize-pool event that year is tier-2 gets no window that year, not a
+    fallback to its tier-2 event.
+
+    **A title-year needs a tier-1 tournament with a NON-NULL prize_pool
+    to get a window at all** — prize_pool is frequently missing in this
+    project's Liquipedia-sourced data (a known, pre-existing gap), and
+    "highest prize_pool" is meaningless to compute over all-NULL
+    candidates; silently falling back to some other criterion (e.g. team
+    count) would misrepresent what was actually being ranked. A tie (two
+    tier-1 tournaments the same year with equal prize_pool) is broken by
+    earliest start_date, then by liquipedia_page for full determinism —
+    documented here as a judgment call, not asserted as principled.
+
+    Returns one dict per (title_id, year) with a qualifying window:
+    title_id, year, liquipedia_page, name, prize_pool, currency,
+    start_date, end_date. Rows with NULL/unparseable start_date are
+    excluded (can't assign a year), same handling as
+    get_success_milestone's own year parsing."""
+    params: tuple = ()
+    title_filter = ""
+    if title_id is not None:
+        title_filter = "AND title_id = ?"
+        params = (title_id,)
+
+    rows = conn.execute(
+        f"""
+        SELECT title_id, start_date, end_date, tier, prize_pool, currency,
+               liquipedia_page, name
+        FROM tournaments
+        WHERE start_date IS NOT NULL AND prize_pool IS NOT NULL {title_filter}
+        """,
+        params,
+    ).fetchall()
+
+    candidates_by_key: dict[tuple[str, int], list[tuple]] = defaultdict(list)
+    for t_id, start_date, end_date, tier, prize_pool, currency, page, name in rows:
+        if _normalize_tier(tier) != "1":
+            continue
+        try:
+            year = int(str(start_date)[:4])
+        except (TypeError, ValueError):
+            continue
+        candidates_by_key[(t_id, year)].append((prize_pool, start_date, page, end_date, currency, name))
+
+    results = []
+    for (t_id, year), candidates in sorted(candidates_by_key.items()):
+        # Highest prize_pool wins; ties broken by earliest start_date
+        # (ISO text, sorts correctly ascending), then liquipedia_page, for
+        # full determinism.
+        prize_pool, start_date, page, end_date, currency, name = max(
+            candidates, key=lambda c: (c[0], _sort_key_desc(c[1]), _sort_key_desc(c[2]))
+        )
+        results.append({
+            "title_id": t_id,
+            "year": year,
+            "liquipedia_page": page,
+            "name": name,
+            "prize_pool": prize_pool,
+            "currency": currency,
+            "start_date": start_date,
+            "end_date": end_date,
+        })
+    return results
+
+
+def _sort_key_desc(value: str | None) -> tuple:
+    """Ties in get_championship_windows are broken by EARLIEST start_date/
+    lowest liquipedia_page, but the overall comparison is `max(...)` (for
+    "highest prize_pool") — this flips a plain ascending string comparison
+    so that "earliest wins" reads as "greatest" under max(), without
+    needing a second, opposite-direction comparison pass."""
+    if value is None:
+        return (1,)  # sorts after any real string, so a real value always "wins" a tie against None
+    return (0, tuple(-ord(c) for c in value))
+
+
+def get_concentration(shares: list[float]) -> dict:
+    """HHI (Herfindahl-Hirschman Index) and top-3 share over a set of
+    values already expressed as a pool (e.g. each title's championship
+    peak viewers in a given year) — PRD §12's originally-planned
+    get_concentration, built now for the championship-concentration
+    notebook rather than earlier, since nothing needed it until this.
+
+    Takes raw values, not pre-computed shares — computing the shares
+    internally (each value / sum of all values) means a caller can't
+    accidentally pass in shares that don't actually sum to 1 (e.g. from
+    a subset) and get a silently-wrong HHI. HHI is computed on the
+    0-1 share scale (max 1.0, a single-title pool), not the 0-10,000
+    scale some finance contexts use — documented here since both
+    conventions are common and silently picking one is a real ambiguity.
+
+    Returns {"hhi", "top3_share", "n", "shares"} — `shares` (title-share
+    pairs aren't tracked here, just the sorted share values themselves)
+    is returned so a caller can audit the computation, not just trust
+    the summary numbers."""
+    total = sum(shares)
+    if total <= 0 or not shares:
+        return {"hhi": None, "top3_share": None, "n": len(shares), "shares": []}
+    normalized = sorted((s / total for s in shares), reverse=True)
+    hhi = sum(s**2 for s in normalized)
+    top3_share = sum(normalized[:3])
+    return {"hhi": hhi, "top3_share": top3_share, "n": len(shares), "shares": normalized}
+
+
 def _trend_result(by_year: dict[int, list[float]], *, source: str, confidence: str, esports_specific: bool) -> dict:
     years_present = sorted(by_year)
     first_year_avg = sum(by_year[years_present[0]]) / len(by_year[years_present[0]])
