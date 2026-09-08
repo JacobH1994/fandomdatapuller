@@ -22,6 +22,13 @@ the `poll.yml` workflow while refactoring something else, even briefly. If a
 change risks the collector, make it in a way that keeps polling running, or
 don't make it yet.
 
+**The same applies to `collectors/youtube_poll.py` / `youtube_poll.yml`
+(PRD §9.7, built 2026-09-08)** — YouTube's live-viewer-count API is exactly
+as unbackfillable as Twitch's. Deliberately a fully separate script, config
+file (`config/channels_youtube.yaml`, not a reshaped `config/channels.yaml`),
+and workflow from Twitch's, specifically so a change to one can never risk
+the other — keep it that way; don't merge them for "consistency" later.
+
 ## Ethical non-goals — do not build these
 
 - No scraping SullyGnome or any comparable tracker, ever, even to fill a gap
@@ -91,7 +98,11 @@ Also built: Phase 3 genre/platform classification; `get_success_milestone`'s
 import; several analysis notebooks (`notebooks/`); `tournament_aliases`
 (rule-based + LLM-derived, `etl/generate_tournament_aliases.py`);
 `viewership_snapshots.broadcast_tier` co-stream detection
-(`etl/classify_broadcast_tier.py`); `data/reference/` exports. See
+(`etl/classify_broadcast_tier.py`); `data/reference/` exports; the
+YouTube live collector (PRD §9.7, `collectors/youtube_poll.py`) — built
+but not yet collecting anything real, since `config/channels_youtube.yaml`
+still needs human curation (same bootstrap gap `config/channels.yaml`
+has had from the start). See
 `docs/milestone_reconciliation.md` and the PRD's changelog-style sections
 for the reasoning behind non-obvious calls in this area — not duplicated
 here.
@@ -115,8 +126,24 @@ Trigger event-mode polling (tighter interval during a specific broadcast
 window) from the GitHub Actions UI: run the "Twitch live-viewership poll"
 workflow manually with `duration_minutes` / `interval_minutes` set.
 
-Load raw Twitch snapshots into `research.db` (incremental; add `--rebuild`
-to wipe and reload everything):
+Run the YouTube collector locally (PRD §9.7 — needs `YOUTUBE_API_KEY` in
+`.env`, or exported in the shell; a completely separate script/config/
+workflow from Twitch's, by design — see `collectors/youtube_poll.py`'s
+own docstring):
+
+```
+python collectors/youtube_poll.py
+```
+
+Curating `config/channels_youtube.yaml` (empty until a human populates
+it, same bootstrap state `config/channels.yaml` started in) is required
+before this collects anything. Force a discovery sweep (otherwise
+governed by `--sweep-interval-hours`, default every 6h) from the GitHub
+Actions UI: run the "YouTube live-viewership poll" workflow manually with
+`sweep=true` — worth doing once at the start of a specific tournament.
+
+Load raw Twitch and YouTube snapshots into `research.db` (incremental;
+add `--rebuild` to wipe and reload everything):
 
 ```
 python etl/load_snapshots.py

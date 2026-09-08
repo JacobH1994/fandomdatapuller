@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Idempotent ETL: data/raw/twitch/*.json.gz -> research.db (PRD §9, §18).
+"""Idempotent ETL: data/raw/{twitch,youtube}/*.json.gz -> research.db
+(PRD §9, §18, §9.7).
 
 research.db is derived and disposable — re-running this over the full raw
 history from scratch always produces the same result. Each raw file is
@@ -38,6 +39,7 @@ from etl.db import DB_PATH, get_connection, seed_titles_and_aliases  # noqa: E40
 
 TITLES_CONFIG = REPO_ROOT / "config" / "titles.yaml"
 RAW_DIR = REPO_ROOT / "data" / "raw" / "twitch"
+RAW_DIR_YOUTUBE = REPO_ROOT / "data" / "raw" / "youtube"
 REFERENCE_DIR = REPO_ROOT / "data" / "reference"
 
 
@@ -142,9 +144,10 @@ def load_titles_config() -> list[dict]:
         return yaml.safe_load(f).get("titles", [])
 
 
-def already_loaded_files(conn) -> set[str]:
+def already_loaded_files(conn, collector: str = "twitch_poll") -> set[str]:
     rows = conn.execute(
-        "SELECT raw_file FROM collector_runs WHERE collector = 'twitch_poll' AND raw_file IS NOT NULL"
+        "SELECT raw_file FROM collector_runs WHERE collector = ? AND raw_file IS NOT NULL",
+        (collector,),
     ).fetchall()
     return {r[0] for r in rows}
 
@@ -242,6 +245,79 @@ def load_one_file(conn, path: Path) -> int:
     return rows_written
 
 
+def load_one_youtube_file(conn, path: Path) -> int:
+    """Loads one collectors/youtube_poll.py raw snapshot (PRD §9.7).
+
+    Every row is is_official_broadcast=1 by construction — a YouTube
+    channel only appears here because it's in config/channels_youtube.yaml
+    in the first place, unlike Twitch's tiered capture. Only channels
+    that were actually LIVE this check get a viewership_snapshots row —
+    a not-live check isn't "zero viewers," it's "nothing was broadcasting,"
+    so it's correctly not represented as a row at all, matching how
+    below-threshold Twitch streams are excluded from individual rows too.
+
+    Also upserts `channels` (platform='youtube') from whatever channels
+    this snapshot actually checked — the first thing in this codebase to
+    ever write to that table (config/channels.yaml's Twitch channels are
+    read directly by collectors/twitch_poll.py at capture time and never
+    synced into it, a separate, pre-existing gap this doesn't attempt to
+    close)."""
+    rel_path = str(path.relative_to(REPO_ROOT))
+    with gzip.open(path, "rt") as f:
+        snapshot = json.load(f)
+
+    rows_written = 0
+
+    with conn:
+        for ch in snapshot.get("channels", []):
+            conn.execute(
+                """
+                INSERT INTO channels (title_id, platform, external_channel_id, login, name, is_official, source, confidence)
+                VALUES (?, 'youtube', ?, ?, ?, 1, 'youtube_api', 'verified')
+                ON CONFLICT (title_id, platform, login) DO UPDATE SET
+                    external_channel_id=excluded.external_channel_id, name=excluded.name
+                """,
+                (ch["title_id"], ch["channel_id"], ch["channel_id"], ch.get("channel_name")),
+            )
+
+            if not ch.get("is_live"):
+                continue
+
+            conn.execute(
+                """
+                INSERT INTO viewership_snapshots
+                    (title_id, platform, channel_id, channel_login, captured_at, viewer_count,
+                     is_official_broadcast, stream_title, source, confidence)
+                VALUES (?, 'youtube', ?, ?, ?, ?, 1, ?, 'youtube_api', 'verified')
+                ON CONFLICT (channel_id, captured_at) DO NOTHING
+                """,
+                (
+                    ch["title_id"], ch["channel_id"], ch["channel_id"], ch["checked_at"],
+                    ch.get("viewer_count") or 0, ch.get("video_title"),
+                ),
+            )
+            rows_written += 1
+
+        errors = snapshot.get("errors") or []
+        conn.execute(
+            """
+            INSERT INTO collector_runs (collector, raw_file, started_at, finished_at, status, rows_written, error)
+            VALUES ('youtube_poll', ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (collector, raw_file) DO NOTHING
+            """,
+            (
+                rel_path,
+                snapshot.get("run_started_at"),
+                snapshot.get("run_finished_at"),
+                snapshot.get("status", "unknown"),
+                rows_written,
+                json.dumps(errors) if errors else None,
+            ),
+        )
+
+    return rows_written
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rebuild", action="store_true", help="delete research.db and reload everything from data/raw/")
@@ -274,9 +350,26 @@ def main() -> int:
             failures += 1
             print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
 
+    loaded_yt = already_loaded_files(conn, collector="youtube_poll")
+    all_files_yt = sorted(RAW_DIR_YOUTUBE.glob("**/*.json.gz"))
+    to_load_yt = [p for p in all_files_yt if str(p.relative_to(REPO_ROOT)) not in loaded_yt]
+
+    print(f"{len(all_files_yt)} YouTube raw files found, {len(loaded_yt)} already loaded, {len(to_load_yt)} to load")
+
+    total_rows_yt = 0
+    failures_yt = 0
+    for path in to_load_yt:
+        try:
+            rows = load_one_youtube_file(conn, path)
+            total_rows_yt += rows
+        except Exception as exc:
+            failures_yt += 1
+            print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
+
     conn.close()
-    print(f"loaded {len(to_load) - failures}/{len(to_load)} files, {total_rows} rows written")
-    return 1 if failures else 0
+    print(f"loaded {len(to_load) - failures}/{len(to_load)} Twitch file(s), {total_rows} row(s) written")
+    print(f"loaded {len(to_load_yt) - failures_yt}/{len(to_load_yt)} YouTube file(s), {total_rows_yt} row(s) written")
+    return 1 if (failures or failures_yt) else 0
 
 
 if __name__ == "__main__":
