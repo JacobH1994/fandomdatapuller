@@ -1,8 +1,24 @@
 #!/usr/bin/env python3
-"""Exports `tournaments`, `tournament_aliases`, and
-`tournament_alias_llm_checked` to committed JSONL files under
-`data/reference/`, so `research.db` is rebuildable from committed repo
-contents ALONE (`data/raw/` + `data/reference/`), not just `data/raw/`.
+"""Exports `tournaments`, `tournament_aliases`,
+`tournament_alias_llm_checked`, and `steam_release_history` to committed
+JSONL files under `data/reference/`, so `research.db` is rebuildable
+from committed repo contents ALONE (`data/raw/` + `data/reference/`),
+not just `data/raw/`.
+
+**`steam_release_history` (PRD §9.12a Track A), added 2026-09-08 —
+closing the exact gap this file already exists to close, before it got
+made a second time.** `collectors/steam_catalog_backfill.py` writes
+straight into `research.db` with no raw-file backup, same as
+`collectors/liquipedia.py`'s tournament writes — without this export, a
+`--rebuild` run partway through (or any time after) the 1-2-week
+catalog backfill would silently discard however much of it had been
+crawled, with no recovery path except re-crawling the whole thing.
+Unlike the tournament tables above, this one can genuinely reach
+100K+ rows at full-catalog scale — still a full dump every run for the
+same simplest-correct reasoning (avoids ever reconciling a partial diff
+against what the DB currently holds), but if that ever becomes a real
+problem (git diff size, repo bloat), incremental export is the fix, not
+assumed unnecessary forever.
 
 `tournament_alias_llm_checked` matters for the same reason as the other
 two: `etl/generate_tournament_aliases.py`'s LLM nickname pass costs real
@@ -66,6 +82,13 @@ ALIAS_COLUMNS = ["title_id", "series_key", "alias", "case_sensitive", "source", 
 
 LLM_CHECKED_COLUMNS = ["title_id", "series_key", "checked_at", "nickname_count"]
 
+STEAM_RELEASE_COLUMNS = [
+    "app_id", "name", "app_type", "release_date_raw", "release_date", "is_released",
+    "genres", "is_indie", "categories", "has_vr_support", "vr_only",
+    "developers", "publishers", "recommendations_total", "low_relevance_flag",
+    "fetched_at", "source", "confidence",
+]
+
 
 def main() -> int:
     REFERENCE_DIR.mkdir(parents=True, exist_ok=True)
@@ -97,6 +120,15 @@ def main() -> int:
         for row in rows:
             f.write(json.dumps(dict(zip(LLM_CHECKED_COLUMNS, row))) + "\n")
     print(f"wrote {len(rows)} LLM-checked series marker(s) to {llm_checked_path}")
+
+    steam_release_path = REFERENCE_DIR / "steam_release_history.jsonl"
+    with open(steam_release_path, "w") as f:
+        rows = conn.execute(
+            f"SELECT {', '.join(STEAM_RELEASE_COLUMNS)} FROM steam_release_history ORDER BY app_id"
+        ).fetchall()
+        for row in rows:
+            f.write(json.dumps(dict(zip(STEAM_RELEASE_COLUMNS, row))) + "\n")
+    print(f"wrote {len(rows)} Steam release record(s) to {steam_release_path}")
 
     conn.close()
     return 0
