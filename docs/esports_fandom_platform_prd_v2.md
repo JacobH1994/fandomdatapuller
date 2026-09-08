@@ -299,6 +299,23 @@ Two token-free, official public endpoints, not scraping: `/invites/{code}?with_c
 
 Worth adding as a new, cheap signal: community size (member count, current online count) per tracked title's official Discord, as a fandom-scale metric independent of viewership. Does not revive the member-overlap approach considered and set aside earlier in this project — testing actual overlap between two communities still requires bot membership in both servers, which neither endpoint provides. Size, not overlap.
 
+### 9.13a Discord integration plan — shelved 2026-09-08, not built
+
+Designed in conversation, not started. Recorded here per §15's documentation workflow so the design isn't lost between sessions, the same reason §9.12a exists.
+
+**Verify first, before building anything** — the "confirmed available" framing above hasn't actually been re-checked live in this build pass, and this project's own discipline (see §9.12a's Steam verification, or the SteamDB FAQ check in §9.12) is to confirm a claim like that directly rather than carry it forward untested:
+1. `GET /invites/{code}?with_counts=true` — confirm it genuinely returns `approximate_member_count`/`approximate_presence_count` with no token, against a real public invite.
+2. `GET /guilds/{id}/widget.json` — confirm it fails cleanly (not some other failure mode) when a server hasn't opted the widget in, since most won't have.
+3. Check Discord's own current API Terms of Service for these two specific endpoints directly, the same way SteamDB's FAQ was checked directly rather than assumed.
+
+**The real bootstrapping problem, harder than YouTube's channel curation (§9.7).** This needs a stable Discord invite code (or guild ID) per tracked title, and unlike a Steam AppID there's no clean official lookup for "the correct Discord server for game X" — invite links can be non-official, fan-run, or expired, and some titles (Riot's especially) may route community discussion through their own forums more than Discord, with no single obvious canonical server. Has to be human-curated per title, individually verified — the same draft-then-curate pattern `notebooks/official_channel_candidates.ipynb`/`config/channels_youtube.yaml` already established, not something to guess reliable invite codes for.
+
+**Schema**: a new table, NOT a reuse of `community_signals` (§6) — checked directly, that table is already Reddit-shaped specifically (`subreddit_type`, `subscriber_count`), not platform-general despite its generic name. Proposed: `discord_community_snapshots` (`title_id, captured_at, member_count, online_count, source, confidence`) — one table per genuinely distinct data source, the same discipline `steam_player_counts`/`monthly_category_history` already follow rather than overloading a table across conceptually different sources.
+
+**Architecture**, mirroring the YouTube/Steam pattern exactly (§9.7, §9.12): `config/discord_servers.yaml` (separate file, empty until curated — same bootstrap shape as `config/channels_youtube.yaml`), `collectors/discord_poll.py` (no OAuth/bot token needed for these two specific endpoints, plain REST via httpx, no new dependency), `.github/workflows/discord_poll.yml`.
+
+**Cadence — the one place this genuinely differs from every other live collector here.** Member/online counts change slowly compared to live viewership, so hourly polling isn't needed — daily is almost certainly sufficient. Still technically unbackfillable (no historical endpoint), so it still belongs in the "one rule" family (CLAUDE.md) and should run on a schedule rather than on-demand like Track A's catalog backfill, but the actual urgency of a missed day is much lower than Twitch/YouTube/Steam's live numbers.
+
 ## 10. Collector reliability & monitoring
 
 Because collector downtime is unrecoverable (§2), reliability requirements are non-negotiable:
