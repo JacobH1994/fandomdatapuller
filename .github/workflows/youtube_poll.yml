@@ -75,7 +75,17 @@ jobs:
           overall_status=0
           python collectors/youtube_poll.py "${ARGS[@]}" || overall_status=1
 
-          git add data/raw/youtube
+          # `git add` on a path with nothing under it yet (e.g. a clean
+          # no-channels-curated no-op — no snapshot gets written in that
+          # case, so the directory never gets created) fails outright and,
+          # under set -e, kills the job before it reaches `exit
+          # $overall_status` below — a spurious failure with no real
+          # collector problem behind it. Confirmed live 2026-09-08: this
+          # fired every scheduled run while config/channels_youtube.yaml
+          # was still empty.
+          if [ -d data/raw/youtube ]; then
+            git add data/raw/youtube
+          fi
           if ! git diff --cached --quiet; then
             git commit -m "YouTube snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git push

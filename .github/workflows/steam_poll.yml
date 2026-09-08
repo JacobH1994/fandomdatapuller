@@ -57,7 +57,15 @@ jobs:
           overall_status=0
           python collectors/steam_poll.py "${ARGS[@]}" || overall_status=1
 
-          git add data/raw/steam
+          # Same defensive check as youtube_poll.yml: `git add` on a path
+          # with nothing under it yet fails outright and, under set -e,
+          # kills the job before `exit $overall_status` below. Not
+          # currently reachable (config/steam_appids.yaml ships
+          # pre-populated, so a snapshot always gets written), but kept
+          # consistent in case that config is ever emptied.
+          if [ -d data/raw/steam ]; then
+            git add data/raw/steam
+          fi
           if ! git diff --cached --quiet; then
             git commit -m "Steam snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             git push
