@@ -49,13 +49,13 @@ STEAM_COHORT_TRACKING_WINDOW_DAYS = 365
 REFERENCE_DIR = REPO_ROOT / "data" / "reference"
 
 
-def load_reference_data(conn) -> tuple[int, int, int]:
-    """Loads data/reference/{tournaments,tournament_aliases}.jsonl (see
-    etl/export_reference_data.py) into research.db. Both files are
-    optional — a repo checkout that predates this mechanism, or one where
-    export hasn't been run yet, just skips silently (nothing to load is
-    not an error). Natural-key upserts throughout, so safe to call on
-    every run, not just --rebuild.
+def load_reference_data(conn) -> tuple[int, int, int, int]:
+    """Loads data/reference/{tournaments,tournament_aliases,
+    steam_release_history}.jsonl (see etl/export_reference_data.py) into
+    research.db. All files are optional — a repo checkout that predates
+    this mechanism, or one where export hasn't been run yet, just skips
+    silently (nothing to load is not an error). Natural-key upserts
+    throughout, so safe to call on every run, not just --rebuild.
 
     tournament_aliases rows are keyed on (title_id, series_key) in the
     export, not a raw numeric tournament_id — series_key is itself a
@@ -140,7 +140,45 @@ def load_reference_data(conn) -> tuple[int, int, int]:
                 llm_checked_written += 1
         conn.commit()
 
-    return tournaments_written, aliases_written, llm_checked_written
+    steam_release_written = 0
+    steam_release_path = REFERENCE_DIR / "steam_release_history.jsonl"
+    if steam_release_path.is_file():
+        with open(steam_release_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                r = json.loads(line)
+                conn.execute(
+                    """
+                    INSERT INTO steam_release_history
+                        (app_id, name, app_type, release_date_raw, release_date, is_released,
+                         genres, is_indie, categories, has_vr_support, vr_only,
+                         developers, publishers, recommendations_total, low_relevance_flag,
+                         fetched_at, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (app_id) DO UPDATE SET
+                        name=excluded.name, app_type=excluded.app_type,
+                        release_date_raw=excluded.release_date_raw, release_date=excluded.release_date,
+                        is_released=excluded.is_released, genres=excluded.genres,
+                        is_indie=excluded.is_indie, categories=excluded.categories,
+                        has_vr_support=excluded.has_vr_support, vr_only=excluded.vr_only,
+                        developers=excluded.developers, publishers=excluded.publishers,
+                        recommendations_total=excluded.recommendations_total,
+                        low_relevance_flag=excluded.low_relevance_flag,
+                        fetched_at=excluded.fetched_at, source=excluded.source, confidence=excluded.confidence
+                    """,
+                    (
+                        r["app_id"], r["name"], r["app_type"], r["release_date_raw"], r["release_date"],
+                        r["is_released"], r["genres"], r["is_indie"], r["categories"], r["has_vr_support"],
+                        r["vr_only"], r["developers"], r["publishers"], r["recommendations_total"],
+                        r["low_relevance_flag"], r["fetched_at"], r["source"], r["confidence"],
+                    ),
+                )
+                steam_release_written += 1
+        conn.commit()
+
+    return tournaments_written, aliases_written, llm_checked_written, steam_release_written
 
 
 def load_titles_config() -> list[dict]:
@@ -534,9 +572,10 @@ def main() -> int:
     conn = get_connection()
     seed_titles_and_aliases(conn, load_titles_config())
 
-    n_tournaments, n_aliases, n_llm_checked = load_reference_data(conn)
+    n_tournaments, n_aliases, n_llm_checked, n_steam_releases = load_reference_data(conn)
     print(f"loaded {n_tournaments} tournament(s), {n_aliases} tournament alias(es), "
-          f"{n_llm_checked} LLM-checked series marker(s) from data/reference/")
+          f"{n_llm_checked} LLM-checked series marker(s), {n_steam_releases} Steam release(s) "
+          f"from data/reference/")
 
     loaded = already_loaded_files(conn)
     all_files = sorted(RAW_DIR.glob("**/*.json.gz"))
