@@ -1,0 +1,44 @@
+# Steam AppID per tracked title, for collectors/steam_poll.py (PRD §9.12).
+#
+# Unlike config/channels_youtube.yaml, this doesn't need human curation
+# before it's useful — a title's Steam AppID is an objective fact, not a
+# judgment call, so this file ships pre-populated. Every entry below was
+# verified LIVE 2026-09-08 against two independent official Valve
+# endpoints: the store's own appdetails API (confirms the AppID's name
+# matches, e.g. appid=730 -> "Counter-Strike 2") AND
+# GetNumberOfCurrentPlayers itself (confirms it returns a real,
+# plausible player count for that ID, not just that the ID exists) —
+# see collectors/steam_poll.py's own docstring for the second check's
+# important gotcha with certain high-traffic titles.
+#
+# Deliberately covers more titles than PRD §9.12's own illustrative list
+# (CS2, Dota 2, PUBG, Apex, Age of Empires) — Rainbow Six Siege, Rocket
+# League, and all four current-gen fighting titles are also genuinely on
+# Steam with working AppIDs, confirmed the same way. Broader coverage is
+# strictly more value from the same collector; flagged here rather than
+# silently narrowed to just the PRD's named examples.
+#
+# NOT covered, and this is a real property of the platform, not a gap in
+# this file: every Riot title (client-exclusive, never on Steam) and
+# every mobile title (Free Fire, PUBG Mobile, Mobile Legends: Bang Bang,
+# Wild Rift, Brawl Stars). Also not covered: Hearthstone, Overwatch,
+# StarCraft II (Blizzard's own Battle.net client, never on Steam) —
+# despite Overwatch/StarCraft II being tracked titles, they have no
+# Steam presence at all.
+#
+# Structure:
+# titles:
+#   <title_id from config/titles.yaml>: <Steam AppID, integer>
+
+titles:
+  dota2: 570
+  counter_strike: 730
+  pubg: 578080
+  apex_legends: 1172470
+  rainbow_six_siege: 359550
+  rocket_league: 252950
+  age_of_empires_ii: 813780
+  tekken: 1778820
+  street_fighter: 1364780
+  mortal_kombat: 1971870
+  guilty_gear: 1384160

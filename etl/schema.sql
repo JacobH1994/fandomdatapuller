@@ -232,6 +232,29 @@ CREATE TABLE IF NOT EXISTS viewership_snapshots (
     UNIQUE (channel_id, captured_at)
 );
 
+-- Current Steam concurrent-player count per title (PRD §9.12), added
+-- 2026-09-08. Deliberately NOT a row in viewership_snapshots — that
+-- table is about STREAM viewership (a channel someone is watching);
+-- this is about PLAYING the game, a fundamentally different signal, the
+-- same reasoning monthly_category_history already documents for staying
+-- separate from viewership_snapshots. Steam's own
+-- GetNumberOfCurrentPlayers has no historical parameter — confirmed live
+-- (2026-09-08) it's current-state-only, same unbackfillable property as
+-- Twitch/YouTube's live APIs (CLAUDE.md's "one rule," extended again).
+-- Only covers titles actually distributed on Steam (config/
+-- steam_appids.yaml) — Riot's client-exclusive titles and every mobile
+-- title have no Steam presence at all, not a gap in this table, a real
+-- property of the platform.
+CREATE TABLE IF NOT EXISTS steam_player_counts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    captured_at TEXT NOT NULL,
+    player_count INTEGER NOT NULL,
+    source TEXT NOT NULL DEFAULT 'steam_api',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (title_id, captured_at)
+);
+
 -- Denominator for "esports' share of total platform attention" (PRD §6/§9).
 -- One row per poll, from the collector's platform_totals aggregate
 -- (already bounded/approximate if hit_page_cap is true on that poll).

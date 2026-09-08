@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Idempotent ETL: data/raw/{twitch,youtube}/*.json.gz -> research.db
-(PRD §9, §18, §9.7).
+"""Idempotent ETL: data/raw/{twitch,youtube,steam}/*.json.gz ->
+research.db (PRD §9, §18, §9.7, §9.12).
 
 research.db is derived and disposable — re-running this over the full raw
 history from scratch always produces the same result. Each raw file is
@@ -40,6 +40,7 @@ from etl.db import DB_PATH, get_connection, seed_titles_and_aliases  # noqa: E40
 TITLES_CONFIG = REPO_ROOT / "config" / "titles.yaml"
 RAW_DIR = REPO_ROOT / "data" / "raw" / "twitch"
 RAW_DIR_YOUTUBE = REPO_ROOT / "data" / "raw" / "youtube"
+RAW_DIR_STEAM = REPO_ROOT / "data" / "raw" / "steam"
 REFERENCE_DIR = REPO_ROOT / "data" / "reference"
 
 
@@ -318,6 +319,54 @@ def load_one_youtube_file(conn, path: Path) -> int:
     return rows_written
 
 
+def load_one_steam_file(conn, path: Path) -> int:
+    """Loads one collectors/steam_poll.py raw snapshot (PRD §9.12).
+
+    A title with player_count=None (Steam's API itself reported failure
+    for that appid this poll — see parse_player_count_response's own
+    docstring) gets no row at all, not a fabricated 0 — the same
+    "absence means unknown, not zero" discipline already used for
+    below-threshold Twitch streams and not-live YouTube channels."""
+    rel_path = str(path.relative_to(REPO_ROOT))
+    with gzip.open(path, "rt") as f:
+        snapshot = json.load(f)
+
+    rows_written = 0
+
+    with conn:
+        for t in snapshot.get("titles", []):
+            if t.get("player_count") is None:
+                continue
+            conn.execute(
+                """
+                INSERT INTO steam_player_counts (title_id, captured_at, player_count, source, confidence)
+                VALUES (?, ?, ?, 'steam_api', 'verified')
+                ON CONFLICT (title_id, captured_at) DO NOTHING
+                """,
+                (t["title_id"], t["checked_at"], t["player_count"]),
+            )
+            rows_written += 1
+
+        errors = snapshot.get("errors") or []
+        conn.execute(
+            """
+            INSERT INTO collector_runs (collector, raw_file, started_at, finished_at, status, rows_written, error)
+            VALUES ('steam_poll', ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (collector, raw_file) DO NOTHING
+            """,
+            (
+                rel_path,
+                snapshot.get("run_started_at"),
+                snapshot.get("run_finished_at"),
+                snapshot.get("status", "unknown"),
+                rows_written,
+                json.dumps(errors) if errors else None,
+            ),
+        )
+
+    return rows_written
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rebuild", action="store_true", help="delete research.db and reload everything from data/raw/")
@@ -366,10 +415,27 @@ def main() -> int:
             failures_yt += 1
             print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
 
+    loaded_steam = already_loaded_files(conn, collector="steam_poll")
+    all_files_steam = sorted(RAW_DIR_STEAM.glob("**/*.json.gz"))
+    to_load_steam = [p for p in all_files_steam if str(p.relative_to(REPO_ROOT)) not in loaded_steam]
+
+    print(f"{len(all_files_steam)} Steam raw files found, {len(loaded_steam)} already loaded, {len(to_load_steam)} to load")
+
+    total_rows_steam = 0
+    failures_steam = 0
+    for path in to_load_steam:
+        try:
+            rows = load_one_steam_file(conn, path)
+            total_rows_steam += rows
+        except Exception as exc:
+            failures_steam += 1
+            print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
+
     conn.close()
     print(f"loaded {len(to_load) - failures}/{len(to_load)} Twitch file(s), {total_rows} row(s) written")
     print(f"loaded {len(to_load_yt) - failures_yt}/{len(to_load_yt)} YouTube file(s), {total_rows_yt} row(s) written")
-    return 1 if (failures or failures_yt) else 0
+    print(f"loaded {len(to_load_steam) - failures_steam}/{len(to_load_steam)} Steam file(s), {total_rows_steam} row(s) written")
+    return 1 if (failures or failures_yt or failures_steam) else 0
 
 
 if __name__ == "__main__":
