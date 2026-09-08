@@ -31,6 +31,7 @@ import gzip
 import json
 import sys
 from collections import Counter
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -41,6 +42,10 @@ TITLES_CONFIG = REPO_ROOT / "config" / "titles.yaml"
 RAW_DIR = REPO_ROOT / "data" / "raw" / "twitch"
 RAW_DIR_YOUTUBE = REPO_ROOT / "data" / "raw" / "youtube"
 RAW_DIR_STEAM = REPO_ROOT / "data" / "raw" / "steam"
+RAW_DIR_STEAM_DISCOVERY = REPO_ROOT / "data" / "raw" / "steam_discovery"
+RAW_DIR_STEAM_COHORT = REPO_ROOT / "data" / "raw" / "steam_cohort"
+STEAM_COHORT_DAILY_PHASE_DAYS = 90
+STEAM_COHORT_TRACKING_WINDOW_DAYS = 365
 REFERENCE_DIR = REPO_ROOT / "data" / "reference"
 
 
@@ -367,6 +372,156 @@ def load_one_steam_file(conn, path: Path) -> int:
     return rows_written
 
 
+def load_one_steam_discovery_file(conn, path: Path) -> int:
+    """Loads one collectors/steam_discovery_poll.py raw snapshot (PRD
+    §9.12a, Track B part 1). Upserts every classified app into
+    steam_release_history regardless of whether it's new or a metadata
+    update. Separately: any app_id NOT already in steam_release_cohort at
+    load time gets a fresh cohort row inserted (discovered_at = this
+    snapshot's captured_at, tracking_window_end = +365 days, next_poll_due
+    = immediately) -- the collector script itself doesn't decide "is this
+    new," only the loader does, since only the loader has a real,
+    already-rebuilt research.db to check against."""
+    rel_path = str(path.relative_to(REPO_ROOT))
+    with gzip.open(path, "rt") as f:
+        snapshot = json.load(f)
+
+    rows_written = 0
+    captured_at = snapshot["captured_at"]
+
+    with conn:
+        for a in snapshot.get("apps", []):
+            app_id = a["app_id"]
+            conn.execute(
+                """
+                INSERT INTO steam_release_history
+                    (app_id, name, app_type, release_date_raw, release_date, is_released,
+                     genres, is_indie, categories, has_vr_support, vr_only,
+                     developers, publishers, recommendations_total, low_relevance_flag,
+                     fetched_at, source, confidence)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'steam_store_api', 'verified')
+                ON CONFLICT (app_id) DO UPDATE SET
+                    name=excluded.name, app_type=excluded.app_type,
+                    release_date_raw=excluded.release_date_raw, release_date=excluded.release_date,
+                    is_released=excluded.is_released, genres=excluded.genres, is_indie=excluded.is_indie,
+                    categories=excluded.categories, has_vr_support=excluded.has_vr_support,
+                    vr_only=excluded.vr_only, developers=excluded.developers, publishers=excluded.publishers,
+                    recommendations_total=excluded.recommendations_total,
+                    low_relevance_flag=excluded.low_relevance_flag, fetched_at=excluded.fetched_at
+                """,
+                (
+                    app_id, a["name"], a["app_type"], a["release_date_raw"], a["release_date"],
+                    a["is_released"], a["genres"], a["is_indie"], a["categories"],
+                    a["has_vr_support"], a["vr_only"], a["developers"], a["publishers"],
+                    a["recommendations_total"], a["low_relevance_flag"], captured_at,
+                ),
+            )
+            rows_written += 1
+
+            already_cohort = conn.execute(
+                "SELECT 1 FROM steam_release_cohort WHERE app_id = ?", (app_id,)
+            ).fetchone()
+            if already_cohort is None:
+                discovered = datetime.strptime(captured_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                window_end = discovered + timedelta(days=STEAM_COHORT_TRACKING_WINDOW_DAYS)
+                conn.execute(
+                    """
+                    INSERT INTO steam_release_cohort (app_id, discovered_at, tracking_window_end, last_polled_at, next_poll_due)
+                    VALUES (?, ?, ?, NULL, ?)
+                    """,
+                    (
+                        app_id, captured_at,
+                        window_end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        captured_at,  # due immediately
+                    ),
+                )
+
+        errors = snapshot.get("errors") or []
+        conn.execute(
+            """
+            INSERT INTO collector_runs (collector, raw_file, started_at, finished_at, status, rows_written, error)
+            VALUES ('steam_discovery_poll', ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (collector, raw_file) DO NOTHING
+            """,
+            (
+                rel_path,
+                snapshot.get("run_started_at"),
+                snapshot.get("run_finished_at"),
+                snapshot.get("status", "unknown"),
+                rows_written,
+                json.dumps(errors) if errors else None,
+            ),
+        )
+
+    return rows_written
+
+
+def load_one_steam_cohort_file(conn, path: Path) -> int:
+    """Loads one collectors/steam_cohort_poll.py raw snapshot (PRD
+    §9.12a, Track B part 2) into steam_cohort_player_counts. Recomputes
+    next_poll_due from steam_release_cohort.discovered_at at LOAD time
+    (daily for the first 90 days, weekly after) rather than trusting a
+    value baked into the raw file -- discovered_at in the DB is the
+    source of truth for "how old is this cohort entry," and the
+    collector script itself already updates next_poll_due directly when
+    run locally, so this is primarily what makes the schedule correct
+    when reconstructing research.db from raw files alone (--rebuild)."""
+    rel_path = str(path.relative_to(REPO_ROOT))
+    with gzip.open(path, "rt") as f:
+        snapshot = json.load(f)
+
+    rows_written = 0
+
+    with conn:
+        for a in snapshot.get("apps", []):
+            if a.get("player_count") is None:
+                continue
+            app_id = a["app_id"]
+            checked_at = a["checked_at"]
+            conn.execute(
+                """
+                INSERT INTO steam_cohort_player_counts (app_id, captured_at, player_count, source, confidence)
+                VALUES (?, ?, ?, 'steam_api', 'verified')
+                ON CONFLICT (app_id, captured_at) DO NOTHING
+                """,
+                (app_id, checked_at, a["player_count"]),
+            )
+            rows_written += 1
+
+            cohort_row = conn.execute(
+                "SELECT discovered_at FROM steam_release_cohort WHERE app_id = ?", (app_id,)
+            ).fetchone()
+            if cohort_row is not None:
+                discovered_at = datetime.strptime(cohort_row[0], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                checked = datetime.strptime(checked_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+                age_days = (checked - discovered_at).days
+                interval = timedelta(days=1) if age_days < STEAM_COHORT_DAILY_PHASE_DAYS else timedelta(days=7)
+                next_due = (checked + interval).strftime("%Y-%m-%dT%H:%M:%SZ")
+                conn.execute(
+                    "UPDATE steam_release_cohort SET last_polled_at = ?, next_poll_due = ? WHERE app_id = ?",
+                    (checked_at, next_due, app_id),
+                )
+
+        errors = snapshot.get("errors") or []
+        conn.execute(
+            """
+            INSERT INTO collector_runs (collector, raw_file, started_at, finished_at, status, rows_written, error)
+            VALUES ('steam_cohort_poll', ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (collector, raw_file) DO NOTHING
+            """,
+            (
+                rel_path,
+                snapshot.get("run_started_at"),
+                snapshot.get("run_finished_at"),
+                snapshot.get("status", "unknown"),
+                rows_written,
+                json.dumps(errors) if errors else None,
+            ),
+        )
+
+    return rows_written
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rebuild", action="store_true", help="delete research.db and reload everything from data/raw/")
@@ -431,11 +586,45 @@ def main() -> int:
             failures_steam += 1
             print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
 
+    loaded_disc = already_loaded_files(conn, collector="steam_discovery_poll")
+    all_files_disc = sorted(RAW_DIR_STEAM_DISCOVERY.glob("**/*.json.gz"))
+    to_load_disc = [p for p in all_files_disc if str(p.relative_to(REPO_ROOT)) not in loaded_disc]
+
+    print(f"{len(all_files_disc)} Steam discovery raw files found, {len(loaded_disc)} already loaded, {len(to_load_disc)} to load")
+
+    total_rows_disc = 0
+    failures_disc = 0
+    for path in to_load_disc:
+        try:
+            rows = load_one_steam_discovery_file(conn, path)
+            total_rows_disc += rows
+        except Exception as exc:
+            failures_disc += 1
+            print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
+
+    loaded_cohort = already_loaded_files(conn, collector="steam_cohort_poll")
+    all_files_cohort = sorted(RAW_DIR_STEAM_COHORT.glob("**/*.json.gz"))
+    to_load_cohort = [p for p in all_files_cohort if str(p.relative_to(REPO_ROOT)) not in loaded_cohort]
+
+    print(f"{len(all_files_cohort)} Steam cohort raw files found, {len(loaded_cohort)} already loaded, {len(to_load_cohort)} to load")
+
+    total_rows_cohort = 0
+    failures_cohort = 0
+    for path in to_load_cohort:
+        try:
+            rows = load_one_steam_cohort_file(conn, path)
+            total_rows_cohort += rows
+        except Exception as exc:
+            failures_cohort += 1
+            print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
+
     conn.close()
     print(f"loaded {len(to_load) - failures}/{len(to_load)} Twitch file(s), {total_rows} row(s) written")
     print(f"loaded {len(to_load_yt) - failures_yt}/{len(to_load_yt)} YouTube file(s), {total_rows_yt} row(s) written")
     print(f"loaded {len(to_load_steam) - failures_steam}/{len(to_load_steam)} Steam file(s), {total_rows_steam} row(s) written")
-    return 1 if (failures or failures_yt or failures_steam) else 0
+    print(f"loaded {len(to_load_disc) - failures_disc}/{len(to_load_disc)} Steam discovery file(s), {total_rows_disc} row(s) written")
+    print(f"loaded {len(to_load_cohort) - failures_cohort}/{len(to_load_cohort)} Steam cohort file(s), {total_rows_cohort} row(s) written")
+    return 1 if (failures or failures_yt or failures_steam or failures_disc or failures_cohort) else 0
 
 
 if __name__ == "__main__":

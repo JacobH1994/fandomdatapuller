@@ -1,0 +1,60 @@
+name: Steam catalog discovery poll
+
+# Deliberately a completely separate workflow file from every other
+# collector's — CLAUDE.md's "one rule" rules out any shared trigger/job/
+# step that could let one platform's failure affect another's collection.
+#
+# Daily, not hourly: this is catalog-wide release/metadata *discovery*
+# (PRD §9.12a Track B), not a live viewer/player count — new releases and
+# metadata updates simply don't happen at an hourly-meaningful cadence
+# across the whole Steam catalog. 03:00 UTC is arbitrary off-peak timing,
+# picked to run well clear of the hourly live-collector jobs' traffic.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: steam-discovery-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Poll Steam catalog discovery
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          overall_status=0
+          python collectors/steam_discovery_poll.py || overall_status=1
+
+          # Same guard as youtube_poll.yml/steam_poll.yml: `git add` on a
+          # path with nothing under it yet fails outright and, under
+          # set -e, kills the job before `exit $overall_status` below.
+          if [ -d data/raw/steam_discovery ]; then
+            git add data/raw/steam_discovery
+          fi
+          if ! git diff --cached --quiet; then
+            git commit -m "Steam discovery snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
+
+          exit $overall_status

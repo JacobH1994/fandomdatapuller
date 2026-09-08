@@ -12,12 +12,21 @@ from pathlib import Path
 
 import pytest
 
-from etl.load_snapshots import REPO_ROOT, load_one_file, load_one_youtube_file, load_one_steam_file
+from etl.load_snapshots import (
+    REPO_ROOT,
+    load_one_file,
+    load_one_youtube_file,
+    load_one_steam_file,
+    load_one_steam_discovery_file,
+    load_one_steam_cohort_file,
+)
 
 SCHEMA_PATH = REPO_ROOT / "etl" / "schema.sql"
 FIXTURE_DIR = REPO_ROOT / "data" / "raw" / "twitch" / "_test_fixtures"
 FIXTURE_DIR_YOUTUBE = REPO_ROOT / "data" / "raw" / "youtube" / "_test_fixtures"
 FIXTURE_DIR_STEAM = REPO_ROOT / "data" / "raw" / "steam" / "_test_fixtures"
+FIXTURE_DIR_STEAM_DISCOVERY = REPO_ROOT / "data" / "raw" / "steam_discovery" / "_test_fixtures"
+FIXTURE_DIR_STEAM_COHORT = REPO_ROOT / "data" / "raw" / "steam_cohort" / "_test_fixtures"
 
 
 @pytest.fixture
@@ -250,3 +259,186 @@ def test_steam_none_player_count_produces_no_row(conn, steam_fixture_snapshot):
     # Only one row total, from the entry with a real player_count -- the
     # None one must not have become a fabricated 0.
     assert conn.execute("SELECT COUNT(*) FROM steam_player_counts").fetchone()[0] == 1
+
+
+def _fixture_app(app_id: int, **overrides) -> dict:
+    app = {
+        "app_id": app_id,
+        "name": "Example Game",
+        "app_type": "game",
+        "release_date_raw": "1 Jan, 2026",
+        "release_date": "2026-01-01",
+        "is_released": 1,
+        "genres": "Action,Indie",
+        "is_indie": 1,
+        "categories": "Single-player",
+        "has_vr_support": 0,
+        "vr_only": 0,
+        "developers": "Example Studio",
+        "publishers": "Example Publisher",
+        "recommendations_total": 500,
+        "low_relevance_flag": 0,
+    }
+    app.update(overrides)
+    return app
+
+
+@pytest.fixture
+def steam_discovery_fixture_snapshot():
+    FIXTURE_DIR_STEAM_DISCOVERY.mkdir(parents=True, exist_ok=True)
+    path = FIXTURE_DIR_STEAM_DISCOVERY / "20260101T000000Z.json.gz"
+    snapshot = {
+        "captured_at": "2026-01-01T00:00:00Z",
+        "run_started_at": "2026-01-01T00:00:00Z",
+        "run_finished_at": "2026-01-01T00:00:05Z",
+        "status": "ok",
+        "if_modified_since": 1735689600,
+        "apps": [_fixture_app(999001), _fixture_app(999002, is_indie=0, genres="Action")],
+        "errors": [],
+    }
+    with gzip.open(path, "wt") as f:
+        json.dump(snapshot, f)
+    yield path
+    path.unlink()
+    FIXTURE_DIR_STEAM_DISCOVERY.rmdir()
+
+
+def test_steam_discovery_loading_twice_produces_no_duplicate_rows(conn, steam_discovery_fixture_snapshot):
+    first_rows = load_one_steam_discovery_file(conn, steam_discovery_fixture_snapshot)
+    assert first_rows == 2
+
+    history_1 = conn.execute("SELECT COUNT(*) FROM steam_release_history").fetchone()[0]
+    cohort_1 = conn.execute("SELECT COUNT(*) FROM steam_release_cohort").fetchone()[0]
+    runs_1 = conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0]
+    assert history_1 == 2
+    assert cohort_1 == 2
+
+    load_one_steam_discovery_file(conn, steam_discovery_fixture_snapshot)
+
+    assert conn.execute("SELECT COUNT(*) FROM steam_release_history").fetchone()[0] == history_1
+    assert conn.execute("SELECT COUNT(*) FROM steam_release_cohort").fetchone()[0] == cohort_1
+    assert conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0] == runs_1
+
+
+def test_steam_discovery_new_app_enters_cohort_with_immediate_due_date(conn, steam_discovery_fixture_snapshot):
+    load_one_steam_discovery_file(conn, steam_discovery_fixture_snapshot)
+
+    row = conn.execute(
+        "SELECT discovered_at, tracking_window_end, last_polled_at, next_poll_due FROM steam_release_cohort WHERE app_id = 999001"
+    ).fetchone()
+    assert row[0] == "2026-01-01T00:00:00Z"
+    assert row[1] == "2027-01-01T00:00:00Z"  # +365 days
+    assert row[2] is None
+    assert row[3] == "2026-01-01T00:00:00Z"  # due immediately
+
+
+def test_steam_discovery_existing_app_does_not_reenter_cohort(conn, steam_discovery_fixture_snapshot):
+    # Simulate an app already known and already progressed through its
+    # cohort lifecycle -- a rediscovery (metadata update) must refresh
+    # steam_release_history but NOT reset its cohort progress.
+    load_one_steam_discovery_file(conn, steam_discovery_fixture_snapshot)
+    conn.execute(
+        "UPDATE steam_release_cohort SET last_polled_at = '2026-02-01T00:00:00Z', next_poll_due = '2026-02-08T00:00:00Z' WHERE app_id = 999001"
+    )
+    conn.commit()
+
+    # Reload the same snapshot (simulating a later run rediscovering the same app).
+    load_one_steam_discovery_file(conn, steam_discovery_fixture_snapshot)
+
+    row = conn.execute(
+        "SELECT last_polled_at, next_poll_due FROM steam_release_cohort WHERE app_id = 999001"
+    ).fetchone()
+    assert row == ("2026-02-01T00:00:00Z", "2026-02-08T00:00:00Z")
+
+
+@pytest.fixture
+def steam_cohort_fixture_snapshot():
+    FIXTURE_DIR_STEAM_COHORT.mkdir(parents=True, exist_ok=True)
+    path = FIXTURE_DIR_STEAM_COHORT / "20260101T000000Z.json.gz"
+    snapshot = {
+        "captured_at": "2026-01-01T00:00:00Z",
+        "run_started_at": "2026-01-01T00:00:00Z",
+        "run_finished_at": "2026-01-01T00:00:05Z",
+        "status": "ok",
+        "apps": [
+            {"app_id": 999001, "player_count": 250, "checked_at": "2026-01-01T00:00:00Z"},
+            {"app_id": 999002, "player_count": None, "checked_at": "2026-01-01T00:00:00Z"},
+        ],
+        "errors": [],
+    }
+    with gzip.open(path, "wt") as f:
+        json.dump(snapshot, f)
+    yield path
+    path.unlink()
+    FIXTURE_DIR_STEAM_COHORT.rmdir()
+
+
+def test_steam_cohort_loading_twice_produces_no_duplicate_rows(conn, steam_discovery_fixture_snapshot, steam_cohort_fixture_snapshot):
+    load_one_steam_discovery_file(conn, steam_discovery_fixture_snapshot)  # seeds steam_release_cohort first
+    first_rows = load_one_steam_cohort_file(conn, steam_cohort_fixture_snapshot)
+    assert first_rows == 1  # the None-player_count entry gets no row
+
+    counts_1 = conn.execute("SELECT COUNT(*) FROM steam_cohort_player_counts").fetchone()[0]
+    runs_1 = conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0]
+    assert counts_1 == 1
+
+    load_one_steam_cohort_file(conn, steam_cohort_fixture_snapshot)
+
+    assert conn.execute("SELECT COUNT(*) FROM steam_cohort_player_counts").fetchone()[0] == counts_1
+    assert conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0] == runs_1
+
+
+def test_steam_cohort_next_poll_due_recomputed_from_discovered_at(conn, steam_discovery_fixture_snapshot, steam_cohort_fixture_snapshot):
+    # discovered_at = 2026-01-01, checked_at = 2026-01-01 -> age 0 days,
+    # still in the daily phase (< 90 days) -> next_poll_due = +1 day.
+    load_one_steam_discovery_file(conn, steam_discovery_fixture_snapshot)
+    load_one_steam_cohort_file(conn, steam_cohort_fixture_snapshot)
+
+    row = conn.execute(
+        "SELECT last_polled_at, next_poll_due FROM steam_release_cohort WHERE app_id = 999001"
+    ).fetchone()
+    assert row == ("2026-01-01T00:00:00Z", "2026-01-02T00:00:00Z")
+
+
+def test_steam_cohort_weekly_taper_after_90_days(conn):
+    # A cohort entry discovered 100 days before checked_at should taper
+    # to a weekly interval, not daily.
+    conn.execute(
+        """
+        INSERT INTO titles (id, canonical_name) VALUES ('dummy', 'Dummy')
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO steam_release_history (app_id, name, fetched_at) VALUES (999003, 'Old Game', '2025-09-01T00:00:00Z')
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO steam_release_cohort (app_id, discovered_at, tracking_window_end, next_poll_due)
+        VALUES (999003, '2025-09-01T00:00:00Z', '2026-09-01T00:00:00Z', '2025-12-10T00:00:00Z')
+        """
+    )
+    conn.commit()
+
+    FIXTURE_DIR_STEAM_COHORT.mkdir(parents=True, exist_ok=True)
+    path = FIXTURE_DIR_STEAM_COHORT / "20251210T000000Z.json.gz"
+    snapshot = {
+        "captured_at": "2025-12-10T00:00:00Z",
+        "run_started_at": "2025-12-10T00:00:00Z",
+        "run_finished_at": "2025-12-10T00:00:05Z",
+        "status": "ok",
+        "apps": [{"app_id": 999003, "player_count": 42, "checked_at": "2025-12-10T00:00:00Z"}],
+        "errors": [],
+    }
+    with gzip.open(path, "wt") as f:
+        json.dump(snapshot, f)
+    try:
+        load_one_steam_cohort_file(conn, path)
+        row = conn.execute(
+            "SELECT next_poll_due FROM steam_release_cohort WHERE app_id = 999003"
+        ).fetchone()
+        assert row[0] == "2025-12-17T00:00:00Z"  # +7 days, not +1
+    finally:
+        path.unlink()
+        FIXTURE_DIR_STEAM_COHORT.rmdir()

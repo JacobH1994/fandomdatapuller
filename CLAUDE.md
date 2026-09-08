@@ -47,6 +47,17 @@ FAQ, and SteamCharts' own displayed data only covers ~30 days — both
 checked directly, neither is a fallback. Same fully-separate-file
 discipline as YouTube (`config/steam_appids.yaml`, `steam_poll.yml`).
 
+**And to `collectors/steam_cohort_poll.py` / `steam_cohort_poll.yml`
+(PRD §9.12a Track B, built 2026-09-08)** — a newly-discovered release's
+daily player-count during its ~90-day launch window has the same
+unbackfillable property, once it's in `steam_release_cohort`. **Not**
+`collectors/steam_catalog_backfill.py` (Track A) or
+`collectors/steam_discovery_poll.py`'s own classification pass, though —
+release *metadata* (genres, VR flags, developer, ...) is fixed historical
+fact, re-fetchable from Valve at any time, so Track A is deliberately
+on-demand/local (mirrors `collectors/liquipedia.py`'s pattern) with no
+schedule to protect.
+
 ## Ethical non-goals — do not build these
 
 - No scraping SullyGnome, SteamDB, or any comparable tracker, ever, even to
@@ -177,6 +188,25 @@ a judgment call):
 ```
 python collectors/steam_poll.py
 ```
+
+Run the Steam catalog backfill (PRD §9.12a Track A — one-time,
+patient, on-demand like `collectors/liquipedia.py`; safe to interrupt
+and resume, skips app_ids already in `steam_release_history` unless
+`--refresh`). Expected to take 1-2 weeks of intermittent runs across
+the full catalog — don't expect this to finish in one sitting:
+
+```
+python collectors/steam_catalog_backfill.py
+```
+
+Track B (ongoing go-forward discovery + lifecycle player-count
+polling of newly-discovered releases) is fully automated —
+`steam_discovery_poll.yml` (daily, 03:00 UTC) and
+`steam_cohort_poll.yml` (daily, 04:00 UTC) — nothing to run manually
+unless testing locally (`python collectors/steam_discovery_poll.py`,
+`python collectors/steam_cohort_poll.py`; the latter needs
+`etl/load_snapshots.py` run first so it has a `steam_release_cohort`
+to query).
 
 Load raw Twitch, YouTube, and Steam snapshots into `research.db` (incremental;
 add `--rebuild` to wipe and reload everything):

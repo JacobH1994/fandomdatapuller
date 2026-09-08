@@ -1,0 +1,75 @@
+name: Steam release-cohort lifecycle poll
+
+# Deliberately a completely separate workflow file from every other
+# collector's — CLAUDE.md's "one rule" rules out any shared trigger/job/
+# step that could let one platform's failure affect another's collection.
+#
+# Daily: matches the daily-then-weekly-tapering lifecycle-polling
+# schedule itself (PRD §9.12a Track B, part 2) — nothing here needs
+# hourly granularity. Runs after steam_discovery_poll.yml's 03:00 UTC
+# slot so a same-day-discovered app's cohort row already exists by the
+# time this runs and looks for apps due today.
+#
+# UNLIKE every other collector workflow in this project, this one needs
+# to READ existing state (which app_ids are due for a poll today) before
+# doing anything — collectors/steam_cohort_poll.py's own docstring covers
+# why. That's the reason for the extra `etl/load_snapshots.py` step below
+# that none of the other workflows have: it rebuilds a working
+# research.db from committed history first, since the runner itself is
+# ephemeral and starts with no local database at all.
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: steam-cohort-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Rebuild research.db from committed history
+        run: python etl/load_snapshots.py
+
+      - name: Poll Steam release-cohort lifecycle
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          overall_status=0
+          python collectors/steam_cohort_poll.py || overall_status=1
+
+          # Same guard as every other collector workflow in this project —
+          # `git add` on a path with nothing under it yet (e.g. a clean
+          # no-cohort-apps-due no-op) fails outright and, under set -e,
+          # kills the job before `exit $overall_status` below.
+          if [ -d data/raw/steam_cohort ]; then
+            git add data/raw/steam_cohort
+          fi
+          if ! git diff --cached --quiet; then
+            git commit -m "Steam cohort snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
+
+          # research.db itself is gitignored/disposable, never committed —
+          # it was only rebuilt above as this job's own scratch state.
+
+          exit $overall_status
