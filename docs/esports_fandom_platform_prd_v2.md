@@ -250,6 +250,33 @@ Access aside, these platforms report a Heat Index, not a viewer count — a comp
 
 Realistic use of this market's data: cite published aggregate figures from firms tracking it professionally (Niko Partners, Streams Charts) as occasional `source=secondary_report` data points, not a connector. Not an open question — revisit only if a legitimate access route appears, not by default the next time China comes up.
 
+### 9.9 Kick live collector (scheduled — mirrors §9.1, access confirmed 2026-09-07)
+Kick operates an official public API (`docs.kick.com`), OAuth-based, with livestream and category endpoints including live viewer counts — a genuine access path, not a Douyu/TikTok situation. Worth adding given real creator migration from Twitch toward Kick — a platform-level version of Limitation 1 (is the audience actually shared), one level up from title-level. Specific rate limits and quota structure not yet confirmed — check current docs before designing polling cadence, same discipline as every other connector here, not an assumption to carry over from Twitch's or YouTube's limits.
+
+### 9.10 TikTok — no viable path for live viewership, a separate uncertain path for video content
+Confirmed: TikTok has no public API for live-stream viewer counts, chat, or gifts. Every source that provides this is built on reverse-engineering TikTok's internal WebCast protocol — the same category of access already declined for SullyGnome and the Chinese platforms (§3, §9.8); not more defensible here for being a larger, more mainstream platform. Not pursued for live data.
+
+A separate, legitimate door exists but answers a different question: TikTok's Research API, restricted to vetted approved researchers (same structure as Reddit's program, §8), covers public video content — not live-stream data. Could support a distinct future question (are esports/gaming clips gaining or losing traction on TikTok over time), not viewership share. Same eligibility uncertainty as Reddit and Liquipedia LPDB; not pursued now.
+
+### 9.11 SOOP (formerly AfreecaTV) — investigated, not pursued, but one finding feeds directly into H2
+No developer API exists; available data is third-party paid analytics (Streams Charts), not a connector target. Not pursued, same verdict as §9.8.
+
+One fact surfaced while checking is directly relevant to the StarCraft II case in the brief's H2: Twitch shut down entirely in South Korea in February 2024, and AfreecaTV rebranded to SOOP that June partly in response. StarCraft II's audience has always skewed heavily Korean — see the brief's H2 refinement for the resulting confound on its measured Twitch decline, now backed by confirmed scale (SOOP ~1.2B hours/year, Twitch was running ~100M hours/month of Korean content pre-exit) and a directly analogous, precisely-dated precedent (LCK's YouTube share falling 46.5%→25.5% in one year as viewers moved to SOOP/CHZZK).
+
+### 9.12 Steam — current players confirmed (already scoped); no historical backfill exists, urgency matches §2
+Valve's official API (`ISteamUserStats/GetNumberOfCurrentPlayers`) is confirmed current-only, no historical parameter — same irreplaceable-if-missed property as every other live source here. Covers CS2, Dota 2, PUBG, Apex, Age of Empires; misses Riot titles and everything mobile entirely.
+
+**No legitimate historical backfill exists — checked both realistic candidates, both ruled out (2026-09-07).** SteamDB explicitly prohibits this: their own FAQ states plainly that they do not allow scraping/crawling, with an explicit warning that automated access risks a ban. Not inferred — their stated position, in their own words, the same category as SullyGnome's request and given the same answer: not pursued. SteamCharts.com's own displayed data is limited to roughly a 30-day window in practice, not the multi-year depth an earlier version of this document claimed based on a third-party scraper's marketing description rather than a direct check of the site itself — that was a real error, corrected here. Neither source backfills.
+
+**Consequence: the current-player collector carries the same urgency as §2's core constraint, not "nice to have when convenient."** With no historical path available from any source, every day this isn't running is Steam player-count history permanently lost, exactly like the Twitch collector's Phase 1 framing. Should not be left as a lower-priority addition behind Kick or Discord.
+
+**No regional breakdown at the game level.** Steam publishes country-level data for its overall user base and region-specific storefront data (top-sellers, pricing) — neither is a per-game concurrent-player breakdown by region. Not available from any source checked.
+
+### 9.13 Discord — community size confirmed available; member overlap still blocked
+Two token-free, official public endpoints, not scraping: `/invites/{code}?with_counts=true` (approximate member and online counts for any public server with a known invite link, no server cooperation needed beyond the invite existing) and `/guilds/{id}/widget.json` (richer — voice channels, a sample of online members — but only if the server owner has explicitly enabled it; most haven't). Neither exposes message content or a full member list.
+
+Worth adding as a new, cheap signal: community size (member count, current online count) per tracked title's official Discord, as a fandom-scale metric independent of viewership. Does not revive the member-overlap approach considered and set aside earlier in this project — testing actual overlap between two communities still requires bot membership in both servers, which neither endpoint provides. Size, not overlap.
+
 ## 10. Collector reliability & monitoring
 
 Because collector downtime is unrecoverable (§2), reliability requirements are non-negotiable:

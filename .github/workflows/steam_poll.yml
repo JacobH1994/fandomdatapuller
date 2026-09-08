@@ -1,0 +1,66 @@
+name: Steam player-count poll
+
+# Deliberately a completely separate workflow file from poll.yml (Twitch)
+# and youtube_poll.yml — CLAUDE.md's "one rule" (now covering all three
+# live collectors) rules out any shared trigger/job/step that could let
+# one platform's failure affect another's collection.
+
+on:
+  schedule:
+    # Hourly, on the hour, UTC — same cadence as the other two collectors.
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      titles:
+        description: "Comma-separated title ids to check (default: all in config/steam_appids.yaml)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: steam-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Poll Steam
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          TITLES="${{ github.event.inputs.titles }}"
+
+          ARGS=()
+          if [ -n "$TITLES" ]; then
+            ARGS+=(--titles "$TITLES")
+          fi
+
+          # Captured, not `set -e`-aborted -- same reasoning as
+          # youtube_poll.yml: a partial/failed run still writes a raw
+          # file worth committing.
+          overall_status=0
+          python collectors/steam_poll.py "${ARGS[@]}" || overall_status=1
+
+          git add data/raw/steam
+          if ! git diff --cached --quiet; then
+            git commit -m "Steam snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
+
+          exit $overall_status

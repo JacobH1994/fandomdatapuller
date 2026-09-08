@@ -2,16 +2,24 @@ name: Collector heartbeat
 
 # Silent collector failure is the worst failure mode in this project (PRD
 # §2, §10) — live viewership data cannot be backfilled, for YouTube
-# (PRD §9.7) exactly as much as Twitch (see CLAUDE.md's "one rule," now
-# extended to both). This workflow fails loudly if the newest raw
-# snapshot is older than expected. A failing scheduled GitHub Actions
-# workflow emails the repo owner by default, which is the alerting
-# mechanism for both collectors.
+# (PRD §9.7) and Steam (PRD §9.12) exactly as much as Twitch (see
+# CLAUDE.md's "one rule," now extended to all three). This workflow
+# fails loudly if the newest raw snapshot is older than expected. A
+# failing scheduled GitHub Actions workflow emails the repo owner by
+# default, which is the alerting mechanism for all three collectors.
 #
-# The Twitch check below is untouched from its original form (added
-# 2026-09-08: the YouTube check is a new, separate block) — deliberately,
-# so extending this workflow for YouTube carries zero risk of a subtle
-# regression to the alerting Twitch already depended on.
+# The Twitch check below is untouched from its original form — each
+# platform's check was added as a new, separate block (YouTube
+# 2026-09-08, Steam same day), deliberately, so extending this workflow
+# never risks a subtle regression to alerting an earlier platform
+# already depended on.
+#
+# The Steam check is expected to fail loudly until STEAM_API_KEY is
+# added as a repo secret — that's correct, not a bug to silence:
+# config/steam_appids.yaml ships pre-populated (unlike YouTube's, a
+# Steam AppID isn't a curation judgment call), so the only thing
+# blocking real collection is the missing secret, and this heartbeat
+# failing is exactly how that should surface.
 
 on:
   schedule:
@@ -130,4 +138,50 @@ jobs:
               print(f"::warning::Latest YouTube snapshot status is 'failed' — check its errors field.")
 
           print("YouTube heartbeat OK.")
+          PY
+
+      - name: Check Steam snapshot freshness
+        env:
+          THRESHOLD_MINUTES: ${{ github.event.inputs.threshold_minutes }}
+        run: |
+          python3 - <<'PY'
+          import glob, gzip, json, os, sys
+          from datetime import datetime, timezone
+
+          threshold = int(os.environ.get("THRESHOLD_MINUTES") or "180")
+
+          # Not gated on config (unlike YouTube's check) — config/
+          # steam_appids.yaml ships pre-populated, so an absent/stale
+          # snapshot here means the collector is actually failing (most
+          # likely: STEAM_API_KEY not yet added as a repo secret), not
+          # a legitimate not-yet-curated bootstrap state.
+          files = sorted(glob.glob("data/raw/steam/**/*.json.gz", recursive=True))
+          if not files:
+              print("::error::No raw Steam snapshots found under data/raw/steam/ — check that STEAM_API_KEY is set as a repo secret.")
+              sys.exit(1)
+
+          latest = files[-1]
+          with gzip.open(latest, "rt") as f:
+              snapshot = json.load(f)
+
+          captured_at = snapshot.get("captured_at")
+          if not captured_at:
+              print(f"::error::{latest} has no captured_at field.")
+              sys.exit(1)
+
+          captured = datetime.strptime(captured_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+          now = datetime.now(timezone.utc)
+          gap_minutes = (now - captured).total_seconds() / 60
+
+          print(f"Latest Steam snapshot: {latest}")
+          print(f"captured_at: {captured_at} ({gap_minutes:.0f} minutes ago)")
+
+          if gap_minutes > threshold:
+              print(f"::error::Newest Steam snapshot is {gap_minutes:.0f} minutes old, exceeding the {threshold}-minute threshold. steam_poll.yml may be silently failing.")
+              sys.exit(1)
+
+          if snapshot.get("status") == "failed":
+              print(f"::warning::Latest Steam snapshot status is 'failed' — check its errors field.")
+
+          print("Steam heartbeat OK.")
           PY

@@ -12,11 +12,12 @@ from pathlib import Path
 
 import pytest
 
-from etl.load_snapshots import REPO_ROOT, load_one_file, load_one_youtube_file
+from etl.load_snapshots import REPO_ROOT, load_one_file, load_one_youtube_file, load_one_steam_file
 
 SCHEMA_PATH = REPO_ROOT / "etl" / "schema.sql"
 FIXTURE_DIR = REPO_ROOT / "data" / "raw" / "twitch" / "_test_fixtures"
 FIXTURE_DIR_YOUTUBE = REPO_ROOT / "data" / "raw" / "youtube" / "_test_fixtures"
+FIXTURE_DIR_STEAM = REPO_ROOT / "data" / "raw" / "steam" / "_test_fixtures"
 
 
 @pytest.fixture
@@ -199,3 +200,53 @@ def test_youtube_loading_does_not_affect_twitch_platform_default(conn, youtube_f
         r[0] for r in conn.execute("SELECT DISTINCT platform FROM viewership_snapshots").fetchall()
     }
     assert platforms == {"twitch", "youtube"}
+
+
+@pytest.fixture
+def steam_fixture_snapshot():
+    FIXTURE_DIR_STEAM.mkdir(parents=True, exist_ok=True)
+    path = FIXTURE_DIR_STEAM / "20260101T000000Z.json.gz"
+    snapshot = {
+        "captured_at": "2026-01-01T00:00:00Z",
+        "run_started_at": "2026-01-01T00:00:00Z",
+        "run_finished_at": "2026-01-01T00:00:05Z",
+        "status": "ok",
+        "titles": [
+            {"title_id": "dota2", "appid": 570, "player_count": 493865, "checked_at": "2026-01-01T00:00:00Z"},
+            {"title_id": "counter_strike", "appid": 730, "player_count": None, "checked_at": "2026-01-01T00:00:00Z"},
+        ],
+        "errors": [],
+    }
+    with gzip.open(path, "wt") as f:
+        json.dump(snapshot, f)
+    yield path
+    path.unlink()
+    FIXTURE_DIR_STEAM.rmdir()
+
+
+def test_steam_loading_twice_produces_no_duplicate_rows(conn, steam_fixture_snapshot):
+    first_rows = load_one_steam_file(conn, steam_fixture_snapshot)
+    assert first_rows == 1  # the None-player_count entry gets no row
+
+    counts_1 = conn.execute("SELECT COUNT(*) FROM steam_player_counts").fetchone()[0]
+    runs_1 = conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0]
+
+    load_one_steam_file(conn, steam_fixture_snapshot)
+
+    assert conn.execute("SELECT COUNT(*) FROM steam_player_counts").fetchone()[0] == counts_1
+    assert conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0] == runs_1
+
+
+def test_steam_row_fields(conn, steam_fixture_snapshot):
+    load_one_steam_file(conn, steam_fixture_snapshot)
+
+    row = conn.execute("SELECT title_id, player_count FROM steam_player_counts").fetchone()
+    assert row == ("dota2", 493865)
+
+
+def test_steam_none_player_count_produces_no_row(conn, steam_fixture_snapshot):
+    load_one_steam_file(conn, steam_fixture_snapshot)
+
+    # Only one row total, from the entry with a real player_count -- the
+    # None one must not have become a fabricated 0.
+    assert conn.execute("SELECT COUNT(*) FROM steam_player_counts").fetchone()[0] == 1

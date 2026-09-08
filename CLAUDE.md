@@ -29,10 +29,21 @@ file (`config/channels_youtube.yaml`, not a reshaped `config/channels.yaml`),
 and workflow from Twitch's, specifically so a change to one can never risk
 the other — keep it that way; don't merge them for "consistency" later.
 
+**And to `collectors/steam_poll.py` / `steam_poll.yml` (PRD §9.12, built
+2026-09-08)** — Steam's `GetNumberOfCurrentPlayers` has no historical
+parameter either, confirmed live. No legitimate backfill path exists if
+this stops running: SteamDB explicitly prohibits scraping in their own
+FAQ, and SteamCharts' own displayed data only covers ~30 days — both
+checked directly, neither is a fallback. Same fully-separate-file
+discipline as YouTube (`config/steam_appids.yaml`, `steam_poll.yml`).
+
 ## Ethical non-goals — do not build these
 
-- No scraping SullyGnome or any comparable tracker, ever, even to fill a gap
-  that looks otherwise unfillable. Approach operators directly instead.
+- No scraping SullyGnome, SteamDB, or any comparable tracker, ever, even to
+  fill a gap that looks otherwise unfillable. Approach operators directly
+  instead. SteamDB specifically: checked their own FAQ directly (2026-09-07)
+  — they explicitly prohibit scraping/crawling and warn of a ban for
+  automated access. Confirmed, not assumed.
 - Respect every source's published terms: Twitch's Developer Agreement,
   Liquipedia's API terms, Reddit's API terms — including retention and
   attribution clauses. For Liquipedia specifically: 1 request/2s general,
@@ -102,7 +113,11 @@ import; several analysis notebooks (`notebooks/`); `tournament_aliases`
 YouTube live collector (PRD §9.7, `collectors/youtube_poll.py`) — built
 but not yet collecting anything real, since `config/channels_youtube.yaml`
 still needs human curation (same bootstrap gap `config/channels.yaml`
-has had from the start). See
+has had from the start); the Steam current-player collector (PRD §9.12,
+`collectors/steam_poll.py`, 11 titles pre-configured in
+`config/steam_appids.yaml`) — built and already collecting real data
+locally, blocked only on `STEAM_API_KEY` being added as a GitHub Actions
+repo secret before the scheduled workflow can run. See
 `docs/milestone_reconciliation.md` and the PRD's changelog-style sections
 for the reasoning behind non-obvious calls in this area — not duplicated
 here.
@@ -142,7 +157,18 @@ governed by `--sweep-interval-hours`, default every 6h) from the GitHub
 Actions UI: run the "YouTube live-viewership poll" workflow manually with
 `sweep=true` — worth doing once at the start of a specific tournament.
 
-Load raw Twitch and YouTube snapshots into `research.db` (incremental;
+Run the Steam collector locally (PRD §9.12 — needs `STEAM_API_KEY` in
+`.env`, or exported in the shell; free to register at
+steamcommunity.com/dev/apikey). Simpler than the other two — no config
+curation needed first, `config/steam_appids.yaml` ships pre-populated
+with every tracked title's verified Steam AppID (an objective fact, not
+a judgment call):
+
+```
+python collectors/steam_poll.py
+```
+
+Load raw Twitch, YouTube, and Steam snapshots into `research.db` (incremental;
 add `--rebuild` to wipe and reload everything):
 
 ```
