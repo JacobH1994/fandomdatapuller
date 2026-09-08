@@ -1,0 +1,84 @@
+name: YouTube live-viewership poll
+
+# Deliberately a completely separate workflow file from poll.yml (the
+# Twitch collector) — CLAUDE.md's "one rule" (never risk the Twitch
+# collector, even briefly) rules out any shared trigger/job/step that
+# could let a YouTube-side failure affect Twitch collection.
+
+on:
+  schedule:
+    # Hourly, on the hour, UTC — same cadence as poll.yml, though the
+    # script itself only does an expensive discovery sweep a few times a
+    # day by default (see collectors/youtube_poll.py's own docstring);
+    # every hourly invocation still does a cheap refresh of whatever's
+    # already known live.
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      titles:
+        description: "Comma-separated title ids to check (default: all with configured channels)"
+        required: false
+        default: ""
+      sweep:
+        description: "Force a discovery sweep this run (recommended once for a specific tournament's start)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Poll YouTube
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          TITLES="${{ github.event.inputs.titles }}"
+          SWEEP="${{ github.event.inputs.sweep }}"
+
+          ARGS=()
+          if [ -n "$TITLES" ]; then
+            ARGS+=(--titles "$TITLES")
+          fi
+          if [ "$SWEEP" = "true" ]; then
+            ARGS+=(--sweep)
+          fi
+
+          # Captured, not `set -e`-aborted: even a partial/failed run still
+          # writes a raw file worth committing (irreplaceable data, same
+          # reasoning as poll.yml's own || overall_status=1 pattern) — a
+          # collector failure should surface as a failed job at the end,
+          # not skip the commit of whatever it did manage to collect.
+          overall_status=0
+          python collectors/youtube_poll.py "${ARGS[@]}" || overall_status=1
+
+          git add data/raw/youtube
+          if ! git diff --cached --quiet; then
+            git commit -m "YouTube snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
+
+          exit $overall_status

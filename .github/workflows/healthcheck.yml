@@ -1,10 +1,17 @@
-name: Twitch collector heartbeat
+name: Collector heartbeat
 
 # Silent collector failure is the worst failure mode in this project (PRD
-# §2, §10) — live viewership data cannot be backfilled. This workflow fails
-# loudly if the newest raw snapshot is older than expected. A failing
-# scheduled GitHub Actions workflow emails the repo owner by default, which
-# is the alerting mechanism for Phase 1.
+# §2, §10) — live viewership data cannot be backfilled, for YouTube
+# (PRD §9.7) exactly as much as Twitch (see CLAUDE.md's "one rule," now
+# extended to both). This workflow fails loudly if the newest raw
+# snapshot is older than expected. A failing scheduled GitHub Actions
+# workflow emails the repo owner by default, which is the alerting
+# mechanism for both collectors.
+#
+# The Twitch check below is untouched from its original form (added
+# 2026-09-08: the YouTube check is a new, separate block) — deliberately,
+# so extending this workflow for YouTube carries zero risk of a subtle
+# regression to the alerting Twitch already depended on.
 
 on:
   schedule:
@@ -62,5 +69,65 @@ jobs:
           if snapshot.get("status") != "ok":
               print(f"::warning::Latest snapshot status is '{snapshot.get('status')}', not 'ok' — check its errors field.")
 
-          print("Heartbeat OK.")
+          print("Twitch heartbeat OK.")
+          PY
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PyYAML (YouTube check only — config/channels_youtube.yaml gating needs it)
+        run: pip install pyyaml
+
+      - name: Check YouTube snapshot freshness
+        env:
+          THRESHOLD_MINUTES: ${{ github.event.inputs.threshold_minutes }}
+        run: |
+          python3 - <<'PY'
+          import glob, gzip, json, os, sys
+          import yaml
+          from datetime import datetime, timezone
+
+          threshold = int(os.environ.get("THRESHOLD_MINUTES") or "180")
+
+          # Gated on config, not just file presence: an empty
+          # config/channels_youtube.yaml means youtube_poll.py is a
+          # deliberate, documented no-op every run (see its own
+          # docstring) — that must not page anyone. Only alert once
+          # there's actually something curated to be silently failing on.
+          with open("config/channels_youtube.yaml") as f:
+              channels = (yaml.safe_load(f) or {}).get("channels") or {}
+          if not channels:
+              print("config/channels_youtube.yaml has no channels curated yet — skipping the YouTube heartbeat (not a failure).")
+              sys.exit(0)
+
+          files = sorted(glob.glob("data/raw/youtube/**/*.json.gz", recursive=True))
+          if not files:
+              print("::error::config/channels_youtube.yaml has channels curated, but no raw YouTube snapshots exist under data/raw/youtube/ — the collector may never have run successfully.")
+              sys.exit(1)
+
+          latest = files[-1]
+          with gzip.open(latest, "rt") as f:
+              snapshot = json.load(f)
+
+          captured_at = snapshot.get("captured_at")
+          if not captured_at:
+              print(f"::error::{latest} has no captured_at field.")
+              sys.exit(1)
+
+          captured = datetime.strptime(captured_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+          now = datetime.now(timezone.utc)
+          gap_minutes = (now - captured).total_seconds() / 60
+
+          print(f"Latest YouTube snapshot: {latest}")
+          print(f"captured_at: {captured_at} ({gap_minutes:.0f} minutes ago)")
+
+          if gap_minutes > threshold:
+              print(f"::error::Newest YouTube snapshot is {gap_minutes:.0f} minutes old, exceeding the {threshold}-minute threshold. youtube_poll.yml may be silently failing.")
+              sys.exit(1)
+
+          if snapshot.get("status") == "failed":
+              print(f"::warning::Latest YouTube snapshot status is 'failed' — check its errors field.")
+
+          print("YouTube heartbeat OK.")
           PY

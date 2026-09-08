@@ -194,9 +194,22 @@ CREATE TABLE IF NOT EXISTS tournament_alias_llm_checked (
 -- auditable rather than a bare label. NULL broadcast_tier means
 -- unclassified (this pass hasn't run on that row yet), not "general" —
 -- classify_broadcast_tier.py's incremental mode targets exactly these.
+-- platform: added 2026-09-08 for collectors/youtube_poll.py (PRD §9.7).
+-- The PRD's own §9.7 note says this table needs "no schema change" —
+-- that undersold it: without an explicit discriminator, a query summing
+-- viewer_count across this table (analysis/metrics.py's
+-- _viewership_trend does exactly this) would silently blend Twitch and
+-- YouTube viewer counts together the moment YouTube rows exist, which is
+-- sometimes the right question (total cross-platform attention) and
+-- sometimes badly wrong (a per-platform trend), and nothing would flag
+-- which. channel_id's format alone (YouTube's "UC..." vs. Twitch's
+-- numeric user_id) is not a reason to skip an explicit column just
+-- because it happens to be inferable — DEFAULT 'twitch' backfills every
+-- existing row correctly with no guessing.
 CREATE TABLE IF NOT EXISTS viewership_snapshots (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title_id TEXT NOT NULL REFERENCES titles(id),
+    platform TEXT NOT NULL DEFAULT 'twitch',
     channel_id TEXT NOT NULL,
     channel_login TEXT,
     captured_at TEXT NOT NULL,
@@ -211,6 +224,11 @@ CREATE TABLE IF NOT EXISTS viewership_snapshots (
     matched_alias TEXT,
     source TEXT NOT NULL DEFAULT 'twitch_api',
     confidence TEXT NOT NULL DEFAULT 'verified',
+    -- Not (platform, channel_id, captured_at): channel_id formats don't
+    -- collide across platforms in practice (YouTube's "UC..." vs.
+    -- Twitch's numeric user_id) — adding platform to the key would need
+    -- an invasive recreate-and-copy migration on a live table with no
+    -- real safety benefit, so left as-is deliberately, not overlooked.
     UNIQUE (channel_id, captured_at)
 );
 

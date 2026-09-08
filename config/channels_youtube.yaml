@@ -1,0 +1,37 @@
+# Official YouTube broadcast channels per title (PRD §9.7).
+#
+# Deliberately a SEPARATE file from config/channels.yaml, not a
+# platform-keyed extension of it — collectors/twitch_poll.py parses that
+# file's exact flat {title_id: [logins]} structure, and CLAUDE.md's "one
+# rule" (never risk the Twitch collector, even briefly) rules out
+# reshaping a file its parser depends on just to make room for a second
+# platform. A separate file costs nothing and removes the risk entirely.
+#
+# Consumer: collectors/youtube_poll.py, at every run (channel discovery
+# and quota-aware live-status checks — see that script's own docstring
+# for the discovery/refresh cadence this drives).
+#
+# Empty for now — nothing has been curated yet, same bootstrap state
+# config/channels.yaml started in. Until this is populated,
+# youtube_poll.py has nothing to check and will run as a no-op (log a
+# clear message, not silently do nothing unexplained).
+#
+# Match key is the channel ID (starts "UC", 24 characters — YouTube's
+# stable, non-renameable identifier; a channel's @handle can change,
+# this can't), not the @handle shown on the channel page. Find a
+# channel's ID via its "About" page's "Share channel" link, or:
+#   https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=<handle>&key=<YOUTUBE_API_KEY>
+#
+# Structure:
+# channels:
+#   <title_id from config/titles.yaml>:
+#     - channel_id: UCxxxxxxxxxxxxxxxxxxxxxx
+#       name: Human-readable label, for this file's own readability only
+#       # video_id: optional — if a specific tournament's YouTube stream
+#       # URL is published in advance, note its video ID here (PRD §9.7:
+#       # "a free efficiency gain when convenient, not a dependency") to
+#       # skip a search.list discovery call for that one event. Remove
+#       # once the event ends; a stale video_id just gets treated as
+#       # "not live" on the next videos.list check, not a crash.
+
+channels: {}
