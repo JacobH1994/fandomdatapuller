@@ -11,6 +11,16 @@ built, wired up, populated, or broken, read straight from the code and
 data) — the PRD describes intent and decisions. When it drifts,
 regenerate it rather than hand-editing it.
 
+**The PRD and the research brief are edited directly, the same as code**
+(PRD §15, added 2026-09-08) — they aren't maintained elsewhere and copied
+in. When a research decision, data-source design, or connection to an
+existing hypothesis comes up in conversation, write it into these
+documents as part of doing the work, not as a separate step to remember
+later. If a request doesn't obviously connect to what's currently
+written, that's the documents lagging the conversation (scope has grown
+several times this way already) — ask what's missing rather than
+assuming the request belongs to a different project.
+
 ## The one rule that overrides everything else
 
 **Live Twitch viewership data cannot be backfilled.** Twitch's API only

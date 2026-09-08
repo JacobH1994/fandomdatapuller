@@ -255,6 +255,93 @@ CREATE TABLE IF NOT EXISTS steam_player_counts (
     UNIQUE (title_id, captured_at)
 );
 
+-- Steam catalog classification (PRD §9.12a), added 2026-09-08. One row
+-- per app_id, covering EVERY Steam release (not just the 23 tracked
+-- esports titles) — release metadata, not player counts, so it's fixed
+-- historical fact and NOT subject to the "one rule"/§2 backfill
+-- constraint the live-poll tables are. Written by two producers into the
+-- same table: collectors/steam_catalog_backfill.py (Track A, one-time,
+-- on-demand, walks the full historical catalog) and
+-- collectors/steam_discovery_poll.py (Track B, ongoing, scheduled,
+-- if_modified_since-driven) — same classification logic in both, see
+-- collectors/steam_catalog_common.py.
+--
+-- app_id is the primary key directly (Steam's own ID, already globally
+-- unique) rather than a separate autoincrement id — there's no reason
+-- for a surrogate key when the natural one is already stable and simple.
+--
+-- VR and Indie are DERIVED, boolean columns, not left as "check the raw
+-- categories/genres text every time" — confirmed live (2026-09-08)
+-- against Half-Life: Alyx that VR support lives in `categories` (id 31 =
+-- "VR Support", id 54 = "VR Only"), NOT `genres` (Alyx's own genres are
+-- just ["Action", "Adventure"], no VR signal there at all). is_indie is
+-- derived from "Indie" appearing in `genres` — note genres is a
+-- multi-valued list, not a taxonomy: a title can carry "Indie" AND
+-- "Action" simultaneously, and there is no positive "AAA" tag, only the
+-- absence of "Indie".
+--
+-- low_relevance_flag (near-zero recommendations.total): flagged, never
+-- used to DROP a row — volume/count analyses need the complete catalog
+-- to stay honest, composition/lifecycle analyses can filter this flag
+-- out when noise, not volume, is what matters.
+CREATE TABLE IF NOT EXISTS steam_release_history (
+    app_id INTEGER PRIMARY KEY,
+    name TEXT,
+    app_type TEXT, -- appdetails' own `type` field ("game", "dlc", ...) — a validation signal: GetAppList's default already excludes DLC, so a non-"game" value here would mean that assumption broke, not something to silently trust
+    release_date_raw TEXT, -- as Steam gives it, e.g. "25 Mar, 2020" — not always a clean parseable date (can be "Coming soon" etc.)
+    release_date TEXT, -- ISO 8601, NULL if release_date_raw wasn't parseable — same "malformed source data degrades gracefully, never guessed" discipline as tournaments.start_date
+    is_released INTEGER NOT NULL DEFAULT 1, -- from release_date.coming_soon
+    genres TEXT, -- comma-joined genre names, as given
+    is_indie INTEGER NOT NULL DEFAULT 0,
+    categories TEXT, -- comma-joined category descriptions, as given
+    has_vr_support INTEGER NOT NULL DEFAULT 0, -- category id 31 present
+    vr_only INTEGER NOT NULL DEFAULT 0, -- category id 54 present
+    developers TEXT, -- comma-joined
+    publishers TEXT, -- comma-joined
+    recommendations_total INTEGER, -- NULL when appdetails omits the field entirely (not the same as a confirmed 0)
+    low_relevance_flag INTEGER NOT NULL DEFAULT 0,
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'steam_store_api',
+    confidence TEXT NOT NULL DEFAULT 'verified'
+);
+
+-- Which apps are inside their post-discovery lifecycle-tracking window
+-- (PRD §9.12a Track B) — bookkeeping only, not the player-count data
+-- itself (see steam_cohort_player_counts below). Populated when
+-- collectors/steam_discovery_poll.py first sees a NEW app_id (one not
+-- already in steam_release_history) via if_modified_since; existing
+-- apps that merely got metadata updates are reclassified into
+-- steam_release_history but do NOT re-enter the cohort.
+--
+-- Separate from steam_player_counts/steam_release_history deliberately:
+-- app_id here is an arbitrary Steam catalog app, not one of the 23
+-- tracked esports titles, so it can't reuse title_id-keyed tables (that
+-- column is a REFERENCES titles(id) FK everywhere else in this schema).
+CREATE TABLE IF NOT EXISTS steam_release_cohort (
+    app_id INTEGER PRIMARY KEY REFERENCES steam_release_history(app_id),
+    discovered_at TEXT NOT NULL,
+    tracking_window_end TEXT NOT NULL, -- discovered_at + ~1 year
+    last_polled_at TEXT,
+    next_poll_due TEXT NOT NULL -- daily for the first ~90 days, weekly out to tracking_window_end — see collectors/steam_cohort_poll.py
+);
+
+-- The actual lifecycle player-count time series for cohort apps (PRD
+-- §9.12a Track B) — the cohort-app equivalent of steam_player_counts,
+-- separate because cohort apps aren't in `titles` (see
+-- steam_release_cohort's own comment). Same unbackfillable property as
+-- every other live-poll table: a missed day during a title's tracked
+-- window is permanent loss, which is exactly why Track B runs on a
+-- schedule rather than on-demand (see PRD §9.12a).
+CREATE TABLE IF NOT EXISTS steam_cohort_player_counts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    app_id INTEGER NOT NULL REFERENCES steam_release_cohort(app_id),
+    captured_at TEXT NOT NULL,
+    player_count INTEGER NOT NULL,
+    source TEXT NOT NULL DEFAULT 'steam_api',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (app_id, captured_at)
+);
+
 -- Denominator for "esports' share of total platform attention" (PRD §6/§9).
 -- One row per poll, from the collector's platform_totals aggregate
 -- (already bounded/approximate if hit_page_cap is true on that poll).
