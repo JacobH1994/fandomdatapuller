@@ -22,4 +22,17 @@
 #     - some_official_channel_login
 #     - another_official_channel_login
 
-channels: {}
+channels:
+  counter_strike:
+    # Curated 2026-09-09 from notebooks/official_channel_candidates.ipynb's
+    # draft (config/channels.draft.yaml), human-reviewed — not a blind
+    # copy. Tournament organizers' own broadcast channels, kept distinct
+    # from popular personality/co-stream channels the draft also surfaced
+    # (chopperinho, shadowkekw, strogo, theburntpeanut, hypetried —
+    # deliberately excluded: high viewer-time during a tournament window
+    # is exactly what a co-stream looks like too, which broadcast_tier's
+    # detected_costream already tracks separately; folding them in here
+    # would blur that distinction, not sharpen it).
+    - blastpremier  # BLAST Premier's own channel — tournament organizer
+    - eslcs         # ESL's Counter-Strike channel — tournament organizer
+    - betboom_cs_ru # BetBoom (real esports org) — user's call; unconfirmed whether this is an official-broadcast channel or a team channel, re-verify if it looks off
