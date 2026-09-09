@@ -1,0 +1,11 @@
+year,cpi_annual_avg,deflator_to_2025,source,fetched_at
+2016,240.007,1.3414,FRED CPIAUCNS (mirrors BLS CPI-U, All Urban Consumers, All Items, Not Seasonally Adjusted),2026-09-09T00:00:00Z
+2017,245.120,1.3132,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2018,251.107,1.2820,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2019,255.657,1.2593,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2020,258.811,1.2439,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2021,270.970,1.1881,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2022,292.655,1.1002,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2023,304.702,1.0566,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2024,313.689,1.0264,FRED CPIAUCNS,2026-09-09T00:00:00Z
+2025,321.943,1.0000,FRED CPIAUCNS (base year -- 2025 is the most recently fully completed calendar year as of this build; 11 months averaged, Oct 2025 unavailable due to a lapse in appropriations -- matches BLS's own published annual figure for the same reason),2026-09-09T00:00:00Z
