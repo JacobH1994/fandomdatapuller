@@ -1,0 +1,17 @@
+Twitch:
+Twitch.tv/ESLCS
+/ESLCSb
+/ESL_Dota2
+/ESL_Dota2Earth
+/ESL_Dota2Void
+/ESL_Dota2Ember
+/ESL_Dota2Storm
+/ESL_Dota2Sange
+/ESL_Dota2Clarity
+/ESL_Dota2Tango
+/ESL_Dota2Mango
+
+Youtube
+youtube.com/esl
+youtube.com/eslcs
+youtube.com/esldota2
