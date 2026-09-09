@@ -281,7 +281,29 @@ def get_championship_windows(conn: sqlite3.Connection, title_id: str | None = No
     title_id, year, liquipedia_page, name, prize_pool, currency,
     start_date, end_date. Rows with NULL/unparseable start_date are
     excluded (can't assign a year), same handling as
-    get_success_milestone's own year parsing."""
+    get_success_milestone's own year parsing.
+
+    **Currency bug, found and fixed 2026-09-09**: `prize_pool` is a raw
+    number with no currency normalization (`etl/liquipedia.py`'s
+    `parse_infobox` stores whatever the wiki's own `prizepool`/
+    `prizepoolusd`/`localcurrency` fields say, verbatim). The original
+    version of this function picked the numerically-largest `prize_pool`
+    regardless of `currency`, which is comparing apples to oranges — a
+    275,000,000 KRW regional league (~$200K USD) has a bigger raw number
+    than a $2.5M USD World Championship, and would win. Confirmed live
+    this wasn't a rare edge case: 95 of 291 windows across the full
+    23-title dataset had a non-USD currency, including EVERY
+    league_of_legends year 2012-2025 (LCK's KRW figures beating Worlds'
+    USD ones every single time). Now restricted to `currency = 'USD'` or
+    `currency IS NULL` (an unlabeled `prizepool` field, by
+    `parse_infobox`'s own convention, means no `localcurrency` was found —
+    treated as presumptively USD, consistent with how the plain
+    `prizepool` field is conventionally used on these wikis, but NOT
+    verified per-row) — a tournament with an explicitly-tagged non-USD
+    currency is excluded from candidacy entirely rather than wrongly
+    compared as if it were USD. A title-year whose only prize_pool data is
+    non-USD now correctly gets no window that year, rather than a wrong
+    one."""
     params: tuple = ()
     title_filter = ""
     if title_id is not None:
@@ -293,7 +315,9 @@ def get_championship_windows(conn: sqlite3.Connection, title_id: str | None = No
         SELECT title_id, start_date, end_date, tier, prize_pool, currency,
                liquipedia_page, name
         FROM tournaments
-        WHERE start_date IS NOT NULL AND prize_pool IS NOT NULL {title_filter}
+        WHERE start_date IS NOT NULL AND prize_pool IS NOT NULL
+              AND (currency = 'USD' OR currency IS NULL)
+              {title_filter}
         """,
         params,
     ).fetchall()
