@@ -3,12 +3,13 @@
 PRD §9 requires `get_success_milestone`'s pipeline output to reconcile
 against the hand-built milestone table (`data/manual/milestone_table.csv`),
 with every discrepancy "either explained or corrected" before Phase 2
-counts as done. As of 2026-09-05, all 23 active titles still show a
-disagreement by strict year-match — but every one now falls into a
-specific, understood category below, rather than an undifferentiated
-mismatch count. This document is that record; short per-title pointers
-also live in `milestone_table.csv`'s own `notes` column (added by
-`data/manual/normalize_original_export.py`'s `RECONCILIATION_NOTES`).
+counts as done. As of 2026-09-05 (categories last refreshed 2026-09-09,
+see Category B below), all 23 active titles still show a disagreement by
+strict year-match — but every one now falls into a specific, understood
+category below, rather than an undifferentiated mismatch count. This
+document is that record; short per-title pointers also live in
+`milestone_table.csv`'s own `notes` column (added by `data/manual/
+normalize_original_export.py`'s `RECONCILIATION_NOTES`).
 
 Reproduce this yourself: `notebooks/reconciliation.ipynb`, re-run top to
 bottom. Its final cell shows the same categorization mechanically,
@@ -117,7 +118,7 @@ cases. Worth a sweep if this area is revisited.
 
 ## Per-title categorization (all 23 active titles)
 
-### Category A — era-relative-tier pattern (20 titles)
+### Category A — era-relative-tier pattern (22 titles)
 
 The pipeline's `milestone_year` is earlier — often by several years —
 than the hand-built table's figure, consistently, across nearly every
@@ -147,9 +148,11 @@ it.
 
 Titles in this category: league_of_legends, dota2, counter_strike,
 starcraft2, hearthstone, rocket_league, rainbow_six_siege, overwatch,
-guilty_gear, valorant, apex_legends, fortnite, pubg, pubg_mobile,
-free_fire, mobile_legends_bb, wild_rift, teamfight_tactics, brawl_stars,
-age_of_empires_ii.
+guilty_gear, tekken, mortal_kombat, valorant, apex_legends, fortnite,
+pubg, pubg_mobile, free_fire, mobile_legends_bb, wild_rift,
+teamfight_tactics, brawl_stars, age_of_empires_ii (22 titles as of
+2026-09-09 — tekken and mortal_kombat moved here from the now-superseded
+Category B above).
 
 **The viewership clause is a related, separate axis.** The brief's full
 definition also requires viewership "flat or growing" over the qualifying
@@ -173,27 +176,39 @@ Whether `milestone_year` should eventually be gated on this clause, to
 match the brief's literal three-part definition, is an open design
 question — not decided either way.
 
-### Category B — generational-boundary mismatch (2 titles)
+### Category B — superseded 2026-09-09 by the generational-continuity policy
 
-Not the tier pattern above — a different mechanism entirely. This
-project tracks exactly one current generation per fighting-game
-franchise (`config/titles.yaml`'s own documented judgment call), but the
-hand-built table's figures describe an **earlier generation's**
-competitive scene — a different product than what `get_success_milestone`
-is actually measuring for that `title_id`. No pipeline fix or viewership
-check could ever close this gap; the two numbers simply aren't about the
-same thing.
+This category, as originally written, no longer applies. It argued
+tekken's and mortal_kombat's mismatch against the hand-built table could
+never be closed, because this project tracked only the *current*
+generation of each fighting-game franchise (`config/titles.yaml`'s
+documented judgment call at the time) while the hand-built figures
+described an earlier generation — two different products, not
+comparable. That premise itself changed on 2026-09-09: per
+`docs/system_reference.md`'s "Generational continuity" note,
+`config/titles.yaml` and `collectors/liquipedia.py` now track every
+generation of each fighting-game franchise as one continuous entity, the
+same policy `counter_strike` already used. Re-running the crawl under
+that policy moved all four fighting-game titles' pipeline milestones
+much earlier (confirmed by re-executing `reconciliation.ipynb` against
+current data, 2026-09-09):
 
-- **tekken**: the hand-built row's 2018 figure cites TWT (Tekken World
-  Tour) peak viewership and the joint 2017 founding of the CPT/TWT
-  circuits — TWT was Tekken 7's circuit. `title_id='tekken'` tracks
-  Tekken 8 (released 2024) only. Tekken 8's own pipeline milestone is
-  2025 (window starting 2024) — a much younger competitive history than
-  Tekken 7's, measured on its own terms.
-- **mortal_kombat**: the hand-built row's own source link is
-  `escharts.com/games/mkx` — Mortal Kombat **X** (2015). `title_id=
-  'mortal_kombat'` tracks Mortal Kombat 1 (released 2023) only. MK1's own
-  pipeline milestone is 2024 (window starting 2023).
+| title | milestone before | milestone after |
+|---|---|---|
+| tekken | 2025 | 2008 |
+| street_fighter | 2024 | 2008 |
+| mortal_kombat | 2024 | 2012 |
+| guilty_gear | 2022 | 2010 |
+
+tekken and mortal_kombat aren't a "different product entirely" gap
+anymore — the pipeline milestone is now *earlier* than the hand-built
+figure (2018, 2015 respectively) rather than later, the same era-relative-
+tier pattern every other title in Category A shows, not a distinct
+mechanism. Both are reclassified into Category A below. guilty_gear
+(previously in Category A already, on a smaller pre-fix gap) and
+street_fighter (Category C, no hand-built comparison exists) shifted
+earlier by the same mechanism and keep their existing category, just
+with updated numbers.
 
 ### Category C — intentionally absent from the manual table (1 title)
 
