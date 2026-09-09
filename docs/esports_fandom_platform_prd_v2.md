@@ -329,6 +329,18 @@ Designed in conversation, not started. Recorded here per §15's documentation wo
 
 **Cadence — the one place this genuinely differs from every other live collector here.** Member/online counts change slowly compared to live viewership, so hourly polling isn't needed — daily is almost certainly sufficient. Still technically unbackfillable (no historical endpoint), so it still belongs in the "one rule" family (CLAUDE.md) and should run on a schedule rather than on-demand like Track A's catalog backfill, but the actual urgency of a missed day is much lower than Twitch/YouTube/Steam's live numbers.
 
+### 9.14 CPI deflator reference table — for `docs/counter_strike_lifecycle_brief.md` §5d, not built
+
+Designed 2026-09-09, recorded per §15 the same way §9.12a/§9.13a were before being built. Needed so tournament prize-pool trends spanning an 11+ year window (2016–2026+) can be read in real, inflation-adjusted terms rather than nominal USD, which overstates growth purely from inflation over that span.
+
+**Source**: US BLS CPI-U (Consumer Price Index, All Urban Consumers, all items) — a public government statistical release, not a competitor's proprietary tracked-content site. A different category of source from the ones CLAUDE.md's ethical non-goals section names (SullyGnome, SteamDB, Esports Charts) — no scraping-prohibition or ToS concern applies here the way it does there.
+
+**Shape**: `data/reference/cpi_deflator.csv` (or similar), one row per year, from BLS's public CPI-U annual-average series. NOT a scheduled "one rule" collector — a small, static, occasionally-refreshed reference table, the same category as `collectors/kaggle_import.py`'s CSV (§9.6): fetched/updated by hand on some infrequent cadence (annually, once the prior year's average is final), not polled.
+
+**Base year**: re-based to the most recently *fully completed* calendar year each time this is refreshed (2025 as of this writing) — not pinned to a fixed distant base year — so a reader always sees figures in approximately today's money rather than an arbitrary historical year's.
+
+**Consumer**: only `docs/counter_strike_lifecycle_brief.md`'s prize-pool-by-year and hours-per-real-dollar intensity metrics (§5c/§5d there) as of this writing — but shaped as a general-purpose reference table (year → deflator), not CS-specific, so any other title's nominal-dollar series can reuse it later without a redesign.
+
 ## 10. Collector reliability & monitoring
 
 Because collector downtime is unrecoverable (§2), reliability requirements are non-negotiable:
