@@ -341,6 +341,23 @@ Needed so tournament prize-pool trends spanning an 11+ year window (2016–2026+
 
 **Consumer**: `docs/counter_strike_lifecycle_brief.md`'s prize-pool-by-year and hours-per-real-dollar intensity metrics, now computed in `notebooks/cs_growth_trajectory.ipynb` — but shaped as a general-purpose reference table (year → deflator), not CS-specific, so any other title's nominal-dollar series can reuse it later without a redesign.
 
+### 9.15 Player/roster connector — scoped 2026-09-09, per user request ("scope now, build later"), NOT built
+
+Motivated by `docs/counter_strike_lifecycle_brief.md`'s grassroots-scene questions (§9 there): is average pro age rising (talent-pipeline health)? Is the rate of unique orgs/players entering the scene falling, even controlling for fewer open-qualifier slots (divergence between the pro scene and a growing playing base)? None of this is answerable from what exists today — `tournaments.team_number` is a per-event headcount, not an identity, and there is no player or roster table in the schema at all.
+
+**Verified live 2026-09-09 that the underlying data exists on Liquipedia, at a scoped-but-real size**, before proposing a design around it:
+
+- **`Infobox player`** (a real template, checked against `s1mple`'s page): `birth_date`, `country`, `status` (Active/Retired), `years_active`, current `team`, and a `team_history` field — a nested, per-transfer sub-structure (`{{TH|date_range}}`), not a flat key-value pair like everything `parse_infobox` currently handles. Parsing it needs genuinely new code, not an extension of the existing tournament-Infobox parser.
+- **Discovery**: a `Category:Players` category exists per wiki — counterstrike's has **4,370 pages**, confirmed via `category_members()` (the same mechanism `collectors/liquipedia_grassroots.py` already uses). A full crawl at the standard 2s/request rate limit is ~2.4 hours — a real commitment, but a much smaller one than the grassroots crawl (§9.2's tier-1/2 crawl and the grassroots crawl are precedent for this pattern: on-demand, patient, resumable).
+- **`Infobox team`** (checked against Natus Vincere's page) carries org metadata (location, region, founding-adjacent fields, current staff) but — importantly — does **not** enumerate roster membership or signup/departure dates itself. That data lives on each *player's* own `team_history`, meaning an org-level "unique signups per year" metric has to be reconstructed bottom-up from every player's transfer history, not read directly off a team page.
+
+**What this would need, not yet built**:
+- New tables — `players` (`player_id`/page, `birth_date`, `country`, `status`, `current_team`, `source`, `confidence`) and `player_team_history` (`player_id`, `team`, `start_date`, `end_date`, `source`, `confidence`) — natural-key-upsertable, same discipline as `tournaments`.
+- A new parser for `team_history`'s nested `{{TH|...}}` structure — the actual new engineering work here, not the crawl itself.
+- A separate design question, **harder than the player-bio crawl and not yet scoped at all**: "entry rate normalized by qualifier count" needs per-tournament *participant lists* (which teams/players actually competed in a given event), not just player bios — Liquipedia stores this on a different page section/template than `Infobox league`, and connecting it back to `tournaments` rows is its own piece of work, larger than everything above.
+
+**Not started.** Recorded here per §15's documentation workflow so the design isn't lost between sessions, the same reason §9.12a/§9.13a/this file's own pattern exists — build only once explicitly commissioned.
+
 ## 10. Collector reliability & monitoring
 
 Because collector downtime is unrecoverable (§2), reliability requirements are non-negotiable:
