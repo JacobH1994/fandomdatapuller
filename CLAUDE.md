@@ -1,14 +1,18 @@
 # fandomdatapuller
 
 A personal research platform tracking digital-fandom metrics, built to serve
-two active research questions and designed so future ones mostly need new
+three active research questions and designed so future ones mostly need new
 queries, not new pipelines:
 `docs/esports_gauses_law_brief.md` (does competitive exclusion sort esports
-titles *within* a niche, across titles?) and `docs/counter_strike_lifecycle_brief.md`
+titles *within* a niche, across titles?), `docs/counter_strike_lifecycle_brief.md`
 (added 2026-09-09 — has a *single* title's own growth trajectory reached a
 ceiling, independent of its competitors — see that brief's §3 for why it's
-kept separate rather than folded into the first). Full spec:
-`docs/esports_fandom_platform_prd_v2.md`.
+kept separate rather than folded into the first), and
+`docs/wider_game_fandom_brief.md` (added 2026-09-09 — how do non-esports
+game fandoms behave on Twitch, starting from an esports-vs-general creator-
+insularity comparison and an anticipated GTA 6 launch as a live case study;
+the first brief whose subject isn't esports at all — see its §3 for how it
+relates to the other two). Full spec: `docs/esports_fandom_platform_prd_v2.md`.
 
 `docs/system_reference.md` describes present state (what's actually
 built, wired up, populated, or broken, read straight from the code and
@@ -61,6 +65,24 @@ release *metadata* (genres, VR flags, developer, ...) is fixed historical
 fact, re-fetchable from Valve at any time, so Track A is deliberately
 on-demand/local (mirrors `collectors/liquipedia.py`'s pattern) with no
 schedule to protect.
+
+**And to `collectors/twitch_platform_poll.py` / `twitch_platform_poll.yml`
+(PRD §9.16, built 2026-09-09)** — the platform-wide, non-esports Twitch
+collector feeding `docs/wider_game_fandom_brief.md`. Same unbackfillable
+property as `collectors/twitch_poll.py` (it's the same API), and the same
+fully-separate-file discipline as YouTube/Steam before it — imports
+`twitch_poll.py`'s auth/retry helpers but never modifies that file, and
+writes to its own `data/raw/twitch_platform/` subtree so a bug here can
+never touch the 23-title collector. Deliberately NOT a full,
+unthresholded capture of every live Twitch channel — discussed directly
+with the user (2026-09-09): permanently committing channel logins and
+freeform stream titles for every ordinary streamer platform-wide, to
+this project's *public* repo, is a materially different thing than the
+23-tracked-titles collection, and doesn't serve any research question
+here. Uses `config/twitch_platform_capture.yaml`'s own tiered threshold
+instead (re-derived from a real poll, not copied from `config/
+capture.yaml` — the two populations' viewer-count distributions turned
+out similarly shaped but not identical).
 
 ## Ethical non-goals — do not build these
 
@@ -142,7 +164,11 @@ has had from the start); the Steam current-player collector (PRD §9.12,
 `collectors/steam_poll.py`, 11 titles pre-configured in
 `config/steam_appids.yaml`) — built and already collecting real data
 locally, blocked only on `STEAM_API_KEY` being added as a GitHub Actions
-repo secret before the scheduled workflow can run. See
+repo secret before the scheduled workflow can run; the platform-wide,
+non-esports Twitch collector (PRD §9.16, `collectors/
+twitch_platform_poll.py`, built 2026-09-09 for `docs/
+wider_game_fandom_brief.md`) — built and tested locally, one real
+snapshot loaded, not yet run on its own GitHub Actions schedule. See
 `docs/milestone_reconciliation.md` and the PRD's changelog-style sections
 for the reasoning behind non-obvious calls in this area — not duplicated
 here.
@@ -165,6 +191,16 @@ python collectors/twitch_poll.py
 Trigger event-mode polling (tighter interval during a specific broadcast
 window) from the GitHub Actions UI: run the "Twitch live-viewership poll"
 workflow manually with `duration_minutes` / `interval_minutes` set.
+
+Run the platform-wide, non-esports Twitch collector locally (PRD §9.16,
+`docs/wider_game_fandom_brief.md` — same `TWITCH_CLIENT_ID`/
+`TWITCH_CLIENT_SECRET` as above; a completely separate script/config/
+workflow from `twitch_poll.py`, by design — see `collectors/
+twitch_platform_poll.py`'s own docstring):
+
+```
+python collectors/twitch_platform_poll.py
+```
 
 Run the YouTube collector locally (PRD §9.7 — needs `YOUTUBE_API_KEY` in
 `.env`, or exported in the shell; a completely separate script/config/
@@ -212,8 +248,8 @@ unless testing locally (`python collectors/steam_discovery_poll.py`,
 `etl/load_snapshots.py` run first so it has a `steam_release_cohort`
 to query).
 
-Load raw Twitch, YouTube, and Steam snapshots into `research.db` (incremental;
-add `--rebuild` to wipe and reload everything):
+Load raw Twitch, YouTube, Steam, and platform-wide-Twitch snapshots into
+`research.db` (incremental; add `--rebuild` to wipe and reload everything):
 
 ```
 python etl/load_snapshots.py

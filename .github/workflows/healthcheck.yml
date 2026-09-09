@@ -20,6 +20,12 @@ name: Collector heartbeat
 # Steam AppID isn't a curation judgment call), so the only thing
 # blocking real collection is the missing secret, and this heartbeat
 # failing is exactly how that should surface.
+#
+# Twitch platform-wide (added 2026-09-09, PRD §9.16) follows the Steam
+# block's pattern, not YouTube's — no curation gate (it needs only the
+# TWITCH_CLIENT_ID/SECRET poll.yml already has configured), so an
+# absent/stale snapshot here means a real failure, not a legitimate
+# not-yet-curated bootstrap state.
 
 on:
   schedule:
@@ -184,4 +190,45 @@ jobs:
               print(f"::warning::Latest Steam snapshot status is 'failed' — check its errors field.")
 
           print("Steam heartbeat OK.")
+          PY
+
+      - name: Check Twitch platform-wide snapshot freshness
+        env:
+          THRESHOLD_MINUTES: ${{ github.event.inputs.threshold_minutes }}
+        run: |
+          python3 - <<'PY'
+          import glob, gzip, json, os, sys
+          from datetime import datetime, timezone
+
+          threshold = int(os.environ.get("THRESHOLD_MINUTES") or "180")
+
+          files = sorted(glob.glob("data/raw/twitch_platform/**/*.json.gz", recursive=True))
+          if not files:
+              print("::error::No raw Twitch platform-wide snapshots found under data/raw/twitch_platform/ — the collector may never have run successfully.")
+              sys.exit(1)
+
+          latest = files[-1]
+          with gzip.open(latest, "rt") as f:
+              snapshot = json.load(f)
+
+          captured_at = snapshot.get("captured_at")
+          if not captured_at:
+              print(f"::error::{latest} has no captured_at field.")
+              sys.exit(1)
+
+          captured = datetime.strptime(captured_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+          now = datetime.now(timezone.utc)
+          gap_minutes = (now - captured).total_seconds() / 60
+
+          print(f"Latest Twitch platform-wide snapshot: {latest}")
+          print(f"captured_at: {captured_at} ({gap_minutes:.0f} minutes ago)")
+
+          if gap_minutes > threshold:
+              print(f"::error::Newest Twitch platform-wide snapshot is {gap_minutes:.0f} minutes old, exceeding the {threshold}-minute threshold. twitch_platform_poll.yml may be silently failing.")
+              sys.exit(1)
+
+          if snapshot.get("status") == "failed":
+              print(f"::warning::Latest Twitch platform-wide snapshot status is 'failed' — check its errors field.")
+
+          print("Twitch platform-wide heartbeat OK.")
           PY

@@ -55,6 +55,7 @@ RAW_DIR_YOUTUBE = REPO_ROOT / "data" / "raw" / "youtube"
 RAW_DIR_STEAM = REPO_ROOT / "data" / "raw" / "steam"
 RAW_DIR_STEAM_DISCOVERY = REPO_ROOT / "data" / "raw" / "steam_discovery"
 RAW_DIR_STEAM_COHORT = REPO_ROOT / "data" / "raw" / "steam_cohort"
+RAW_DIR_TWITCH_PLATFORM = REPO_ROOT / "data" / "raw" / "twitch_platform"
 STEAM_COHORT_DAILY_PHASE_DAYS = 90
 STEAM_COHORT_TRACKING_WINDOW_DAYS = 365
 REFERENCE_DIR = REPO_ROOT / "data" / "reference"
@@ -316,6 +317,80 @@ def load_one_file(conn, path: Path) -> int:
             """
             INSERT INTO collector_runs (collector, raw_file, started_at, finished_at, status, rows_written, error)
             VALUES ('twitch_poll', ?, ?, ?, ?, ?, ?)
+            ON CONFLICT (collector, raw_file) DO NOTHING
+            """,
+            (
+                rel_path,
+                snapshot.get("run_started_at"),
+                snapshot.get("run_finished_at"),
+                snapshot.get("status", "unknown"),
+                rows_written,
+                json.dumps(errors) if errors else None,
+            ),
+        )
+
+    return rows_written
+
+
+def load_one_platform_file(conn, path: Path) -> int:
+    """Loads one collectors/twitch_platform_poll.py raw snapshot (PRD
+    §9.16). Same shape as load_one_file, but grouped by game_id rather
+    than title_id, and there's no is_official_broadcast/language_mix
+    counterpart -- see platform_viewership_snapshots' own schema comment
+    for why."""
+    rel_path = str(path.relative_to(REPO_ROOT))
+    with gzip.open(path, "rt") as f:
+        snapshot = json.load(f)
+
+    rows_written = 0
+    captured_at = snapshot["captured_at"]
+
+    with conn:
+        for game_id, game_data in snapshot.get("games", {}).items():
+            game_name = game_data.get("game_name")
+
+            for stream in game_data.get("streams", []):
+                tags = stream.get("tags") or []
+                conn.execute(
+                    """
+                    INSERT INTO platform_viewership_snapshots
+                        (game_id, game_name, channel_id, channel_login, captured_at,
+                         viewer_count, stream_title, tags, language, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'twitch_api', 'verified')
+                    ON CONFLICT (channel_id, captured_at) DO NOTHING
+                    """,
+                    (
+                        game_id,
+                        game_name,
+                        stream.get("user_id"),
+                        stream.get("user_login"),
+                        captured_at,
+                        stream.get("viewer_count", 0),
+                        stream.get("title"),
+                        ",".join(tags) if tags else None,
+                        stream.get("language"),
+                    ),
+                )
+                rows_written += 1
+
+            below = game_data.get("below_threshold") or {}
+            if below.get("stream_count"):
+                conn.execute(
+                    """
+                    INSERT INTO platform_viewership_below_threshold
+                        (game_id, game_name, captured_at, stream_count, viewer_total, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, 'twitch_api', 'verified')
+                    ON CONFLICT (game_id, captured_at) DO NOTHING
+                    """,
+                    (game_id, game_name, captured_at, below["stream_count"], below.get("viewer_total", 0)),
+                )
+                rows_written += 1
+
+        errors = snapshot.get("errors") or []
+        conn.execute(
+            """
+            INSERT INTO collector_runs (collector, raw_file, started_at, finished_at, status, rows_written, error)
+            VALUES ('twitch_platform_poll', ?, ?, ?, ?, ?, ?)
             ON CONFLICT (collector, raw_file) DO NOTHING
             """,
             (
@@ -710,13 +785,30 @@ def main() -> int:
             failures_cohort += 1
             print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
 
+    loaded_platform = already_loaded_files(conn, collector="twitch_platform_poll")
+    all_files_platform = sorted(RAW_DIR_TWITCH_PLATFORM.glob("**/*.json.gz"))
+    to_load_platform = [p for p in all_files_platform if str(p.relative_to(REPO_ROOT)) not in loaded_platform]
+
+    print(f"{len(all_files_platform)} Twitch platform-wide raw files found, {len(loaded_platform)} already loaded, {len(to_load_platform)} to load")
+
+    total_rows_platform = 0
+    failures_platform = 0
+    for path in to_load_platform:
+        try:
+            rows = load_one_platform_file(conn, path)
+            total_rows_platform += rows
+        except Exception as exc:
+            failures_platform += 1
+            print(f"[error] failed to load {path}: {exc}", file=sys.stderr)
+
     conn.close()
     print(f"loaded {len(to_load) - failures}/{len(to_load)} Twitch file(s), {total_rows} row(s) written")
     print(f"loaded {len(to_load_yt) - failures_yt}/{len(to_load_yt)} YouTube file(s), {total_rows_yt} row(s) written")
     print(f"loaded {len(to_load_steam) - failures_steam}/{len(to_load_steam)} Steam file(s), {total_rows_steam} row(s) written")
     print(f"loaded {len(to_load_disc) - failures_disc}/{len(to_load_disc)} Steam discovery file(s), {total_rows_disc} row(s) written")
     print(f"loaded {len(to_load_cohort) - failures_cohort}/{len(to_load_cohort)} Steam cohort file(s), {total_rows_cohort} row(s) written")
-    return 1 if (failures or failures_yt or failures_steam or failures_disc or failures_cohort) else 0
+    print(f"loaded {len(to_load_platform) - failures_platform}/{len(to_load_platform)} Twitch platform-wide file(s), {total_rows_platform} row(s) written")
+    return 1 if (failures or failures_yt or failures_steam or failures_disc or failures_cohort or failures_platform) else 0
 
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ from etl.load_snapshots import (
     load_one_steam_file,
     load_one_steam_discovery_file,
     load_one_steam_cohort_file,
+    load_one_platform_file,
     load_reference_data,
 )
 
@@ -29,6 +30,7 @@ FIXTURE_DIR_YOUTUBE = REPO_ROOT / "data" / "raw" / "youtube" / "_test_fixtures"
 FIXTURE_DIR_STEAM = REPO_ROOT / "data" / "raw" / "steam" / "_test_fixtures"
 FIXTURE_DIR_STEAM_DISCOVERY = REPO_ROOT / "data" / "raw" / "steam_discovery" / "_test_fixtures"
 FIXTURE_DIR_STEAM_COHORT = REPO_ROOT / "data" / "raw" / "steam_cohort" / "_test_fixtures"
+FIXTURE_DIR_TWITCH_PLATFORM = REPO_ROOT / "data" / "raw" / "twitch_platform" / "_test_fixtures"
 
 
 @pytest.fixture
@@ -120,6 +122,77 @@ def test_language_mix_combines_full_detail_and_below_threshold(conn, fixture_sna
     # full-detail stream contributes en=500; below_threshold adds en=15, pt=5
     assert rows["en"] == 515
     assert rows["pt"] == 5
+
+
+@pytest.fixture
+def platform_fixture_snapshot():
+    FIXTURE_DIR_TWITCH_PLATFORM.mkdir(parents=True, exist_ok=True)
+    path = FIXTURE_DIR_TWITCH_PLATFORM / "20260101T000000Z.json.gz"
+    snapshot = {
+        "captured_at": "2026-01-01T00:00:00Z",
+        "run_started_at": "2026-01-01T00:00:00Z",
+        "run_finished_at": "2026-01-01T00:00:05Z",
+        "status": "ok",
+        "capture_policy": {"full_detail_min_viewers": 5},
+        "excluded_tracked_game_ids": ["21779"],
+        "games": {
+            "32982": {
+                "game_name": "Grand Theft Auto V",
+                "streams": [
+                    {
+                        "user_id": "999",
+                        "user_login": "somestreamer",
+                        "viewer_count": 500,
+                        "language": "en",
+                        "title": "GTA RP",
+                        "tags": ["English"],
+                    }
+                ],
+                "below_threshold": {"stream_count": 10, "viewer_total": 20},
+            }
+        },
+        "errors": [],
+    }
+    with gzip.open(path, "wt") as f:
+        json.dump(snapshot, f)
+    yield path
+    path.unlink()
+    FIXTURE_DIR_TWITCH_PLATFORM.rmdir()
+
+
+def test_platform_loading_twice_produces_no_duplicate_rows(conn, platform_fixture_snapshot):
+    first_rows = load_one_platform_file(conn, platform_fixture_snapshot)
+    assert first_rows > 0
+
+    snapshots_1 = conn.execute("SELECT COUNT(*) FROM platform_viewership_snapshots").fetchone()[0]
+    below_1 = conn.execute("SELECT COUNT(*) FROM platform_viewership_below_threshold").fetchone()[0]
+    runs_1 = conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0]
+
+    load_one_platform_file(conn, platform_fixture_snapshot)
+
+    assert conn.execute("SELECT COUNT(*) FROM platform_viewership_snapshots").fetchone()[0] == snapshots_1
+    assert conn.execute("SELECT COUNT(*) FROM platform_viewership_below_threshold").fetchone()[0] == below_1
+    assert conn.execute("SELECT COUNT(*) FROM collector_runs").fetchone()[0] == runs_1
+
+
+def test_platform_viewership_row_fields(conn, platform_fixture_snapshot):
+    load_one_platform_file(conn, platform_fixture_snapshot)
+
+    row = conn.execute(
+        "SELECT game_id, game_name, channel_id, viewer_count, tags FROM platform_viewership_snapshots"
+    ).fetchone()
+
+    assert row == ("32982", "Grand Theft Auto V", "999", 500, "English")
+
+
+def test_platform_below_threshold_row_fields(conn, platform_fixture_snapshot):
+    load_one_platform_file(conn, platform_fixture_snapshot)
+
+    row = conn.execute(
+        "SELECT game_id, stream_count, viewer_total FROM platform_viewership_below_threshold"
+    ).fetchone()
+
+    assert row == ("32982", 10, 20)
 
 
 @pytest.fixture

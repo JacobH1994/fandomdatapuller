@@ -1,0 +1,40 @@
+# Tiered capture policy for the platform-wide collector
+# (collectors/twitch_platform_poll.py) -- the non-esports counterpart to
+# config/capture.yaml. Same two tiers, but no official-channel override
+# (see that collector's own docstring for why):
+#
+#   1. viewer_count >= full_detail_min_viewers -> full detail
+#   2. below the threshold                     -> no per-stream record;
+#        folded into that game's below_threshold.viewer_total for the
+#        poll (no per-language breakdown here, unlike capture.yaml --
+#        see platform_viewership_below_threshold's own schema comment
+#        for why).
+#
+# full_detail_min_viewers was picked from a real, near-full pagination
+# pass (2026-09-09, 99,955 raw streams platform-wide before excluding the
+# 23 tracked titles' own game IDs, 76,417 remaining -- capped at
+# max_pages=1000/1,000,000 theoretical ceiling but not pagination-exhausted,
+# so this is a lower bound on the true live count, not a guess). Record-
+# count vs. viewer-total retention at each candidate threshold:
+#
+#   threshold   % of streams kept   % of total viewers retained
+#   1                     97.7%                       100.0%
+#   2                     62.2%                        98.7%   <- biggest single jump: 1-viewer streams are ~36% of all records and ~1% of viewership
+#   3                     49.5%                        97.8%
+#   5                     35.3%                        96.1%
+#   10                    21.1%                        92.8%
+#   20                    11.9%                        88.3%
+#
+# Chosen value is 2, not config/capture.yaml's 3 -- confirmed these are
+# genuinely different populations rather than assumed to share one
+# threshold: the general Twitch population's sharpest elbow sits one
+# step earlier than the 23-tracked-titles population's does. Same
+# "biggest jump" selection rule as capture.yaml, applied fresh rather
+# than copied.
+#
+# Re-derive this table (run collectors/twitch_platform_poll.py --min-viewers 1
+# with a generous --max-pages, then bucket the raw viewer_count distribution
+# it captures) if the live distribution ever looks like it's shifted
+# meaningfully from the one above.
+
+full_detail_min_viewers: 2
