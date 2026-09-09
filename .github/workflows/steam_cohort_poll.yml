@@ -66,7 +66,27 @@ jobs:
           fi
           if ! git diff --cached --quiet; then
             git commit -m "Steam cohort snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            git push
+            # Confirmed live 2026-09-09 elsewhere in this project (steam_
+            # poll.yml, steam_discovery_poll.yml): with multiple scheduled
+            # collector workflows now pushing to main on similar cadences,
+            # two can race and one gets rejected. fetch+rebase+retry is
+            # standard practice for exactly this -- safe here since every
+            # collector writes to its own distinct data/raw/<platform>/
+            # subtree, so a concurrent commit from another workflow never
+            # conflicts at the content level, only at the ref-update level.
+            attempt=1
+            until git push; do
+              if [ "$attempt" -ge 5 ]; then
+                echo "[error] push failed after 5 attempts"
+                overall_status=1
+                break
+              fi
+              echo "[warn] push attempt $attempt failed -- fetching + rebasing before retry"
+              git fetch origin main
+              git rebase origin/main
+              attempt=$((attempt + 1))
+              sleep $((attempt * 2))
+            done
           fi
 
           # research.db itself is gitignored/disposable, never committed —

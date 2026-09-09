@@ -1,7 +1,11 @@
 """Fixture-based tests for collectors/steam_poll.py's pure logic — no
 network calls, no live API key needed."""
 
-from collectors.steam_poll import parse_player_count_response
+import json
+
+import httpx
+
+from collectors.steam_poll import RunErrors, fetch_player_count, parse_player_count_response
 
 
 def test_parse_player_count_response_success():
@@ -33,3 +37,50 @@ def test_parse_player_count_response_result_not_one():
 
 def test_parse_player_count_response_empty_body():
     assert parse_player_count_response({}) is None
+
+
+def _mock_client(status_code: int, body: dict) -> httpx.Client:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(status_code, content=json.dumps(body))
+
+    return httpx.Client(transport=httpx.MockTransport(handler))
+
+
+def test_fetch_player_count_404_returns_none_without_logging_an_error():
+    # Confirmed live 2026-09-09: Steam returns a genuine HTTP 404 (body
+    # {"response":{"result":42}}) for an appid it doesn't recognize yet —
+    # routine for a pre-release title, not an anomaly. This was
+    # previously logged via errors.add and drove
+    # collectors/steam_cohort_poll.py's status to "failed" (a false
+    # alarm) whenever every currently-due cohort title happened to be
+    # pre-release.
+    errors = RunErrors()
+    client = _mock_client(404, {"response": {"result": 42}})
+
+    count = fetch_player_count(client, 12345, "fake-key", errors, "12345")
+
+    assert count is None
+    assert errors.items == []
+
+
+def test_fetch_player_count_other_4xx_still_logs_an_error():
+    # A genuine problem (e.g. bad key -> 403) must still be logged --
+    # the 404 carve-out is specific to Steam's "unrecognized appid"
+    # shape, not a blanket "ignore all 4xx" change.
+    errors = RunErrors()
+    client = _mock_client(403, {"response": {}})
+
+    count = fetch_player_count(client, 12345, "fake-key", errors, "12345")
+
+    assert count is None
+    assert len(errors.items) == 1
+
+
+def test_fetch_player_count_success_returns_count():
+    errors = RunErrors()
+    client = _mock_client(200, {"response": {"result": 1, "player_count": 500}})
+
+    count = fetch_player_count(client, 12345, "fake-key", errors, "12345")
+
+    assert count == 500
+    assert errors.items == []
