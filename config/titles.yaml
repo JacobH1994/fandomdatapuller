@@ -30,15 +30,46 @@
 #   liquipedia_wiki       Liquipedia sub-wiki slug (liquipedia.net/<slug>/api.php).
 #                         Several games can share one wiki — see liquipedia_category.
 #   liquipedia_category   Exact Liquipedia per-game "Competitions" category
-#                         name (e.g. "Tekken 8 Competitions"), verified live
-#                         against the wiki's own category membership — NOT a
-#                         title substring or a guess. Tournament discovery
-#                         intersects this category with the wiki's tier
-#                         categories (Tier 1/2, S/A-Tier, ...). null means
-#                         "no narrowing needed" — only set for the shared
-#                         fighting-game wiki, which hosts several games (and
-#                         several versions of each) under the same tier
-#                         categories with no other split available.
+#                         name(s) (e.g. "Tekken 8 Competitions"), verified
+#                         live against the wiki's own category membership —
+#                         NOT a title substring or a guess. Tournament
+#                         discovery intersects (the union of, if a list)
+#                         this category with the wiki's tier categories
+#                         (Tier 1/2, S/A-Tier, ...). null means "no
+#                         narrowing needed" — checked live 2026-09-09 for
+#                         all 18 titles this was true for at the time (see
+#                         docs/system_reference.md); re-check before
+#                         leaving a newly-added title's category null.
+#                         Only set for the shared fighting-game wiki, which
+#                         hosts several games under the same tier categories
+#                         with no other split available.
+#
+#                         A list (not a single string) is how the four
+#                         fighting-game titles below implement the
+#                         generational-continuity policy (PRD §19, decided
+#                         2026-09-09): "fighters" splits every generation of
+#                         a franchise into its OWN "<Franchise> <Version>
+#                         Competitions" category, with no unifying parent —
+#                         unlike counterstrike's dedicated wiki, which
+#                         tracks CS 1.6 through CS2 as one continuous entity
+#                         with liquipedia_category left null. Listing every
+#                         verified generation's category reconstructs that
+#                         same continuity here. A true crossover/spin-off
+#                         product (its own game, not a version of the
+#                         mainline franchise) is deliberately excluded, not
+#                         unioned in — flagged inline per title, same as
+#                         every other judgment call in this file.
+#
+#                         This is a Liquipedia/tournament-data-layer policy
+#                         only. It does NOT extend to Twitch polling:
+#                         Twitch's own category IDs are genuinely separate
+#                         per generation (confirmed: Tekken 7/8 are
+#                         different Twitch categories, unlike Counter-
+#                         Strike's single renamed-in-place category), and
+#                         historical viewership under a retired category
+#                         can't be backfilled or merged after the fact —
+#                         twitch_category_id below still tracks the current
+#                         generation only, by necessity, not by choice.
 #   genre / platform      reference tags (Phase 3 classification, PRD §18).
 #                         Claude-assisted first pass, ai_assisted_unreviewed
 #                         until a human reviews it (CLAUDE.md provenance
@@ -293,7 +324,14 @@ titles:
     twitch_category_id: "538054672"
     twitch_category_verified: true # judgment call: current-gen entry (Twitch also has separate Tekken 7 / Tekken 3 / etc. categories)
     liquipedia_wiki: fighters # shared wiki, confirmed live — "Liquipedia Fighting Games Wiki"
-    liquipedia_category: Tekken 8 Competitions # verified live 2026-09-03 (827 pages); Tekken 7 events carry a separate "Tekken 7 Competitions" category, correctly excluded
+    liquipedia_category: # generational continuity (PRD §19, 2026-09-09) — every verified Tekken-mainline generation category on the shared wiki, live-checked via action=query&list=allcategories&acprefix=Tekken
+      - Tekken 4 Competitions
+      - Tekken 5 Competitions
+      - Tekken 6 Competitions
+      - Tekken 7 Competitions
+      - Tekken 8 Competitions
+      - Tekken Tag Tournament Competitions
+      - Tekken Tag Tournament 2 Competitions
     genre: fighting
     platform: console # verified 2026-09-05, medium confidence: majors (EVO, Tekken World Tour) run offline on one TO-provided hardware standard, not fragmented platforms — one competitive pool, not cross_platform, though an explicit "console-only" rule text (unlike Mortal Kombat's) wasn't found
     is_active: true
@@ -304,7 +342,16 @@ titles:
     twitch_category_id: "55453844"
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
-    liquipedia_category: Street Fighter 6 Competitions # verified live 2026-09-03 (1,335 pages)
+    liquipedia_category: # generational continuity (PRD §19, 2026-09-09) — every verified Street Fighter-mainline generation category, live-checked 2026-09-09. Excludes "Street Fighter X Tekken Competitions": that's a genuine crossover product (its own Capcom/Bandai Namco release, not a Street Fighter version) — judgment call, flag for human review if this should instead count as in-franchise
+      - Street Fighter II Competitions
+      - Street Fighter Alpha 2 Competitions
+      - Street Fighter Alpha 3 Competitions
+      - Street Fighter III Competitions
+      - "Street Fighter III: 3rd Strike Competitions"
+      - Street Fighter IV Competitions
+      - Street Fighter V Competitions
+      - "Street Fighter V: Arcade Edition Competitions"
+      - Street Fighter 6 Competitions
     genre: fighting
     platform: console # verified 2026-09-05, medium confidence: same reasoning as tekken above — one TO-provided hardware standard at majors (Capcom Pro Tour), not a fragmented multi-platform pool
     is_active: true
@@ -315,7 +362,12 @@ titles:
     twitch_category_id: "904864974"
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
-    liquipedia_category: Mortal Kombat 1 Competitions # verified live 2026-09-03 (183 pages)
+    liquipedia_category: # generational continuity (PRD §19, 2026-09-09) — every verified Mortal Kombat-mainline generation category, live-checked 2026-09-09; "Mortal Kombat (2011)" is the informally-numbered "MK9" reboot, correctly a mainline entry not a spin-off
+      - Mortal Kombat 3 Competitions
+      - Mortal Kombat (2011) Competitions
+      - Mortal Kombat X Competitions
+      - Mortal Kombat 11 Competitions
+      - Mortal Kombat 1 Competitions
     genre: fighting
     platform: console # verified 2026-09-05, high confidence: MK1 Pro Kompetition is explicitly PS5-exclusive ("the event is only for PlayStation 5 owners" — EventHubs, Dec 2023)
     is_active: true
@@ -326,7 +378,13 @@ titles:
     twitch_category_id: "517159"
     twitch_category_verified: true # judgment call: current-gen entry
     liquipedia_wiki: fighters
-    liquipedia_category: Guilty Gear -STRIVE- Competitions # verified live 2026-09-03 (666 pages); note wiki's category capitalizes STRIVE, unlike this title's display_name
+    liquipedia_category: # generational continuity (PRD §19, 2026-09-09) — every verified Guilty Gear-mainline generation category, live-checked 2026-09-09; note wiki's category capitalizes STRIVE, unlike this title's display_name
+      - Guilty Gear XX Competitions
+      - "Guilty Gear XX Accent Core Plus R Competitions"
+      - Guilty Gear Xrd Competitions
+      - "Guilty Gear Xrd -SIGN- Competitions"
+      - "Guilty Gear Xrd -REVELATOR- Competitions"
+      - Guilty Gear -STRIVE- Competitions
     genre: fighting
     platform: pc_console # verified 2026-09-05, medium confidence: unlike the other three fighting titles, ARC World Tour has both a PS5 qualification path (PlayStation Tournaments) and a separate PC qualifier feeding the same Finals — a real dual-platform circuit, not just a single-hardware LAN standard
     is_active: true

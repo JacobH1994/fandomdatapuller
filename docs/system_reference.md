@@ -8,7 +8,7 @@ notebooks directly. Where the two disagree, this document describes what
 the code actually does and flags the divergence.
 
 Row counts, coverage figures, and "currently N rows" statements below are
-a snapshot as of 2026-09-06 and will drift — regenerate this file rather
+a snapshot as of 2026-09-09 and will drift — regenerate this file rather
 than hand-editing it (see CLAUDE.md).
 
 ## 1. Component inventory
@@ -18,13 +18,13 @@ than hand-editing it (see CLAUDE.md).
 | File | What it does | Reads | Writes |
 |---|---|---|---|
 | `twitch_poll.py` | Polls Twitch Helix `Get Streams` for every active title in `config/titles.yaml`, plus a platform-wide total; classifies each stream into official/full-detail/below-threshold tiers per `config/capture.yaml` | Twitch Helix API, `config/titles.yaml`, `config/channels.yaml`, `config/capture.yaml` | One gzipped JSON file per run under `data/raw/twitch/YYYY/MM/DD/` |
-| `youtube_poll.py` | Added 2026-09-08 (PRD §9.7). Checks curated official YouTube channels for live status; quota-aware (expensive discovery `search.list` a few times/day, cheap `videos.list` viewer-count refresh every run) — see its own docstring for the full discovery/refresh design | YouTube Data API v3 (plain API key, no OAuth), `config/titles.yaml`, `config/channels_youtube.yaml`, its own prior raw snapshot (for live-state carry-over, no separate state file) | One gzipped JSON file per run under `data/raw/youtube/YYYY/MM/DD/` |
-| `steam_poll.py` | Added 2026-09-08 (PRD §9.12). Polls `GetNumberOfCurrentPlayers` for every title in `config/steam_appids.yaml` (11 titles, pre-verified live — no discovery/curation step needed, unlike YouTube). Confirmed live: several high-traffic titles (CS2, PUBG, Apex, Tekken) silently return 0 without an API key present — the collector always sends one | Steam Web API (plain API key), `config/steam_appids.yaml` | One gzipped JSON file per run under `data/raw/steam/YYYY/MM/DD/` |
-| `steam_catalog_common.py` | Added 2026-09-08 (PRD §9.12a). Shared classification logic (`classify_app`) used by both catalog tracks below — one implementation, not two to keep in sync. Proactively rate-limits `appdetails` (1.5s/call, a conservative estimate — Valve doesn't publish one, unlike Liquipedia) | — (a library module, not run directly) | — |
-| `steam_catalog_backfill.py` (Track A) | Added 2026-09-08. One-time, on-demand, patient full-catalog historical sweep — modeled directly on `liquipedia.py` (resumable, skips already-classified `app_id`s, `--refresh` to force). Release metadata is fixed historical fact, not subject to the unbackfillable-live-data constraint, so this is NOT scheduled | `IStoreService/GetAppList` (no `if_modified_since` — full walk), `appdetails` per app | `steam_release_history` directly (no raw-file backup — same as `liquipedia.py`'s tournament writes) |
-| `steam_discovery_poll.py` (Track B, part 1) | Added 2026-09-08. Scheduled daily. Go-forward only — `if_modified_since` set to its own last raw snapshot's timestamp (2-day bootstrap on first run, reduced from an initial 7-day draft after live measurement showed ~10,300 apps in a 7-day window vs. ~2,200/day — a 7-day first run risked 4+ hours of unbatched `appdetails` calls) | `IStoreService/GetAppList` (`if_modified_since`), `appdetails` per new/updated app | One gzipped JSON file per run under `data/raw/steam_discovery/YYYY/MM/DD/` |
-| `steam_cohort_poll.py` (Track B, part 2) | Added 2026-09-08. Scheduled daily, 1 hour after discovery. The one collector in this project whose workflow rebuilds `research.db` from committed history first (`etl/load_snapshots.py`) before running, since it needs to query `steam_release_cohort` for which `app_id`s are due today — every other collector here is stateless enough not to need this | `GetNumberOfCurrentPlayers` per due `app_id` (reuses `steam_poll.py`'s own fetch function) | `steam_cohort_player_counts` + `steam_release_cohort` scheduling fields, directly in `research.db`; also a raw file under `data/raw/steam_cohort/YYYY/MM/DD/` for reproducibility |
-| `liquipedia.py` | Crawls tournament pages from each title's Liquipedia wiki (MediaWiki API, `action=query`), parses the `Infobox league` template for tier/prize pool/dates/country | Liquipedia MediaWiki API, `config/titles.yaml`, local wikitext cache (`data/cache/liquipedia/`) | `tournaments` table directly (no raw-file backup) |
+| `youtube_poll.py` | PRD §9.7. Checks curated official YouTube channels for live status; quota-aware (expensive discovery `search.list` a few times/day, cheap `videos.list` viewer-count refresh every run) | YouTube Data API v3 (plain API key, no OAuth), `config/titles.yaml`, `config/channels_youtube.yaml`, its own prior raw snapshot (for live-state carry-over, no separate state file) | One gzipped JSON file per run under `data/raw/youtube/YYYY/MM/DD/` |
+| `steam_poll.py` | PRD §9.12. Polls `GetNumberOfCurrentPlayers` for every title in `config/steam_appids.yaml` (11 titles, pre-verified live). Special-cases HTTP 404 (`{"response":{"result":42}}`) as "unrecognized appid" — returns `None` silently, no error logged — distinct from other 4xx codes (fixed 2026-09-09, was previously misread as a real error and drove `steam_cohort_poll.py`'s status to a false "failed" whenever every due cohort title happened to be pre-release) | Steam Web API (plain API key), `config/steam_appids.yaml` | One gzipped JSON file per run under `data/raw/steam/YYYY/MM/DD/` |
+| `steam_catalog_common.py` | PRD §9.12a. Shared classification logic (`classify_app`) used by both catalog tracks below. Proactively rate-limits `appdetails` (1.5s/call) | — (a library module, not run directly) | — |
+| `steam_catalog_backfill.py` (Track A) | One-time, on-demand, patient full-catalog historical sweep — modeled on `liquipedia.py` (resumable, skips already-classified `app_id`s, `--refresh` to force). Release metadata is fixed historical fact, so NOT scheduled. **Running now** (started 2026-09-08, in progress — see §5) | `IStoreService/GetAppList` (no `if_modified_since` — full walk), `appdetails` per app | `steam_release_history` directly (no raw-file backup — closed by `data/reference/steam_release_history.jsonl`, see below) |
+| `steam_discovery_poll.py` (Track B, part 1) | Scheduled daily, 03:00 UTC. Go-forward only — `if_modified_since` set to its own last raw snapshot's timestamp (2-day bootstrap on first run) | `IStoreService/GetAppList` (`if_modified_since`), `appdetails` per new/updated app | One gzipped JSON file per run under `data/raw/steam_discovery/YYYY/MM/DD/` |
+| `steam_cohort_poll.py` (Track B, part 2) | Scheduled daily, 04:00 UTC. The one collector whose workflow rebuilds `research.db` from committed history first (`etl/load_snapshots.py`), since it needs to query `steam_release_cohort` for which `app_id`s are due today | `GetNumberOfCurrentPlayers` per due `app_id` (reuses `steam_poll.py`'s own fetch function) | `steam_cohort_player_counts` + `steam_release_cohort` scheduling fields, directly in `research.db`; also a raw file under `data/raw/steam_cohort/YYYY/MM/DD/` |
+| `liquipedia.py` | Crawls tournament pages from each title's Liquipedia wiki (MediaWiki API, `action=query`), parses the `Infobox league` template for tier/prize pool/dates/country. `liquipedia_category` (the per-title narrowing filter for a wiki shared by several games) now accepts a **list** of categories, unioned before being intersected against the wiki's tier categories — added 2026-09-09 for the generational-continuity policy (see §5) | Liquipedia MediaWiki API, `config/titles.yaml`, local wikitext cache (`data/cache/liquipedia/`) | `tournaments` table directly (no raw-file backup — closed by `data/reference/tournaments.jsonl`) |
 | `kaggle_import.py` | One-time/on-demand import of a manually-downloaded Kaggle CSV ("Evolution of Top Games on Twitch") for pre-2026 category-wide monthly viewership | A local CSV under `data/kaggle/` (gitignored, not committed) | `monthly_category_history` |
 
 ### ETL (`etl/`)
@@ -32,18 +32,18 @@ than hand-editing it (see CLAUDE.md).
 | File | What it does | Reads | Writes |
 |---|---|---|---|
 | `db.py` | Shared connection helper — applies `schema.sql` on every `get_connection()` call, seeds `titles`/`title_aliases`/genre/platform from `config/titles.yaml` | `schema.sql`, `config/titles.yaml` (via callers) | `research.db` schema, `titles`, `title_aliases`, `genres`, `platforms` |
-| `schema.sql` | Source of truth for the SQLite schema (`CREATE TABLE IF NOT EXISTS` — see §7's note on why this doesn't handle migrations) | — | — |
-| `load_snapshots.py` | Loads raw Twitch snapshot files into `viewership_snapshots`/`language_mix_snapshots`/`platform_totals`; raw YouTube files into `viewership_snapshots`/`channels` (`platform='youtube'`); raw Steam files into `steam_player_counts`; also loads `data/reference/*.jsonl` (tournaments + aliases) on every run | `data/raw/{twitch,youtube,steam}/**/*.json.gz`, `data/reference/*.jsonl` | `viewership_snapshots`, `language_mix_snapshots`, `platform_totals`, `channels`, `steam_player_counts`, `tournaments`, `tournament_aliases`, `tournament_alias_llm_checked`, `collector_runs` |
-| `generate_tournament_aliases.py` | Derives a `series_key` per tier-1/2 tournament (rule-based, from `liquipedia_page`), then generates rule-based aliases (full name / name-minus-year / acronym) and an optional LLM pass for colloquial nicknames | `tournaments` | `tournaments.series_key`, `tournament_aliases`, `collector_runs` |
-| `export_reference_data.py` | Dumps `tournaments`, `tournament_aliases`, and `tournament_alias_llm_checked` to committed JSONL so `research.db` is rebuildable from git alone | `tournaments`, `tournament_aliases`, `tournament_alias_llm_checked` | `data/reference/*.jsonl` |
-| `compute_monthly_category_totals.py` | Added 2026-09-07. Time-weighted `hours_watched` per (title, month) from `language_mix_snapshots` (the true category-wide total, including below-threshold viewers) — real inter-poll time deltas, not an assumed cadence, since polling turned out sparse/irregular | `language_mix_snapshots` | `monthly_category_history` (`source='own_collector'`) — not covered by `export_reference_data.py`, vulnerable to `--rebuild` |
+| `schema.sql` | Source of truth for the SQLite schema (`CREATE TABLE IF NOT EXISTS` — 19 tables; see §7's note on why this doesn't handle migrations) | — | — |
+| `load_snapshots.py` | Loads raw Twitch/YouTube/Steam/Steam-discovery/Steam-cohort snapshot files into their respective tables; also loads `data/reference/*.jsonl` (tournaments, tournament_aliases, tournament_alias_llm_checked, steam_release_history) on every run | `data/raw/{twitch,youtube,steam,steam_discovery,steam_cohort}/**/*.json.gz`, `data/reference/*.jsonl` | `viewership_snapshots`, `language_mix_snapshots`, `platform_totals`, `channels`, `steam_player_counts`, `steam_release_cohort`, `steam_cohort_player_counts`, `tournaments`, `tournament_aliases`, `tournament_alias_llm_checked`, `steam_release_history`, `collector_runs` |
+| `generate_tournament_aliases.py` | Derives a `series_key` per tier-1/2 tournament (rule-based, from `liquipedia_page`), then generates rule-based aliases (full name / name-minus-year / acronym, Unicode-aware since 2026-09-08) and an optional LLM pass for colloquial nicknames, tracked via `tournament_alias_llm_checked` (separate from alias presence, so a `--skip-llm` run doesn't permanently block the LLM pass from ever running) | `tournaments` | `tournaments.series_key`, `tournament_aliases`, `tournament_alias_llm_checked`, `collector_runs` |
+| `export_reference_data.py` | Dumps `tournaments`, `tournament_aliases`, `tournament_alias_llm_checked`, and (added 2026-09-08) `steam_release_history` to committed JSONL so `research.db` is rebuildable from git alone | `tournaments`, `tournament_aliases`, `tournament_alias_llm_checked`, `steam_release_history` | `data/reference/*.jsonl` |
+| `compute_monthly_category_totals.py` | Time-weighted `hours_watched` per (title, month) from `language_mix_snapshots` (real inter-poll time deltas, not an assumed cadence) | `language_mix_snapshots` | `monthly_category_history` (`source='own_collector'`) — not covered by `export_reference_data.py`, vulnerable to `--rebuild` (see §5 — this has actually happened again since the last snapshot) |
 | `classify_broadcast_tier.py` | Sets `viewership_snapshots.broadcast_tier` (`primary_official`/`detected_costream`/`general`) via the three-condition detection (title match, date-window match against `tournaments`, word-boundary alias match against `tournament_aliases`) | `viewership_snapshots`, `tournaments`, `tournament_aliases` | `viewership_snapshots.broadcast_tier` (+ confidence, matched_tournament_id, matched_alias), `collector_runs` |
 
 ### Analysis (`analysis/`)
 
 | File | What it does |
 |---|---|
-| `metrics.py` | `get_success_milestone()` — the brief's success-milestone definition (2 consecutive years of tier-1/2 competition across 2+ continents), plus `_normalize_tier()` (S/A-Tier → "1"/"2" label normalization) and `_viewership_trend()` (flat-or-growing check, falling back to `monthly_category_history` when `viewership_snapshots` has no coverage for the window). No other metric functions exist yet (`get_niche_share`, `get_concentration`, `get_official_broadcast_share`, `get_primary_region` are referenced only in the module docstring as not-yet-built). |
+| `metrics.py` | `get_success_milestone()` — the brief's success-milestone definition (2 consecutive years of tier-1/2 competition across 2+ continents). `get_championship_windows()` — added 2026-09-08: the single highest-non-null-prize-pool tier-1 tournament per (title, calendar year), objective and name-matching-free. `get_concentration()` — added 2026-09-08: HHI + top-3 share over a list of raw values (computes shares internally). Plus `_normalize_tier()`, `_qualifying_window_scale()`, `_viewership_trend()` (with `monthly_category_history` fallback), `_sort_key_desc()` (tie-break helper), `_trend_result()`. `get_niche_share()`, `get_official_broadcast_share()`, `get_primary_region()` are still not built (Phase 4 remainder). |
 
 ### Notebooks (`notebooks/`)
 
@@ -51,9 +51,14 @@ than hand-editing it (see CLAUDE.md).
 |---|---|---|
 | `reconciliation.ipynb` | Compares `get_success_milestone`'s pipeline output against the hand-built `data/manual/milestone_table.csv`, flags every disagreement | `tournaments`, `viewership_snapshots`, `monthly_category_history`, `data/manual/milestone_table.csv` |
 | `category_trajectories.ipynb` | Plots every title's monthly category-wide viewership (2016 onward) against its milestone window | `monthly_category_history` |
-| `niche_membership.ipynb` | Tests whether genre×platform "niche cells" share an audience: language-mix vs. tournament-region agreement, and pairwise audience similarity within same-cell titles (three metrics: cosine, cosine excluding English, Jensen-Shannon distance) | `language_mix_snapshots`, `tournaments`, `titles` |
-| `official_channel_candidates.ipynb` | Generates draft official-channel candidates for `config/channels.yaml` (currently empty) from viewership patterns, ranked by in-tournament-window streaming behavior | `viewership_snapshots`, `tournaments` |
-| `creator_crossover.ipynb` | Finds channels that stream above-threshold for more than one tracked title; computes directional overlap ratios and chance-adjusted enrichment (hypergeometric test) per title pair | `viewership_snapshots` |
+| `niche_membership.ipynb` | Tests whether genre×platform "niche cells" share an audience: language-mix vs. tournament-region agreement, and pairwise audience similarity within same-cell titles | `language_mix_snapshots`, `tournaments`, `titles` |
+| `official_channel_candidates.ipynb` | Generates draft official-channel candidates for `config/channels.yaml` (currently empty) from viewership patterns | `viewership_snapshots`, `tournaments` |
+| `creator_crossover.ipynb` | Finds channels that stream above-threshold for more than one tracked title; directional overlap ratios and hypergeometric-test enrichment per title pair | `viewership_snapshots` |
+| `esports_share_of_twitch.ipynb` | Tests the brief's motivating claim (esports' share of overall Twitch attention has declined) against the Kaggle dataset — cohort comparison, extensive/intensive margin, publisher grouping, per-title breakdown | `monthly_category_history` (Kaggle side) |
+| `niche_stacked_area.ipynb` | Per genre×platform niche cell (2+ tracked titles): absolute-hours stack (is the niche growing) and 100%-normalized stack (is competitive balance shifting within it) | `monthly_category_history`, `viewership_snapshots` |
+| `present_day_snapshot.ipynb` | Point-in-time cross-section from this project's own collected data only (2026-08-31–present), not a time series; companion to the two above | `viewership_snapshots`, `language_mix_snapshots` |
+
+`championship_concentration.ipynb` (within-title and cross-title concentration over `get_championship_windows`, planned per PRD §9.3a) is **not built** — paused on Esports Charts access, confirmed blocked (see §6).
 
 ### Scripts (`scripts/`)
 
@@ -65,16 +70,18 @@ than hand-editing it (see CLAUDE.md).
 
 | File | Purpose | Current state |
 |---|---|---|
-| `titles.yaml` | Registry of 23 tracked titles: Twitch category ID, Liquipedia wiki/category, genre/platform tags, active flag | 23 titles, all `is_active: true`, all Twitch category IDs marked `twitch_category_verified: true` |
+| `titles.yaml` | Registry of 23 tracked titles: Twitch category ID, Liquipedia wiki/category, genre/platform tags, active flag | 23 titles, all `is_active: true`, all Twitch category IDs `twitch_category_verified: true`. `liquipedia_category` is a **list** for the four fighting-game titles as of 2026-09-09 (generational continuity — see §5), a single string for `age_of_empires_ii`, and `null` for the other 18, live-reverified clean 2026-09-09 (see §5/§6) |
 | `capture.yaml` | Tiered capture policy (`full_detail_min_viewers: 3`) | Static, one value |
-| `channels.yaml` | Official broadcast channel logins per title, consumed by `twitch_poll.py` at capture time | **Empty** (`channels: {}`) — nothing curated yet |
-| `channels_youtube.yaml` | Added 2026-09-08. Official YouTube channel IDs per title, consumed by `youtube_poll.py`. Deliberately a separate file, not a platform-keyed extension of `channels.yaml` — see that collector's docstring | **Empty** (`channels: {}`) — nothing curated yet; `youtube_poll.py` runs as a documented no-op until this is populated |
-| `steam_appids.yaml` | Added 2026-09-08. Steam AppID per title, consumed by `steam_poll.py` | **Pre-populated**, 11 titles, all live-verified 2026-09-08 — no curation needed, unlike the YouTube/Twitch channel files (an AppID is an objective fact, not a judgment call) |
-| `channels.draft.yaml` | Machine-generated candidates from `official_channel_candidates.ipynb`, for manual review | Populated (85 candidates across 12 titles as of last run), not yet promoted into `channels.yaml` |
+| `channels.yaml` | Official Twitch broadcast channel **logins** (lowercase, not display names or URLs) per title, consumed by `twitch_poll.py` at capture time | **Empty** (`channels: {}`) — nothing curated yet |
+| `channels_youtube.yaml` | Official YouTube channel **IDs** (the stable `UC...`, 24-character form — not the `@handle`) per title, consumed by `youtube_poll.py` | **Empty** (`channels: {}`) — nothing curated yet; `youtube_poll.py` runs as a documented no-op until this is populated |
+| `steam_appids.yaml` | Steam AppID per title, consumed by `steam_poll.py` | Pre-populated, 11 titles, live-verified — no curation needed (an AppID is an objective fact, not a judgment call) |
+| `channels.draft.yaml` | Machine-generated candidates from `official_channel_candidates.ipynb`, for manual review before promotion into `channels.yaml` | Populated (85 candidates across 12 titles as of last run), not yet promoted |
+
+**Neither `channels.yaml` nor `channels_youtube.yaml` accepts a channel URL** — both files' own header comments spell out the exact match key: a Twitch login (e.g. `esl_csgo`, not `https://twitch.tv/ESL_CSGO` and not the display name `ESL_CSGO`) for the former, a YouTube channel ID (e.g. `UCz3IJEo6bU3-Sl6PU5S9tqQ`) for the latter. Populating either is a plain YAML edit under the existing `channels:` key, keyed by `title_id` from `titles.yaml` — no code change, no script to run afterward (the next collector run just picks it up).
 
 ### Tests (`tests/`)
 
-62 tests across 7 files: `test_etl_idempotency.py` (re-loading the same raw Twitch, YouTube, or Steam file produces no duplicates), `test_liquipedia.py` (`parse_infobox` fixtures), `test_metrics.py` (`get_success_milestone` fixtures), `test_generate_tournament_aliases.py` (series_key derivation, rule-based alias generation), `test_classify_broadcast_tier.py` (word-boundary + case-sensitive alias matching), `test_youtube_poll.py` (live/ended/missing video-response parsing, prior-live-state extraction), `test_steam_poll.py` (added 2026-09-08: player-count response parsing, distinguishing a real 0 from an API-level failure). All fixture-based — no live network calls, no dependency on `research.db`'s actual contents.
+95 tests across 8 files: `test_etl_idempotency.py` (re-loading the same raw file produces no duplicates), `test_liquipedia.py` (`parse_infobox` fixtures), `test_metrics.py` (`get_success_milestone`, `get_championship_windows`, `get_concentration` fixtures), `test_generate_tournament_aliases.py` (series_key derivation, Unicode-aware rule-based alias generation), `test_classify_broadcast_tier.py` (word-boundary + case-sensitive alias matching), `test_youtube_poll.py` (live/ended/missing video-response parsing), `test_steam_poll.py` (player-count response parsing, the 404-vs-error distinction), `test_steam_catalog_common.py` (`classify_app` fixtures). All fixture-based — no live network calls, no dependency on `research.db`'s actual contents.
 
 ### Manual data (`data/manual/`)
 
@@ -83,75 +90,84 @@ than hand-editing it (see CLAUDE.md).
 ## 2. Data flow and dependency order
 
 ```
-Twitch Helix API                    Liquipedia MediaWiki API
-      |                                      |
-      v                                      v
-collectors/twitch_poll.py          collectors/liquipedia.py
-      |                                      |
-      v                                      v
-data/raw/twitch/*.json.gz          tournaments (research.db, direct write,
-      |                             no raw-file backup)
-      v                                      |
-etl/load_snapshots.py <---------------------+ (also loads data/reference/*.jsonl)
-      |
-      +--> viewership_snapshots, language_mix_snapshots, platform_totals
-      |
-      v
-etl/generate_tournament_aliases.py  (reads tournaments, needs it populated first)
-      |
-      +--> tournaments.series_key, tournament_aliases
-      |
-      v
-etl/export_reference_data.py  (reads tournaments + tournament_aliases)
-      |
-      +--> data/reference/*.jsonl  (committed — closes the load_snapshots.py
-      |     rebuild loop above)
-      v
-etl/classify_broadcast_tier.py  (needs viewership_snapshots AND
-      |                          tournaments/tournament_aliases populated)
-      +--> viewership_snapshots.broadcast_tier
+Twitch Helix API      YouTube Data API      Steam Web API          Liquipedia MediaWiki API
+      |                      |                     |                        |
+      v                      v                     v                        v
+twitch_poll.py        youtube_poll.py        steam_poll.py            liquipedia.py
+      |                      |                     |                        |
+      v                      v                     v                        v
+data/raw/twitch/*     data/raw/youtube/*     data/raw/steam/*         tournaments (direct write,
+                                                                       no raw-file backup)
+      |                      |                     |                        |
+      +----------------------+---------------------+                        |
+                             |                                               |
+                             v                                               v
+                    etl/load_snapshots.py  <----------------------------------+ (also loads data/reference/*.jsonl)
+                             |
+                             +--> viewership_snapshots, language_mix_snapshots, platform_totals,
+                             |    channels, steam_player_counts, steam_release_cohort,
+                             |    steam_cohort_player_counts
+                             v
+              etl/generate_tournament_aliases.py  (reads tournaments, needs it populated first)
+                             |
+                             +--> tournaments.series_key, tournament_aliases
+                             v
+              etl/export_reference_data.py  (reads tournaments + tournament_aliases + steam_release_history)
+                             |
+                             +--> data/reference/*.jsonl  (committed — closes the load_snapshots.py rebuild loop)
+                             v
+              etl/classify_broadcast_tier.py  (needs viewership_snapshots AND tournaments/tournament_aliases)
+                             +--> viewership_snapshots.broadcast_tier
 
 collectors/kaggle_import.py  (independent one-time path)
-      |
-      +--> monthly_category_history  (NOT covered by data/reference/'s
-                                       export — see §5)
+      +--> monthly_category_history  (NOT covered by data/reference/'s export — see §5)
+
+collectors/steam_catalog_backfill.py  (Track A, independent one-time/on-demand path)
+      +--> steam_release_history  (covered by data/reference/steam_release_history.jsonl since 2026-09-08)
+
+collectors/steam_discovery_poll.py --> data/raw/steam_discovery/*  --> (via load_snapshots.py) steam_release_cohort
+collectors/steam_cohort_poll.py    --> data/raw/steam_cohort/*     --> (via load_snapshots.py) steam_cohort_player_counts
 ```
 
 **Hard ordering constraints**:
 1. `load_snapshots.py` before `generate_tournament_aliases.py` before `export_reference_data.py` before `classify_broadcast_tier.py` — each reads what the previous step wrote. This is the exact order `scripts/local_refresh.sh` runs them in.
 2. `collectors/liquipedia.py` must run (or `data/reference/*.jsonl` must already be loaded) before `generate_tournament_aliases.py` — it operates on `tournaments`, which only `liquipedia.py` or a reference-data reload populates.
-3. `classify_broadcast_tier.py` degrades gracefully, not silently wrong, when run before aliases exist: a tournament with no `series_key` (not tier-1/2, or `generate_tournament_aliases.py` hasn't run) simply produces no co-stream candidates for that tournament — rows fall through to `general`.
-4. `kaggle_import.py` has no ordering dependency on anything else — it writes to a table nothing else reads except `analysis/metrics.py`'s `_viewership_trend()` fallback and `category_trajectories.ipynb`.
-5. `official_channel_candidates.ipynb` (step 3 of `local_refresh.sh`) only needs `viewership_snapshots` and `tournaments` — it doesn't depend on aliases or classification.
+3. `classify_broadcast_tier.py` degrades gracefully, not silently wrong, when run before aliases exist: a tournament with no `series_key` simply produces no co-stream candidates for that tournament — rows fall through to `general`.
+4. `kaggle_import.py` has no ordering dependency on anything else.
+5. `steam_cohort_poll.py`'s workflow runs `load_snapshots.py` first, unlike every other collector's workflow, since it needs to query `steam_release_cohort` (populated by `steam_discovery_poll.py`'s own committed raw files) for which `app_id`s are due.
+6. `official_channel_candidates.ipynb` (step 3 of `local_refresh.sh`) only needs `viewership_snapshots` and `tournaments`.
 
 ## 3. Schema as built
 
-`etl/schema.sql` defines 15 tables via `CREATE TABLE IF NOT EXISTS`. Row counts below are from the local `research.db` as of 2026-09-06.
+`etl/schema.sql` defines 19 tables via `CREATE TABLE IF NOT EXISTS`. Row counts below are from the local `research.db` as of 2026-09-09; the Steam catalog backfill (Track A) is actively running as this snapshot is taken, so `steam_release_history` and its `fetched_at` timestamps will already be higher by the time this is read.
 
 | Table | Rows | Status |
 |---|---:|---|
 | `titles` | 23 | Populated |
-| `title_aliases` | 23 | Populated (one row per title, seeded from `config/titles.yaml`) |
-| `genres` | 10 | Populated (reference table, values seeded as they appear in `config/titles.yaml`) |
-| `platforms` | 4 | Populated (`pc`, `mobile`, `console`, `pc_console`) |
-| `tournaments` | 19,560 | Populated. `series_key` set for 19,551 (tier-1/2 only, by design) |
-| `tournament_aliases` | 7,050 | Populated (rule-based + a partial LLM pass, 550/2,576 series checked as of this snapshot) |
-| `viewership_snapshots` | 309,211 | Populated, all `platform='twitch'` currently (column added 2026-09-08 for the YouTube collector; not yet any YouTube rows — see §5). `is_official_broadcast=1` for **0** rows (see §5 — `channels.yaml` is empty) |
-| `language_mix_snapshots` | 13,734 | Populated |
-| `platform_totals` | 2 | Was 1 through 2026-09-06 (see §5 — fixed 2026-09-07), now growing hourly |
-| `monthly_category_history` | 1,690 | Populated: 1,644 `kaggle_import` (2016-2024) + 46 `own_collector` (2026-present, via `etl/compute_monthly_category_totals.py`) |
-| `channels` | 0 | Written to by `youtube_poll.py`'s ETL loader as of 2026-09-08, but `config/channels_youtube.yaml` is empty so nothing has landed yet. `config/channels.yaml`'s Twitch channels are still never synced here — a separate, pre-existing gap this didn't close, see §5 |
-| `steam_player_counts` | 11 | Added 2026-09-08 (PRD §9.12). Populated with one real snapshot collected during local testing — all 11 configured titles succeeded |
+| `title_aliases` | 23 | Populated |
+| `genres` | 10 | Populated |
+| `platforms` | 4 | Populated |
+| `tournaments` | 19,655+ | Populated, growing — the four fighting-game titles' generational-continuity re-crawl (§5) is in progress as this snapshot is taken. `series_key` set for 19,551 (tier-1/2 only, by design) as of last count |
+| `tournament_aliases` | 7,050 | Populated: 6,812 `rule_based` + 238 `ai_assisted` (the LLM colloquial-nickname pass has run partially — `ANTHROPIC_API_KEY` was available for at least one `--with-llm-aliases` run) |
+| `viewership_snapshots` | 359,703 | Populated, all `platform='twitch'` — no YouTube rows yet (`config/channels_youtube.yaml` still empty). `is_official_broadcast=1` for **0** rows — `config/channels.yaml` is empty |
+| `language_mix_snapshots` | 17,702 | Populated |
+| `platform_totals` | 7 | Growing hourly since the 2026-09-07 fix (was silently skipped on every scheduled run before that — see §5) |
+| `monthly_category_history` | **0** | **Regressed to empty** since the 2026-09-06 snapshot documented 1,690 rows — an `etl/load_snapshots.py --rebuild` has evidently run again without this table's data being re-imported first. Not covered by `data/reference/`'s export (documented risk, now realized a second time). Fully recoverable: `data/kaggle/Twitch_game_data.csv` is still present locally, so re-running `python collectors/kaggle_import.py --input data/kaggle/Twitch_game_data.csv` then `python etl/compute_monthly_category_totals.py` restores both sides — not yet done as of this snapshot |
+| `channels` | 0 | Written to by `youtube_poll.py`'s ETL loader, but `config/channels_youtube.yaml` is empty so nothing has landed. `config/channels.yaml`'s Twitch channels are still never synced here — a separate, pre-existing gap |
+| `steam_player_counts` | 33 | Growing hourly — `steam_poll.yml` has been running successfully on schedule since `STEAM_API_KEY` was added as a repo secret (2026-09-08) |
+| `steam_release_history` | 5,997+ (rising) | Track A backfill actively running in the background as this snapshot is taken — expected to take 1-2 weeks of intermittent progress across the full ~185,000-app catalog. Covered by `data/reference/steam_release_history.jsonl` |
+| `steam_release_cohort` | 23 | Populated by `steam_discovery_poll.py`'s first scheduled run |
+| `steam_cohort_player_counts` | 1 | Populated by `steam_cohort_poll.py`'s first scheduled run; most due `app_id`s on any given day are still pre-release (genuine Steam 404s, not errors — see §1) |
 | `community_signals` | 0 | Schema only (Phase 5, not built) |
 | `demographic_snapshots` | 0 | Schema only (Phase 5, not built) |
 | `failed_challengers` | 0 | Schema only (Phase 5, not built) |
-| `collector_runs` | 41 | Populated (40 `twitch_poll` runs, 1 `classify_broadcast_tier` run; `liquipedia.py` and `generate_tournament_aliases.py` also log here but this DB's rows predate/postdate individual reruns inconsistently — check `collector` column, not row count, for a given script's history) |
+| `collector_runs` | 57+ | Populated across `twitch_poll`, `steam_poll`, `steam_discovery_poll`, `steam_cohort_poll` |
 
-Key columns worth noting as-built (not necessarily as originally specified):
-- `tournaments.tier` is the raw Liquipedia field value — a plain digit string ("1", "2") on most wikis, but a literal label ("S-Tier", "A-Tier", "A") on `counter_strike`, `valorant`, and some `age_of_empires_ii` pages. Nothing in the schema normalizes this; `analysis/metrics.py:_normalize_tier()` and `etl/generate_tournament_aliases.py` both do it at query time, independently — there is no canonical normalized column.
-- `tournament_aliases` keys on `(title_id, series_key)`, not `tournament_id` — an alias identifies a recurring series, not one edition (see `etl/generate_tournament_aliases.py`'s docstring for the full derivation).
+Key columns worth noting as-built:
+- `tournaments.tier` is the raw Liquipedia field value — a plain digit string ("1", "2") on most wikis, but a literal label ("S-Tier", "A-Tier") on `counter_strike`, `valorant`, and some `age_of_empires_ii` pages. `analysis/metrics.py:_normalize_tier()` and `etl/generate_tournament_aliases.py` both normalize this at query time, independently — no canonical normalized column.
+- `tournament_aliases` keys on `(title_id, series_key)`, not `tournament_id`.
 - `viewership_snapshots.tags` is a comma-joined string, not a normalized child table.
-- `titles.genre_confidence`/`platform_confidence` are `ai_assisted_unreviewed` for all 23 titles — none have been promoted to `verified` by human review.
+- `titles.genre_confidence`/`platform_confidence` are `ai_assisted_unreviewed` for all 23 titles — none promoted to `verified`.
 
 ## 4. Operational
 
@@ -159,6 +175,9 @@ Key columns worth noting as-built (not necessarily as originally specified):
 ```
 pip install -r requirements.txt
 python collectors/twitch_poll.py                    # needs TWITCH_CLIENT_ID/SECRET
+python collectors/youtube_poll.py                   # needs YOUTUBE_API_KEY
+python collectors/steam_poll.py                      # needs STEAM_API_KEY
+python collectors/steam_catalog_backfill.py           # Track A, one-time/on-demand
 python collectors/liquipedia.py [--titles a,b] [--refresh]
 python etl/load_snapshots.py [--rebuild]
 python etl/generate_tournament_aliases.py [--skip-llm] [--max-llm-calls N]
@@ -169,55 +188,60 @@ scripts/local_refresh.sh [--with-crawl] [--with-llm-aliases]
 pytest
 ```
 
-`scripts/local_refresh.sh` runs steps 2–6 of the pipeline above (raw-snapshot loading through broadcast-tier classification) in fixed order; the Liquipedia crawl (step 1) and LLM-derived aliases are both opt-in flags, not defaults, since both cost time/money the other steps don't.
+`scripts/local_refresh.sh` runs the raw-snapshot-loading-through-broadcast-tier-classification steps in fixed order; the Liquipedia crawl and LLM-derived aliases are both opt-in flags, not defaults.
 
 **GitHub Actions** (`.github/workflows/`):
 
 | Workflow | Trigger | What it does | Secrets needed |
 |---|---|---|---|
-| `poll.yml` | `cron: "0 * * * *"` (hourly) + manual dispatch | Runs `collectors/twitch_poll.py`, commits+pushes any new raw snapshot file directly from the runner | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` |
-| `youtube_poll.yml` | Added 2026-09-08. `cron: "0 * * * *"` (hourly) + manual dispatch | Runs `collectors/youtube_poll.py`, commits+pushes any new raw snapshot file. Currently a no-op every run — `config/channels_youtube.yaml` is empty | `YOUTUBE_API_KEY` (now set as a repo secret; still a no-op until channels are curated) |
-| `steam_poll.yml` | Added 2026-09-08. `cron: "0 * * * *"` (hourly) + manual dispatch | Runs `collectors/steam_poll.py`, commits+pushes any new raw snapshot file | `STEAM_API_KEY` (not yet added as a repo secret — this workflow will fail every run until it is, expected and by design, see `healthcheck.yml`) |
-| `healthcheck.yml` | `cron: "0 12 * * *"` (daily) + manual dispatch | Fails loudly (→ email to repo owner) if the newest committed raw snapshot for any of the three collectors is older than a threshold (default 180 min) — one check per platform, added incrementally as each collector was built. The YouTube check is gated on `config/channels_youtube.yaml` actually having channels (an intentionally-idle collector shouldn't page anyone); Twitch's and Steam's are not, since both are expected to always be running once their secret exists | None (reads committed files only) |
+| `poll.yml` | `cron: "0 * * * *"` (hourly) + manual dispatch | Runs `collectors/twitch_poll.py`, commits+pushes any new raw snapshot file. Uses a reusable `push_with_retry()` bash function (fetch+rebase+retry, up to 5 attempts) since event-mode can push multiple times per run — added 2026-09-09 after a real lost-commit incident | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` |
+| `youtube_poll.yml` | `cron: "0 * * * *"` (hourly) + manual dispatch | Runs `collectors/youtube_poll.py`, commits+pushes. Currently a no-op every run — `config/channels_youtube.yaml` is empty. Same fetch+rebase+retry push logic | `YOUTUBE_API_KEY` (repo secret, set) |
+| `steam_poll.yml` | `cron: "0 * * * *"` (hourly) + manual dispatch | Runs `collectors/steam_poll.py`, commits+pushes. Running successfully on schedule as of this snapshot. Same fetch+rebase+retry push logic (added 2026-09-08 after a real lost-commit incident) | `STEAM_API_KEY` (repo secret, set 2026-09-08) |
+| `steam_discovery_poll.yml` | `cron: "0 3 * * *"` (daily) + manual dispatch | Runs `collectors/steam_discovery_poll.py` (Track B, part 1), commits+pushes. Same fetch+rebase+retry push logic | `STEAM_API_KEY` |
+| `steam_cohort_poll.yml` | `cron: "0 4 * * *"` (daily) + manual dispatch | Runs `etl/load_snapshots.py` first (this workflow's only unique step — see §2, constraint 5), then `collectors/steam_cohort_poll.py` (Track B, part 2), commits+pushes. Same fetch+rebase+retry push logic | `STEAM_API_KEY` |
+| `healthcheck.yml` | `cron: "0 12 * * *"` (daily) + manual dispatch | Fails loudly (→ email) if the newest committed raw snapshot for Twitch/Steam is older than a threshold (default 180 min); the YouTube check is gated on `config/channels_youtube.yaml` actually having channels | None (reads committed files only) |
 
-Nothing else runs on a schedule. `etl/export_reference_data.py`'s own docstring references "PRD §9.6b's weekly Action (scheduled `niche_similarity_history`/`creator_crossover_history` computation)" — **this workflow does not exist**, and neither table it names exists in `etl/schema.sql`. That comment describes a planned automation, not a built one; `local_refresh.sh` is the only orchestration that exists, and it's run manually.
+All five collector workflows now push with fetch+rebase+retry (not a bare `git push`) — added 2026-09-08/09 after two real, independently-diagnosed incidents (a Steam-poll lost commit, a Steam-discovery-poll lost ~25 minutes/1,021 classified apps) where a bare push got rejected by a concurrent collector's push to `main` and, under `set -e`, silently killed the job with the local commit never reaching the remote. Safe here because every collector writes to its own distinct `data/raw/<platform>/` subtree — a concurrent commit from another workflow never conflicts at the content level, only at the ref-update level.
 
-**Credentials by component**:
-- `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` (`.env` locally, repo secrets in CI) — required for `twitch_poll.py`, nothing else.
-- `YOUTUBE_API_KEY` (`.env` locally, **now also a repo secret**) — required for `youtube_poll.py`; unlike `ANTHROPIC_API_KEY` there's no degraded no-op mode, it exits with an error if unset.
-- `STEAM_API_KEY` (`.env` locally if set, **not yet a repo secret**) — required for `steam_poll.py`, same no-degraded-mode reasoning. Confirmed live several high-traffic titles silently return 0 without a key present, so this is load-bearing for correctness, not just access.
-- `ANTHROPIC_API_KEY` (`.env`, optional) — only used by `generate_tournament_aliases.py`'s LLM nickname pass; every other script runs without it. Not currently set in this local environment.
-- Liquipedia and the Kaggle CSV need no credentials (Liquipedia's general MediaWiki API is open; the Kaggle CSV is downloaded manually, not fetched by a script).
+The similarity/crossover tracker's own scheduled Action, referenced in PRD §9.6b and previously (incorrectly) described in this document and the PRD as resolved, **does not exist** — reopened as a build task 2026-09-09 (see PRD §19).
+
+**Credentials by component** — all four now set as repo secrets, not just present locally:
+- `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` — required for `twitch_poll.py`.
+- `YOUTUBE_API_KEY` — required for `youtube_poll.py`; no degraded no-op mode, exits with an error if unset.
+- `STEAM_API_KEY` — required for `steam_poll.py`/the Steam catalog collectors; several high-traffic titles silently return 0 without a key present, so this is load-bearing for correctness, not just access.
+- `ANTHROPIC_API_KEY` (`.env`, optional, not a repo secret) — only used by `generate_tournament_aliases.py`'s LLM nickname pass.
+- Liquipedia and the Kaggle CSV need no credentials.
 
 ## 5. Current data state
 
 - **Collection start**: `2026-08-31T10:10:37Z` (first `twitch_poll` run). All 23 titles have `viewership_snapshots` coverage from that timestamp through the present.
-- **Coverage per title** ranges from 293 rows (`free_fire`) to 48,136 rows (`valorant`) as of 2026-09-06 — driven by each title's actual concurrent stream volume, not a sampling difference. `is_official_broadcast=1` is **0 rows for every title** — `config/channels.yaml` is empty, so no channel has ever been captured as "official" at ingest time; every row is tier-2/3-derived.
-- **`platform_totals` had 2 rows as of this snapshot** (2026-08-31T10:13:48Z and one manually-triggered 2026-09-07T14:13:18Z poll) — **fixed 2026-09-07**, growing hourly going forward. Every scheduled run had been silently passing `--skip-platform-totals` since collection began: `poll.yml`'s bash fallback defaulted to `"true"` when `github.event.inputs` is empty, which it always is for a `schedule`-triggered run (that object only exists for `workflow_dispatch`). Confirmed live before fixing that a full pagination run (~815 pages at current channel counts) takes under 5 minutes, well inside the hourly window — not a collector-cadence risk. The gap between 2026-08-31 and 2026-09-07 is permanent (can't be backfilled, same as any other Phase 1 collection gap); everything from 2026-09-07 onward is real.
-- **`monthly_category_history` — restored 2026-09-07**, 1,690 rows (1,644 `kaggle_import` + 46 `own_collector`). It had been emptied by an `etl/load_snapshots.py --rebuild` earlier in that session; re-running `python collectors/kaggle_import.py --input data/kaggle/Twitch_game_data.csv` restored the Kaggle side, and the new `etl/compute_monthly_category_totals.py` populates the `own_collector` side (time-weighted hours from `language_mix_snapshots`, using real inter-poll gaps rather than an assumed cadence — polling turned out sparse/irregular). Unlike `tournaments`/`tournament_aliases`, this table still has **no `data/reference/` export/reload path** — a future `--rebuild` will drop it again with no automatic recovery, for both sources now, not just Kaggle's.
-- **`channels` table (schema) has 0 rows and is never written to by any script** — `config/channels.yaml` is read directly by `twitch_poll.py` at capture time; nothing syncs it into the `channels` table. The table is schema-only dead weight unless something is built against it.
-- **Liquipedia tournament data**: 19,560 rows across all 23 titles, tier-1/2 subset is 19,551. All active titles have completed crawls (no partial/in-progress state as of this snapshot).
-- **`tournament_aliases`**: 6,815 rows, all `source='rule_based'`. The LLM colloquial-nickname pass (`source='ai_assisted'`) has never run in this environment — `ANTHROPIC_API_KEY` is unset.
-- **Genre/platform classification**: all 23 titles tagged, all at `confidence='ai_assisted_unreviewed'` — none promoted to `verified`.
-- **`config/channels.draft.yaml`**: 85 candidates across 12 titles from the last `official_channel_candidates.ipynb` run; not yet curated into `config/channels.yaml`.
+- **`platform_totals` fix holding**: growing hourly since 2026-09-07 (7 rows as of this snapshot); the 2026-08-31–2026-09-06 gap remains permanent.
+- **`monthly_category_history` has regressed to 0 rows** (see §3) — a second, real occurrence of the exact `--rebuild`-drops-unexported-tables risk this document already flagged after the first occurrence. Restorable locally (Kaggle CSV still present); not yet restored as of this snapshot. Worth deciding whether to finally close this gap (extend `export_reference_data.py` to cover it) rather than restore-and-wait-for-a-third-time.
+- **Git-push races across all five collector workflows — fixed 2026-09-08/09** (see §4). Two real incidents diagnosed from actual failure logs before fixing: a Steam-poll run at 2026-09-08T23:48:38Z lost one full 11-title poll (`fatal error in commit_refs`); a Steam-discovery run at 2026-09-09T07:46:53Z lost ~25 minutes / 1,021 classified apps (`rejected...fetch first`). A third failure at 2026-09-09T08:42:43Z (Steam cohort poll, all 22 due titles logged as HTTP 404) was checked and confirmed to be the *same, already-diagnosed* 404-misread-as-error bug, occurring before that day's fix (landed 2026-09-09T10:17 UTC) had reached `main` — not a new issue. No scheduled run has exercised the fix yet as of this snapshot (next: 03:00/04:00 UTC).
+- **Shared-wiki contamination — swept across all 23 titles, 2026-09-09.** Two ad hoc checks (fighting games, Age of Empires) had previously found real contamination and were fixed with a `liquipedia_category` filter; the other 18 titles had never been checked. Checked live via two independent signals: each wiki's own `siteinfo` sitename (all 18 report a clean, single-game name, unlike the "Liquipedia Fighting Games Wiki" umbrella) and a live discovery run's actual sampled page titles (no cross-game bleed-through found in any of the 18). Documented as clean as of this date in `config/titles.yaml`'s header comment — re-check is still warranted before adding any new title to a wiki that already hosts a tracked one.
+- **Generational continuity — policy set 2026-09-09 (PRD §19): align every franchise with how `counter_strike` is already tracked (one continuous entity across engine/version changes).** The shared `fighters` wiki splits each fighting-game franchise into a separate `"<Franchise> <Version> Competitions"` category per generation with no unifying parent category (unlike `counterstrike`'s own dedicated wiki, which needs no split at all). `collectors/liquipedia.py`'s `liquipedia_category` filter now accepts a list, and `tekken`/`street_fighter`/`mortal_kombat`/`guilty_gear` in `config/titles.yaml` were changed from a single current-generation category to the live-verified list of every generation's category for that franchise (`Street Fighter X Tekken Competitions` deliberately excluded — a genuine crossover product, not a Street Fighter version, flagged as a judgment call). **This is a Liquipedia/tournament-data-layer policy only** — it does not and cannot extend to Twitch polling, since Twitch's own category IDs are genuinely separate per generation (unlike Counter-Strike's single category, renamed in place across CS:GO→CS2) and historical viewership under a retired category has no backfill path. A re-crawl for these four titles (`python collectors/liquipedia.py --titles tekken,street_fighter,mortal_kombat,guilty_gear`) was **started but had not finished** as of this snapshot — expect `tournaments` row counts for these four titles, and their `get_championship_windows` year ranges, to grow substantially once it completes.
+- **Steam catalog Track A backfill — in progress.** Started 2026-09-08, still running as a long-lived background process as of this snapshot (5,997+ of ~185,000 apps classified, ~3.2%). Resumable if interrupted; expected to take 1-2 weeks of intermittent progress.
+- **`channels` table (schema) has 0 rows** — `config/channels.yaml` is read directly by `twitch_poll.py` at capture time; nothing syncs it into the `channels` table.
+- **Genre/platform classification**: all 23 titles tagged, all at `confidence='ai_assisted_unreviewed'`.
+- **`config/channels.draft.yaml`**: 85 candidates across 12 titles from the last `official_channel_candidates.ipynb` run; not yet curated into `config/channels.yaml`. Neither `channels.yaml` nor `channels_youtube.yaml` has been populated with anything real yet — both remain at their bootstrap-empty state (§1).
 
 ## 6. What's missing
 
-**Specified in the PRD, not built at all**:
-- Esports Charts connector (PRD §9.3) — no code exists.
-- Reddit / subreddit-overlap connector (Limitation 1, multi-homing) — explicitly shelved; Reddit's post-November-2025 API registration policy makes access non-trivial (see project memory, not reproduced here since it's investigation history, not current-state).
-- The weekly scheduled Action for `niche_similarity_history`/`creator_crossover_history` computation, referenced in `etl/export_reference_data.py`'s docstring — no such workflow file, no such tables.
-- `analysis/metrics.py`'s `get_niche_share`, `get_concentration` (HHI), `get_official_broadcast_share`, `get_primary_region` — referenced in that module's own docstring as Phase 4 work, not implemented. Everything `niche_membership.ipynb`/`creator_crossover.ipynb` compute is done ad hoc in the notebooks, not via reusable `analysis/` functions.
+**Specified in the PRD, not built**:
+- Esports Charts connector (PRD §9.3) — **confirmed blocked, not merely unbuilt**: a live check (2026-09-08/09) found the public site returns a site-wide 403 behind a Cloudflare bot challenge for automated access. Enterprise/paid-tier terms were never separately checked (PRD §19).
+- `championship_concentration.ipynb` (PRD §9.3a) — paused on the above; `get_championship_windows()`/`get_concentration()` (the metrics it would consume) are built and tested, but the notebook itself doesn't exist yet.
+- Reddit / subreddit-overlap connector (Limitation 1, multi-homing) — explicitly shelved, blocked on Reddit For Researchers approval (PRD §19).
+- The weekly scheduled Action for `niche_similarity_history`/`creator_crossover_history` computation (PRD §9.6b) — designed, never built. No workflow file, no such tables in `etl/schema.sql`.
+- `analysis/metrics.py`'s `get_niche_share`, `get_official_broadcast_share`, `get_primary_region` — Phase 4 remainder, not implemented.
+- Discord integration — a plan was recorded (PRD §9.13a) then explicitly shelved by the user; not started.
 
 **Tables defined, currently unpopulated**:
-- `community_signals`, `demographic_snapshots`, `failed_challengers` — schema exists (Phase 5), no ingestion code exists for any of them.
-- `channels` — schema now has a writer (`youtube_poll.py`'s ETL loader, added 2026-09-08) but `config/channels_youtube.yaml` is empty, so still 0 rows in practice; `config/channels.yaml`'s Twitch channels are still never synced here regardless (unrelated, pre-existing gap).
-- `monthly_category_history` — restored (see §5); still not covered by `data/reference/`, so remains vulnerable to a future `--rebuild`.
+- `community_signals`, `demographic_snapshots`, `failed_challengers` — schema exists (Phase 5), no ingestion code.
+- `channels` — has a writer (`youtube_poll.py`'s ETL loader) but `config/channels_youtube.yaml` is empty, so still 0 rows; `config/channels.yaml`'s Twitch channels are never synced here regardless (separate, pre-existing gap).
+- `monthly_category_history` — currently empty, a second occurrence of the unexported-table-dropped-by-`--rebuild` risk (§5), not yet restored.
 
 **Known-incomplete or known-broken**:
-- `tournaments.start_date`/`end_date` are frequently `NULL` (very common — unannounced future brackets) and occasionally a literal non-parseable placeholder string like `"2026-??-??"` (Liquipedia's own convention for an unconfirmed date). Affected row counts as of this snapshot: `rainbow_six_siege` (18), `pubg_mobile` (6), `counter_strike` (5), `starcraft2` (5), `league_of_legends` (4), `rocket_league` (4), `free_fire` (3), `mobile_legends_bb` (3), `dota2` (2), `hearthstone` (2), `overwatch` (1), `pubg` (1), `teamfight_tactics` (1) — 13 titles total, not just `rocket_league`. `etl/classify_broadcast_tier.py`'s date-window join (`date(start_date) <= date(?)`) silently evaluates to no match for these rows via SQLite's `date()` returning `NULL` on unparseable input — a tournament with a malformed date can never be a co-stream match candidate. This degrades gracefully (no crash, no false positive) but is a real, silent coverage gap, not surfaced anywhere at runtime.
-- Shared-wiki tournament contamination (Liquipedia's `fighters` wiki hosting Tekken/Street Fighter/Mortal Kombat/Guilty Gear under shared tier categories, and `ageofempires` hosting multiple Age of Empires titles) — **this was found and fixed**, not an open issue: `config/titles.yaml`'s `liquipedia_category` field narrows discovery per title for every title on a shared wiki, and a live re-validation (re-crawl + stale-row check) found zero misattributed rows remaining as of the last check. Flagged here only because it's the kind of thing worth re-verifying if `liquipedia.py`'s discovery logic changes again — not a currently-known contamination.
-- `platform_totals` was effectively dead in production from collection start through 2026-09-06 (see §5) — **fixed 2026-09-07**, the scheduled job now exercises it every hour. The 2026-08-31 through 2026-09-06 gap is permanent.
+- `tournaments.start_date`/`end_date` are frequently `NULL` or an unparseable placeholder (`"2026-??-??"`) across 13 titles — `etl/classify_broadcast_tier.py`'s date-window join silently evaluates to no match for these rows. Degrades gracefully, not surfaced anywhere at runtime.
 - `data/manual/milestone_table.csv` has no row for `street_fighter` (a deliberate "hand-built table has no opinion" gap, not a bug) — `tekken` absorbed the merged original export's `street_fighter`/`tekken` row.
-- **YouTube collector (PRD §9.7) — built 2026-09-08, not yet collecting anything real.** `YOUTUBE_API_KEY` is now a repo secret; `config/channels_youtube.yaml` still needs human curation (empty, same starting state `channels.yaml` had) before `youtube_poll.yml`'s scheduled runs do anything but log a no-op. `healthcheck.yml` now covers this (gated on the config actually having channels).
-- **Steam collector (PRD §9.12) — built 2026-09-08, working locally, not yet running on schedule.** `config/steam_appids.yaml` is pre-populated (11 titles, live-verified) — the only blocker is `STEAM_API_KEY` not yet being a GitHub Actions repo secret. `steam_poll.yml` and `healthcheck.yml`'s Steam check will both fail every run until it's added — expected, not a bug (see `healthcheck.yml`'s own comments). `analysis/metrics.py`'s `_viewership_trend` does not yet read `steam_player_counts` as a fallback source the way it already does `monthly_category_history` — a reasonable next step, not done as part of this build.
+- `analysis/metrics.py`'s `_viewership_trend` does not yet read `steam_player_counts` as a fallback source the way it already does `monthly_category_history` — a reasonable next step, not done.
+- Repo visibility is public (confirmed live via `gh repo view`) — the PRD's "decide before the first push" framing (§19) is now moot, resolved by action rather than by a memo.
