@@ -468,7 +468,60 @@ CREATE TABLE IF NOT EXISTS collector_runs (
     UNIQUE (collector, raw_file)
 );
 
+-- Platform-wide, non-esports Twitch viewership (PRD §9.16, added
+-- 2026-09-09) -- collectors/twitch_platform_poll.py's full-detail tier,
+-- for docs/wider_game_fandom_brief.md. Deliberately NOT keyed on
+-- title_id: these are arbitrary Twitch game categories this project
+-- doesn't otherwise track (GTA V, Minecraft, Just Chatting, ...), so
+-- game_id (Twitch's own id) is the natural key, same reasoning
+-- steam_release_cohort documents for why app_id-keyed tables can't
+-- reuse the title_id FK pattern. Streams under one of the 23 tracked
+-- titles' twitch_category_id are excluded here by the collector itself
+-- (see excluded_tracked_game_ids in its raw snapshot) -- that data
+-- already lives in viewership_snapshots; duplicating it here would let
+-- a future query silently double-count a title's own attention.
+--
+-- No is_official_broadcast column: that concept requires config/
+-- channels.yaml, which is title-specific and doesn't exist for games
+-- this project doesn't track.
+CREATE TABLE IF NOT EXISTS platform_viewership_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id TEXT NOT NULL,
+    game_name TEXT,
+    platform TEXT NOT NULL DEFAULT 'twitch',
+    channel_id TEXT NOT NULL,
+    channel_login TEXT,
+    captured_at TEXT NOT NULL,
+    viewer_count INTEGER NOT NULL,
+    stream_title TEXT,
+    tags TEXT, -- comma-joined, same convention as viewership_snapshots.tags
+    language TEXT,
+    source TEXT NOT NULL DEFAULT 'twitch_api',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (channel_id, captured_at)
+);
+
+-- The below-threshold aggregate counterpart to
+-- platform_viewership_snapshots -- one row per (game, poll), mirroring
+-- language_mix_snapshots' role for viewership_snapshots but keyed by
+-- game_id and without the per-language breakdown (not needed for the
+-- creator-insularity/lifecycle questions this table exists for; add a
+-- language dimension later if a question actually needs it, rather
+-- than building it speculatively now).
+CREATE TABLE IF NOT EXISTS platform_viewership_below_threshold (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id TEXT NOT NULL,
+    game_name TEXT,
+    captured_at TEXT NOT NULL,
+    stream_count INTEGER NOT NULL,
+    viewer_total INTEGER NOT NULL,
+    source TEXT NOT NULL DEFAULT 'twitch_api',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (game_id, captured_at)
+);
+
 CREATE INDEX IF NOT EXISTS idx_viewership_title_captured ON viewership_snapshots (title_id, captured_at);
+CREATE INDEX IF NOT EXISTS idx_platform_viewership_game_captured ON platform_viewership_snapshots (game_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_language_mix_title_captured ON language_mix_snapshots (title_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title ON tournaments (title_id);
 CREATE INDEX IF NOT EXISTS idx_tournament_aliases_series ON tournament_aliases (title_id, series_key);

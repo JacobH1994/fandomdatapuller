@@ -1,0 +1,101 @@
+name: Twitch platform-wide poll
+
+# Deliberately a completely separate workflow file from poll.yml (the
+# 23-title Twitch collector) — same discipline CLAUDE.md documents for
+# youtube_poll.yml/steam_poll.yml: no shared trigger/job/step that could
+# let this collector's failure affect poll.yml's, which CLAUDE.md
+# protects as the "one rule." Uses the same TWITCH_CLIENT_ID/
+# TWITCH_CLIENT_SECRET secrets poll.yml already has configured — no new
+# secret needed, same Twitch app, a different, unfiltered query.
+#
+# Offset 15 minutes from poll.yml/youtube_poll.yml/steam_poll.yml's ":00"
+# cadence (not a fix for the known multi-collector git-push race — the
+# fetch+rebase+retry logic below already handles that — just reduces how
+# often this one actually collides with the other three).
+
+on:
+  schedule:
+    - cron: "15 * * * *"
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: "Pagination page cap (default: config default, ~1000)"
+        required: false
+        default: ""
+      min_viewers:
+        description: "Override config/twitch_platform_capture.yaml's full_detail_min_viewers"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: twitch-platform-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Poll Twitch (platform-wide)
+        env:
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          MAX_PAGES="${{ github.event.inputs.max_pages }}"
+          MIN_VIEWERS="${{ github.event.inputs.min_viewers }}"
+
+          ARGS=()
+          if [ -n "$MAX_PAGES" ]; then
+            ARGS+=(--max-pages "$MAX_PAGES")
+          fi
+          if [ -n "$MIN_VIEWERS" ]; then
+            ARGS+=(--min-viewers "$MIN_VIEWERS")
+          fi
+
+          # Captured, not `set -e`-aborted -- same reasoning as the other
+          # collectors: a partial/failed run (e.g. hit_page_cap) still
+          # writes a raw file worth committing.
+          overall_status=0
+          python collectors/twitch_platform_poll.py "${ARGS[@]}" || overall_status=1
+
+          if [ -d data/raw/twitch_platform ]; then
+            git add data/raw/twitch_platform
+          fi
+          if ! git diff --cached --quiet; then
+            git commit -m "Twitch platform-wide snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            # Same fetch+rebase+retry as poll.yml/steam_poll.yml -- safe
+            # here for the same reason: this collector writes only to
+            # its own data/raw/twitch_platform/ subtree, so a concurrent
+            # commit from another collector's workflow never conflicts
+            # at the content level, only at the ref-update level.
+            attempt=1
+            until git push; do
+              if [ "$attempt" -ge 5 ]; then
+                echo "[error] push failed after 5 attempts"
+                overall_status=1
+                break
+              fi
+              echo "[warn] push attempt $attempt failed -- fetching + rebasing before retry"
+              git fetch origin main
+              git rebase origin/main
+              attempt=$((attempt + 1))
+              sleep $((attempt * 2))
+            done
+          fi
+
+          exit $overall_status
