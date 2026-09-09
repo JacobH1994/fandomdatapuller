@@ -38,6 +38,34 @@ channels:
     - eslcsb        # ESL's CS backup/secondary channel — docs/eslchannelnames.txt; live-verified against Twitch Helix (Get Users) 2026-09-09
     - betboom_cs_ru # BetBoom (real esports org) — user's call; unconfirmed whether this is an official-broadcast channel or a team channel, re-verify if it looks off
 
+    # Added 2026-09-09, found via Twitch Helix search/channels for
+    # "blast"/"pgl" (user's request — scan for BLAST/PGL-named channels),
+    # live-verified to exist. Excludes obvious squatter/fan/bot accounts
+    # from the same search (numbered suffixes, "bot"/"hd" suffixes, etc.)
+    # without further checking those individually.
+    - pgl_cs2              # PGL's CS2 channel — tournament organizer
+    - pgl_cs2en2           # PGL's secondary English CS2 feed
+    - pgl_csgoru           # PGL's Russian-language CS feed
+    - blastpremier_cs2     # BLAST Premier's CS2-specific channel, distinct from blastpremier above
+    - blastpremier_worldfeed # BLAST Premier world-feed channel
+
+    # NOT added: "blast" and "pgl" (each org's general/multi-game
+    # account — both run tournaments for other titles too, BLAST also
+    # Rainbow Six, PGL also Dota2/PUBG/FIFA/Hearthstone). User asked
+    # whether inclusion could be ringfenced to only when a stream's
+    # title strongly indicates CS content — checked directly: this file
+    # has no per-stream conditional, is_official_broadcast is set at
+    # capture time purely from channel identity (collectors/
+    # twitch_poll.py), so there's no way to make an entry here
+    # conditional on title text. Per the user's own fallback instruction,
+    # excluded rather than added unconditionally. Nothing is actually
+    # lost by this: if either channel streams CS content whose title
+    # names a known tournament, broadcast_tier's detected_costream
+    # (etl/classify_broadcast_tier.py) already catches it independently
+    # of channel identity — that's the title-text-conditional mechanism
+    # the user was asking for, it just lives in a different place than
+    # this file.
+
   dota2:
     # Added 2026-09-09 from docs/eslchannelnames.txt (user-supplied) — ESL
     # runs several parallel Dota 2 broadcast channels simultaneously

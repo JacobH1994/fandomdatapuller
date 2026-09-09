@@ -34,4 +34,27 @@
 #       # once the event ends; a stale video_id just gets treated as
 #       # "not live" on the next videos.list check, not a crash.
 
-channels: {}
+channels:
+  counter_strike:
+    # Resolved 2026-09-09 from docs/eslchannelnames.txt (user-supplied
+    # handle) via the YouTube Data API's forHandle lookup — the file's
+    # own documented method, not guessed.
+    - channel_id: UCPq2ETz4aAGo2Z-8JisDPIA
+      name: ESL Counter-Strike (@eslcs)
+
+  dota2:
+    - channel_id: UCaYLBJfw6d8XqmNlL204lNg
+      name: ESL Dota 2 (@esldota2)
+
+# ESL's general/multi-game channel (@esl -> UC0G2qz-hoaCswQNgoWU_LTw,
+# resolved but deliberately not added under any single title_id — same
+# reasoning as excluding the Twitch "blast"/"pgl" org-level accounts from
+# config/channels.yaml: it isn't scoped to one game, and this file has no
+# per-video title-conditional mechanism to ringfence it. Checked directly
+# (2026-09-09): etl/classify_broadcast_tier.py never references
+# `platform` at all, so it's already platform-agnostic — any YouTube
+# video this channel produces still gets a fair shot at
+# detected_costream classification via title/date/alias matching, same
+# as Twitch, once youtube_poll.py actually captures something from it.
+# It just can't get is_official_broadcast-equivalent treatment for a
+# specific title, for the same structural reason "blast"/"pgl" can't.
