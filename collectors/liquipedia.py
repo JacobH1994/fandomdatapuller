@@ -213,7 +213,10 @@ def category_members(client: httpx.Client, wiki: str, category: str, limiter: Ra
 
 
 def discover_tournament_pages(
-    client: httpx.Client, wiki: str, limiter: RateLimiter, competitions_category: str | None = None
+    client: httpx.Client,
+    wiki: str,
+    limiter: RateLimiter,
+    competitions_category: str | list[str] | None = None,
 ) -> tuple[list[str], str | None]:
     """Returns (page_titles, convention_used). convention_used is None if no
     known tier convention had any members on this wiki (after intersecting
@@ -236,18 +239,35 @@ def discover_tournament_pages(
     "Tekken 8", even though "Tekken" is a substring of both). An earlier
     version of this function filtered by title-substring instead, which
     both missed tournaments not named after the game (e.g. Guilty Gear
-    Strive's "ARC World Tour") and let prior-generation tournaments leak in
-    (e.g. Tekken 7 events under title_id="tekken", which tracks Tekken 8
-    only). competitions_category, when given, is intersected against the
-    tier-category pages rather than substring-matched. If that intersection
-    is empty, that's treated the same as "no convention found" — skipped,
-    not silently widened back to the unfiltered pool."""
+    Strive's "ARC World Tour") and let prior-generation tournaments leak in.
+
+    competitions_category accepts a list (2026-09-09, PRD §19 generational
+    continuity policy: track a fighting-game franchise continuously across
+    version changes, the same way the dedicated counterstrike wiki tracks
+    CS 1.6 through CS2 with no per-version split — the shared "fighters"
+    wiki has no such unified franchise category, so the union of every
+    known generation's own "Category:<Franchise> <Version> Competitions"
+    is how that continuity is reconstructed). Categories in the list are
+    UNIONed with each other first, then that union is intersected against
+    the tier-category pages — so a franchise's full generational history
+    is included, while other franchises sharing the wiki still are not. A
+    plain string keeps working (treated as a single-element list) for
+    titles needing only one category (e.g. age_of_empires_ii). If that
+    intersection is empty, that's treated the same as "no convention
+    found" — skipped, not silently widened back to the unfiltered pool."""
+    if isinstance(competitions_category, str):
+        categories = [competitions_category]
+    else:
+        categories = competitions_category or []
+
     for top, second in TIER_CONVENTIONS:
         top_pages = category_members(client, wiki, top, limiter)
         second_pages = category_members(client, wiki, second, limiter)
         combined = set(top_pages) | set(second_pages)
-        if competitions_category:
-            game_pages = set(category_members(client, wiki, competitions_category, limiter))
+        if categories:
+            game_pages: set[str] = set()
+            for category in categories:
+                game_pages |= set(category_members(client, wiki, category, limiter))
             combined = combined & game_pages
         if combined:
             return sorted(combined), f"{top} + {second}"
@@ -410,10 +430,15 @@ def main() -> int:
         for t in titles:
             wiki = t["liquipedia_wiki"]
             competitions_category = t.get("liquipedia_category")
+            categories_desc = (
+                ", ".join(competitions_category)
+                if isinstance(competitions_category, list)
+                else competitions_category
+            )
             pages, convention = discover_tournament_pages(client, wiki, limiter, competitions_category)
             if convention is None:
                 reason = (
-                    f"no pages in Category:'{competitions_category}' overlapping a recognized tier category"
+                    f"no pages in Category:'{categories_desc}' overlapping a recognized tier category"
                     if competitions_category
                     else "no recognized tier-category convention"
                 )
@@ -424,7 +449,7 @@ def main() -> int:
 
             known = known_pages_by_wiki.get(wiki, set())
             to_fetch = [p for p in pages if p not in known]
-            filter_note = f", intersected with Category:'{competitions_category}'" if competitions_category else ""
+            filter_note = f", intersected with Category:'{categories_desc}'" if competitions_category else ""
             print(
                 f"[info] {t['id']}: using '{convention}' on wiki '{wiki}'{filter_note} — {len(pages)} candidate pages, "
                 f"{len(to_fetch)} new (skipping {len(pages) - len(to_fetch)} already in research.db)",
