@@ -34,5 +34,26 @@ channels:
     # detected_costream already tracks separately; folding them in here
     # would blur that distinction, not sharpen it).
     - blastpremier  # BLAST Premier's own channel — tournament organizer
-    - eslcs         # ESL's Counter-Strike channel — tournament organizer
+    - eslcs         # ESL's Counter-Strike channel — tournament organizer; corroborated by docs/eslchannelnames.txt (user-supplied, 2026-09-09)
+    - eslcsb        # ESL's CS backup/secondary channel — docs/eslchannelnames.txt; live-verified against Twitch Helix (Get Users) 2026-09-09
     - betboom_cs_ru # BetBoom (real esports org) — user's call; unconfirmed whether this is an official-broadcast channel or a team channel, re-verify if it looks off
+
+  dota2:
+    # Added 2026-09-09 from docs/eslchannelnames.txt (user-supplied) — ESL
+    # runs several parallel Dota 2 broadcast channels simultaneously
+    # (regional/group-stage coverage), each named after real Dota 2
+    # items/lore (Sange, Yasha's counterpart Clarity, Tango, Mango are all
+    # actual in-game items — a deliberate ESL naming convention, not a
+    # coincidence). All 11 logins in the source file live-verified to
+    # exist against Twitch Helix (Get Users) before being added here — no
+    # further check (e.g. follower count, partner status) performed
+    # beyond that; revisit if any of these looks off in practice.
+    - esl_dota2
+    - esl_dota2earth
+    - esl_dota2void
+    - esl_dota2ember
+    - esl_dota2storm
+    - esl_dota2sange
+    - esl_dota2clarity
+    - esl_dota2tango
+    - esl_dota2mango
