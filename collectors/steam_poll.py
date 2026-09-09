@@ -144,6 +144,19 @@ def fetch_player_count(client: httpx.Client, appid: int, api_key: str, errors: R
             time.sleep(backoff_seconds(attempt))
             continue
 
+        if resp.status_code == 404:
+            # Confirmed live 2026-09-09: Steam returns a genuine HTTP 404
+            # (body `{"response":{"result":42}}`) for an appid it doesn't
+            # recognize yet — routine and expected for a title that
+            # hasn't released, not an anomaly. Logging this via errors.add
+            # made every steam_cohort_poll.py run whose newly-discovered
+            # titles are all still pre-release report status="failed" and
+            # page — a false alarm for exactly the case
+            # collectors/steam_cohort_poll.py's own docstring already
+            # said was expected and handled. Silently return None (the
+            # existing "unknown, not zero" semantics), no errors.add.
+            return None
+
         if resp.status_code >= 400:
             errors.add(scope, f"status {resp.status_code}: {resp.text[:200]}")
             return None

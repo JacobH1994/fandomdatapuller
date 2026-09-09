@@ -86,6 +86,34 @@ jobs:
             ARGS+=(--skip-platform-totals)
           fi
 
+          # Confirmed live 2026-09-09: with five scheduled collector
+          # workflows now pushing to main on similar cadences, two can
+          # race and one gets rejected ("fetch first" / "fatal error in
+          # commit_refs") — under set -e that killed the whole job before
+          # this point, discarding a commit that only ever existed on the
+          # now-destroyed ephemeral runner (confirmed: one Steam poll and
+          # one Steam discovery run, the latter losing ~25 minutes/1,021
+          # apps of real crawl work). fetch+rebase+retry is standard
+          # practice for exactly this — safe here specifically because
+          # every collector writes to its own distinct data/raw/<platform>/
+          # subtree, so a concurrent commit from another workflow never
+          # conflicts at the content level, only at the ref-update level.
+          push_with_retry() {
+            local max_attempts=5 attempt=1
+            while [ "$attempt" -le "$max_attempts" ]; do
+              if git push; then
+                return 0
+              fi
+              echo "[warn] push attempt $attempt failed -- fetching + rebasing before retry"
+              git fetch origin main
+              git rebase origin/main
+              attempt=$((attempt + 1))
+              sleep $((attempt * 2))
+            done
+            echo "[error] push failed after $max_attempts attempts"
+            return 1
+          }
+
           end_time=$(( $(date +%s) + DURATION * 60 ))
           overall_status=0
           while true; do
@@ -94,7 +122,7 @@ jobs:
             git add data/raw
             if ! git diff --cached --quiet; then
               git commit -m "Twitch snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-              git push
+              push_with_retry || overall_status=1
             fi
 
             if [ "$DURATION" -le 0 ] || [ "$(date +%s)" -ge "$end_time" ]; then
