@@ -8,6 +8,7 @@
 *.db-wal
 *.sqlite
 *.sqlite3
+*.db.lock
 
 # Connector caches (disposable, re-fetchable — not the permanent raw record)
 data/cache/

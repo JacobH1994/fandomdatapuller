@@ -22,6 +22,14 @@ time — it had regressed to 0 rows after a --rebuild ran while this table
 was still uncovered here. Cheap and idempotent (natural-key upserts), so
 it runs unconditionally, not just under --rebuild.
 
+`--rebuild` refuses to run if anything else currently holds research.db
+open (etl/db.py's try_acquire_rebuild_lock — an OS-level advisory lock,
+not a guess) — added 2026-09-09 after a real incident where --rebuild
+deleted the file out from under a still-running Steam catalog backfill
+and the replacement came up corrupted. No data was lost that time
+(recovered via /proc/<pid>/fd), but this closes the gap properly instead
+of relying on being able to do that again.
+
 Usage:
     python etl/load_snapshots.py                 # incremental: only new files
     python etl/load_snapshots.py --rebuild        # delete research.db and reload everything
@@ -39,7 +47,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
-from etl.db import DB_PATH, get_connection, seed_titles_and_aliases  # noqa: E402
+from etl.db import DB_PATH, get_connection, seed_titles_and_aliases, try_acquire_rebuild_lock  # noqa: E402
 
 TITLES_CONFIG = REPO_ROOT / "config" / "titles.yaml"
 RAW_DIR = REPO_ROOT / "data" / "raw" / "twitch"
@@ -599,9 +607,20 @@ def main() -> int:
     parser.add_argument("--rebuild", action="store_true", help="delete research.db and reload everything from data/raw/")
     args = parser.parse_args()
 
-    if args.rebuild and DB_PATH.exists():
-        DB_PATH.unlink()
-        print(f"deleted {DB_PATH}")
+    if args.rebuild:
+        if not try_acquire_rebuild_lock():
+            print(
+                "[error] research.db appears to be in use by another process right now "
+                "(a running collector, or collectors/steam_catalog_backfill.py, which can "
+                "stay connected for hours/days) -- refusing to --rebuild while that's true, "
+                "since deleting the file out from under an open connection can corrupt it. "
+                "Stop that process first, then retry.",
+                file=sys.stderr,
+            )
+            return 1
+        if DB_PATH.exists():
+            DB_PATH.unlink()
+            print(f"deleted {DB_PATH}")
 
     conn = get_connection()
     seed_titles_and_aliases(conn, load_titles_config())

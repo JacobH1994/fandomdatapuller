@@ -7,6 +7,7 @@ that opens a connection through here can assume the schema exists.
 
 from __future__ import annotations
 
+import fcntl
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,14 +15,66 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = REPO_ROOT / "etl" / "schema.sql"
 DB_PATH = REPO_ROOT / "data" / "research.db"
+LOCK_PATH = REPO_ROOT / "data" / "research.db.lock"
+
+# Opened once per process and never explicitly closed — an OS-level advisory
+# lock (flock) taken on this single fd is what `--rebuild` checks before
+# deleting research.db (see try_acquire_rebuild_lock below). Kept module-level
+# and reused rather than reopened per call: flock() locks are per *open file
+# description*, not per process — a second fd opened by the same process
+# would be an independent lock holder and could self-block against the first,
+# which is exactly the trap this mechanism has to avoid, not just the
+# cross-process case it's actually for. Never explicitly unlocked: the OS
+# releases it automatically when this process's last fd to it closes, which
+# happens on normal exit AND on a crash — no stale-lock cleanup needed, and
+# a script simply holding a connection open for its whole run (correctly)
+# keeps the lock for exactly that long, no extra bookkeeping required.
+_lock_file = None
+
+
+def _lock_fd():
+    global _lock_file
+    if _lock_file is None:
+        LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _lock_file = open(LOCK_PATH, "w")
+    return _lock_file
 
 
 def utcnow_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def try_acquire_rebuild_lock() -> bool:
+    """Non-blocking attempt at an EXCLUSIVE lock on research.db.lock, for
+    `etl/load_snapshots.py --rebuild` to call before deleting research.db.
+
+    Returns False if any other process currently holds get_connection()'s
+    shared lock (below) — i.e. something else has research.db open right
+    now, most dangerously a long-running script like collectors/
+    steam_catalog_backfill.py, which can stay connected for hours/days.
+
+    Added 2026-09-09 after a real incident: --rebuild deleted research.db
+    while that backfill's connection was still open, and the fresh file
+    SQLite created at the same path came up corrupted (a stale -shm/-wal
+    mismatch) while the backfill's own file descriptor kept writing into
+    the now-unlinked-but-still-open inode, invisible at the filesystem
+    path. No data was lost (recovered via /proc/<pid>/fd), but nothing
+    should rely on that being possible every time."""
+    try:
+        fcntl.flock(_lock_fd(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return True
+    except BlockingIOError:
+        return False
+
+
 def get_connection(db_path: Path = DB_PATH) -> sqlite3.Connection:
     db_path.parent.mkdir(parents=True, exist_ok=True)
+    # Shared: many readers/writers may hold this at once (matches WAL's own
+    # concurrency model below) — it exists so try_acquire_rebuild_lock()'s
+    # EXCLUSIVE attempt has something real to fail against. Blocking (no
+    # LOCK_NB) is deliberate here: a script starting mid-rebuild should wait
+    # for a consistent file, not error out.
+    fcntl.flock(_lock_fd(), fcntl.LOCK_SH)
     conn = sqlite3.connect(db_path)
     # WAL: readers (a notebook, another script) aren't blocked by a writer
     # mid-run, and a writer isn't blocked by a reader. Several scripts touch
