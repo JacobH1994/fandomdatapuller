@@ -250,14 +250,14 @@ def test_custom_thresholds_are_respected(conn):
     assert result["milestone_year"] == 2021
 
 
-def insert_tournament_with_prize(conn, page, tier, start_date, prize_pool, title_id="test_title"):
+def insert_tournament_with_prize(conn, page, tier, start_date, prize_pool, title_id="test_title", currency="USD"):
     conn.execute(
         """
         INSERT INTO tournaments
             (title_id, liquipedia_wiki, liquipedia_page, name, tier, start_date, prize_pool, currency, fetched_at)
-        VALUES (?, 'test', ?, ?, ?, ?, ?, 'USD', '2026-01-01T00:00:00Z')
+        VALUES (?, 'test', ?, ?, ?, ?, ?, ?, '2026-01-01T00:00:00Z')
         """,
-        (title_id, page, page, tier, start_date, prize_pool),
+        (title_id, page, page, tier, start_date, prize_pool, currency),
     )
 
 
@@ -271,6 +271,50 @@ def test_championship_window_picks_highest_prize_pool_tier1(conn):
     assert windows[0]["year"] == 2019
     assert windows[0]["liquipedia_page"] == "TI 2019"
     assert windows[0]["prize_pool"] == 34_000_000
+
+
+def test_championship_window_non_usd_currency_excluded_even_if_numerically_larger(conn):
+    # Real bug, found 2026-09-09: a raw prize_pool number with no currency
+    # normalization means a foreign-currency figure can be numerically
+    # bigger than a much larger real-USD prize without being worth more --
+    # confirmed live this affected 95 of 291 windows across the full
+    # 23-title dataset (every league_of_legends year, among others) before
+    # this fix. A 275,000,000 KRW regional league (~$200K) must NOT beat a
+    # $2,500,000 USD World Championship just because the raw number is
+    # bigger.
+    insert_tournament_with_prize(conn, "Regional League KRW", "1", "2020-06-01", 275_000_000, currency="krw")
+    insert_tournament_with_prize(conn, "World Championship USD", "1", "2020-08-15", 2_500_000, currency="USD")
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert len(windows) == 1
+    assert windows[0]["liquipedia_page"] == "World Championship USD"
+    assert windows[0]["prize_pool"] == 2_500_000
+
+
+def test_championship_window_only_non_usd_candidate_produces_no_window(conn):
+    # A title-year whose ONLY prize_pool data is non-USD must get no
+    # window that year, not a wrong one -- same "no guessed fallback"
+    # principle as the NULL-prize_pool case already tested.
+    insert_tournament_with_prize(conn, "Only KRW Event", "1", "2021-01-01", 300_000_000, currency="krw")
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert windows == []
+
+
+def test_championship_window_null_currency_treated_as_usd(conn):
+    # parse_infobox's own convention: currency is NULL when the plain
+    # `prizepool` field was used with no `localcurrency` specified --
+    # presumptively USD (not verified per-row, but the conservative,
+    # documented assumption), so a NULL-currency candidate must still be
+    # eligible, not silently excluded alongside real non-USD ones.
+    insert_tournament_with_prize(conn, "Unlabeled Currency", "1", "2022-01-01", 1_000_000, currency=None)
+
+    windows = get_championship_windows(conn, "test_title")
+
+    assert len(windows) == 1
+    assert windows[0]["liquipedia_page"] == "Unlabeled Currency"
 
 
 def test_championship_window_tier1_only_not_tier2(conn):
