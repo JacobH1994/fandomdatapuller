@@ -1,9 +1,13 @@
 # fandomdatapuller
 
 A personal research platform tracking digital-fandom metrics, built to serve
-`docs/esports_gauses_law_brief.md` (the current research question — does
-competitive exclusion sort esports titles within a niche?) and designed so
-future questions mostly need new queries, not new pipelines. Full spec:
+two active research questions and designed so future ones mostly need new
+queries, not new pipelines:
+`docs/esports_gauses_law_brief.md` (does competitive exclusion sort esports
+titles *within* a niche, across titles?) and `docs/counter_strike_lifecycle_brief.md`
+(added 2026-09-09 — has a *single* title's own growth trajectory reached a
+ceiling, independent of its competitors — see that brief's §3 for why it's
+kept separate rather than folded into the first). Full spec:
 `docs/esports_fandom_platform_prd_v2.md`.
 
 `docs/system_reference.md` describes present state (what's actually
@@ -11,7 +15,7 @@ built, wired up, populated, or broken, read straight from the code and
 data) — the PRD describes intent and decisions. When it drifts,
 regenerate it rather than hand-editing it.
 
-**The PRD and the research brief are edited directly, the same as code**
+**The PRD and both research briefs are edited directly, the same as code**
 (PRD §15, added 2026-09-08) — they aren't maintained elsewhere and copied
 in. When a research decision, data-source design, or connection to an
 existing hypothesis comes up in conversation, write it into these
