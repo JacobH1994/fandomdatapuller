@@ -85,3 +85,35 @@ channels:
     - esl_dota2clarity
     - esl_dota2tango
     - esl_dota2mango
+
+    # Added 2026-09-09, PGL Dota2 feeds — same discovery method as the CS
+    # pgl_cs2* entries above (Twitch Helix search, live-verified via Get
+    # Users). Excludes pgldotaalpha/pgldotabeta (test/staging-named, not
+    # broadcast feeds) and pgl_dota/pgl_dota3/pgl_dota_2/pgldota_2/
+    # pgl_dota2_off (ambiguous, don't fit the clean main+language-feed
+    # numbering pattern the rest of these do — same judgment call as
+    # excluding CS's personality/co-stream candidates, flag for review
+    # if any of these turns out to matter).
+    - pgl_dota2     # main channel
+    - pgl_dota2en1
+    - pgl_dota2en2
+    - pgl_dota2en3
+    - pgl_dota2en4
+    - pgl_dota2en5
+    - pgl_dota2en6
+    - pgl_dota2es1
+    - pgl_dota2es2
+    - pgl_dota2ru
+    - pgl_dota2ru2
+    - pgl_dota2ru3
+    - pgl_dota2ru4
+
+    # NOT added: no official BLAST Dota2 channel found. BLAST SLAM is a
+    # real, confirmed multi-edition Dota2 tournament series (live-verified
+    # directly in `tournaments`), but neither "blast dota" nor "blast slam"
+    # Twitch searches turned up an obvious official channel — only noise
+    # (blastdota/blastdotab exist but have no independent signal they're
+    # actually BLAST's, unlike the PGL case above where scale and naming
+    # directly parallel already-verified channels). Worth a different
+    # search angle (BLAST's own site/socials) if this needs resolving
+    # rather than guessed at.
