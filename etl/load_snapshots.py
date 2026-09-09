@@ -9,15 +9,18 @@ fully loaded, so a file is either "not loaded yet" or "fully loaded," never
 partially. Already-loaded files (by relative path) are skipped on rerun.
 
 Also loads data/reference/{tournaments,tournament_aliases,
-tournament_alias_llm_checked}.jsonl on every run (see
+tournament_alias_llm_checked,steam_release_history,
+monthly_category_history}.jsonl on every run (see
 etl/export_reference_data.py) — this is what makes `--rebuild` actually
 rebuild a *working* database rather than one with an empty tournaments
 table: collectors/liquipedia.py writes tournament data directly into
 research.db with no raw-file backup, so without this, --rebuild would
 silently discard it (and, for the LLM-checked marker, silently re-spend
-already-spent API budget re-asking questions already answered). Cheap
-and idempotent (natural-key upserts), so it runs unconditionally, not
-just under --rebuild.
+already-spent API budget re-asking questions already answered).
+monthly_category_history (added 2026-09-09) closes the same gap a third
+time — it had regressed to 0 rows after a --rebuild ran while this table
+was still uncovered here. Cheap and idempotent (natural-key upserts), so
+it runs unconditionally, not just under --rebuild.
 
 Usage:
     python etl/load_snapshots.py                 # incremental: only new files
@@ -49,13 +52,14 @@ STEAM_COHORT_TRACKING_WINDOW_DAYS = 365
 REFERENCE_DIR = REPO_ROOT / "data" / "reference"
 
 
-def load_reference_data(conn) -> tuple[int, int, int, int]:
+def load_reference_data(conn) -> tuple[int, int, int, int, int]:
     """Loads data/reference/{tournaments,tournament_aliases,
-    steam_release_history}.jsonl (see etl/export_reference_data.py) into
-    research.db. All files are optional — a repo checkout that predates
-    this mechanism, or one where export hasn't been run yet, just skips
-    silently (nothing to load is not an error). Natural-key upserts
-    throughout, so safe to call on every run, not just --rebuild.
+    steam_release_history,monthly_category_history}.jsonl (see
+    etl/export_reference_data.py) into research.db. All files are
+    optional — a repo checkout that predates this mechanism, or one where
+    export hasn't been run yet, just skips silently (nothing to load is
+    not an error). Natural-key upserts throughout, so safe to call on
+    every run, not just --rebuild.
 
     tournament_aliases rows are keyed on (title_id, series_key) in the
     export, not a raw numeric tournament_id — series_key is itself a
@@ -178,7 +182,37 @@ def load_reference_data(conn) -> tuple[int, int, int, int]:
                 steam_release_written += 1
         conn.commit()
 
-    return tournaments_written, aliases_written, llm_checked_written, steam_release_written
+    monthly_category_written = 0
+    monthly_category_path = REFERENCE_DIR / "monthly_category_history.jsonl"
+    if monthly_category_path.is_file():
+        with open(monthly_category_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                m = json.loads(line)
+                conn.execute(
+                    """
+                    INSERT INTO monthly_category_history
+                        (title_id, year_month, hours_watched, avg_viewers, peak_viewers, source, confidence)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT (title_id, year_month) DO UPDATE SET
+                        hours_watched=excluded.hours_watched, avg_viewers=excluded.avg_viewers,
+                        peak_viewers=excluded.peak_viewers, source=excluded.source,
+                        confidence=excluded.confidence
+                    """,
+                    (
+                        m["title_id"], m["year_month"], m["hours_watched"], m["avg_viewers"],
+                        m["peak_viewers"], m["source"], m["confidence"],
+                    ),
+                )
+                monthly_category_written += 1
+        conn.commit()
+
+    return (
+        tournaments_written, aliases_written, llm_checked_written, steam_release_written,
+        monthly_category_written,
+    )
 
 
 def load_titles_config() -> list[dict]:
@@ -572,10 +606,10 @@ def main() -> int:
     conn = get_connection()
     seed_titles_and_aliases(conn, load_titles_config())
 
-    n_tournaments, n_aliases, n_llm_checked, n_steam_releases = load_reference_data(conn)
+    n_tournaments, n_aliases, n_llm_checked, n_steam_releases, n_monthly_category = load_reference_data(conn)
     print(f"loaded {n_tournaments} tournament(s), {n_aliases} tournament alias(es), "
-          f"{n_llm_checked} LLM-checked series marker(s), {n_steam_releases} Steam release(s) "
-          f"from data/reference/")
+          f"{n_llm_checked} LLM-checked series marker(s), {n_steam_releases} Steam release(s), "
+          f"{n_monthly_category} monthly category history row(s) from data/reference/")
 
     loaded = already_loaded_files(conn)
     all_files = sorted(RAW_DIR.glob("**/*.json.gz"))

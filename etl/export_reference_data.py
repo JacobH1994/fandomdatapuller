@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
 """Exports `tournaments`, `tournament_aliases`,
-`tournament_alias_llm_checked`, and `steam_release_history` to committed
-JSONL files under `data/reference/`, so `research.db` is rebuildable
-from committed repo contents ALONE (`data/raw/` + `data/reference/`),
-not just `data/raw/`.
+`tournament_alias_llm_checked`, `steam_release_history`, and
+`monthly_category_history` to committed JSONL files under
+`data/reference/`, so `research.db` is rebuildable from committed repo
+contents ALONE (`data/raw/` + `data/reference/`), not just `data/raw/`.
+
+**`monthly_category_history`, added 2026-09-09 — closing the exact gap
+this file already exists to close, made a THIRD time (steam_release_history
+was the second — see below).** Confirmed live: this table had regressed
+to 0 rows (from a documented 1,690) after an `etl/load_snapshots.py
+--rebuild` ran with this table still uncovered here. Both its sources are
+themselves recoverable in principle (`collectors/kaggle_import.py`'s
+manually-downloaded CSV, still present locally; `etl/
+compute_monthly_category_totals.py`'s derivation from
+`language_mix_snapshots`) — but "recoverable if you remember to rerun two
+specific scripts" is exactly the kind of silent gap this export mechanism
+exists to eliminate, and it had already bitten this project once before
+without that being enough to close it. Keyed on `(title_id, year_month)`,
+not the raw autoincrement `id` — same natural-key-upsert shape as every
+other table here.
 
 **`steam_release_history` (PRD §9.12a Track A), added 2026-09-08 —
 closing the exact gap this file already exists to close, before it got
@@ -89,6 +104,11 @@ STEAM_RELEASE_COLUMNS = [
     "fetched_at", "source", "confidence",
 ]
 
+MONTHLY_CATEGORY_COLUMNS = [
+    "title_id", "year_month", "hours_watched", "avg_viewers", "peak_viewers",
+    "source", "confidence",
+]
+
 
 def main() -> int:
     REFERENCE_DIR.mkdir(parents=True, exist_ok=True)
@@ -129,6 +149,15 @@ def main() -> int:
         for row in rows:
             f.write(json.dumps(dict(zip(STEAM_RELEASE_COLUMNS, row))) + "\n")
     print(f"wrote {len(rows)} Steam release record(s) to {steam_release_path}")
+
+    monthly_category_path = REFERENCE_DIR / "monthly_category_history.jsonl"
+    with open(monthly_category_path, "w") as f:
+        rows = conn.execute(
+            f"SELECT {', '.join(MONTHLY_CATEGORY_COLUMNS)} FROM monthly_category_history ORDER BY title_id, year_month"
+        ).fetchall()
+        for row in rows:
+            f.write(json.dumps(dict(zip(MONTHLY_CATEGORY_COLUMNS, row))) + "\n")
+    print(f"wrote {len(rows)} monthly category history row(s) to {monthly_category_path}")
 
     conn.close()
     return 0

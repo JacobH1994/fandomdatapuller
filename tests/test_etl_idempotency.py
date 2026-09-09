@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pytest
 
+import etl.load_snapshots as load_snapshots
 from etl.load_snapshots import (
     REPO_ROOT,
     load_one_file,
@@ -19,6 +20,7 @@ from etl.load_snapshots import (
     load_one_steam_file,
     load_one_steam_discovery_file,
     load_one_steam_cohort_file,
+    load_reference_data,
 )
 
 SCHEMA_PATH = REPO_ROOT / "etl" / "schema.sql"
@@ -442,3 +444,26 @@ def test_steam_cohort_weekly_taper_after_90_days(conn):
     finally:
         path.unlink()
         FIXTURE_DIR_STEAM_COHORT.rmdir()
+
+
+def test_monthly_category_history_reference_load_is_idempotent(conn, tmp_path, monkeypatch):
+    # load_reference_data() reads from a module-level REFERENCE_DIR
+    # constant, not a parameter — monkeypatched to a tmp_path here rather
+    # than writing into the real data/reference/ (which this session's
+    # gap-closing fix means is no longer empty, unlike every other
+    # reference file's tests below it in this project's history).
+    monkeypatch.setattr(load_snapshots, "REFERENCE_DIR", tmp_path)
+    path = tmp_path / "monthly_category_history.jsonl"
+    path.write_text(
+        json.dumps({
+            "title_id": "dota2", "year_month": "2026-01", "hours_watched": 1234.5,
+            "avg_viewers": 500.0, "peak_viewers": 900.0, "source": "kaggle_import",
+            "confidence": "proxy_estimate",
+        }) + "\n"
+    )
+
+    load_reference_data(conn)
+    load_reference_data(conn)  # second load must not duplicate the row
+
+    rows = conn.execute("SELECT hours_watched FROM monthly_category_history WHERE title_id = 'dota2'").fetchall()
+    assert rows == [(1234.5,)]
