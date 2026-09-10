@@ -1,0 +1,39 @@
+name: External trigger -- daily fan-out
+
+# Counterpart to dispatch_hourly.yml -- see that file's own comment for
+# the full "why this exists" explanation. This one is for the two
+# collectors whose *design* is daily, not hourly (steam_discovery_poll.py
+# Track B part 1, steam_cohort_poll.py Track B part 2 -- PRD §9.12a): a
+# missed cron tick for these is a smaller loss than for the hourly-class
+# collectors, but the same underlying GitHub `schedule` unreliability
+# applies, so they get the same fix rather than being left on the
+# degraded native scheduler.
+#
+# Meant to be called by an external cron service once daily (see docs/
+# external_scheduler_setup.md).
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger every daily-cadence collector
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+          overall_status=0
+          for wf in steam_discovery_poll.yml steam_cohort_poll.yml; do
+            echo "[info] dispatching $wf"
+            if ! gh workflow run "$wf" --ref main; then
+              echo "[warn] failed to dispatch $wf"
+              overall_status=1
+            fi
+          done
+          exit $overall_status
