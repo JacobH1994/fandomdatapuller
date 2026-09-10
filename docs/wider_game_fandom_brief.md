@@ -35,7 +35,12 @@ The third research brief in this project (added 2026-09-09, alongside [[esports_
 
 ## 5. Findings
 
-None yet — this brief was created the same day its data source was built. First finding expected once `platform_viewership_snapshots` accumulates enough of a window to compute a real (not single-poll) creator-crossover comparison against the esports baseline in `notebooks/creator_crossover.ipynb`.
+**First real findings, 2026-09-10, from Grand Theft Auto V specifically** — not question 1 (that still needs a longer window), but genuine early results on question 3's structural-comparison spirit and directly useful groundwork for question 2's GTA 6 case study:
+
+- **GTA V's historical Twitch trajectory (2016-2024, read directly from the raw Kaggle CSV, not loaded into `monthly_category_history` since GTA V isn't a tracked title) shows four distinct step-changes, not smooth growth**: a 2017 jump, a much larger 2019 one, an all-time peak of 253M hours/month in 2021, then a stable #2-5 Twitch rank ever since — no meaningful decline since that 2021 peak, unlike several tracked esports titles this project has studied.
+- **Grand Theft Auto VI already exists as its own Twitch category** (`game_id` 1867279146, confirmed live), with zero live streams as of this check — seeded ahead of any real gameplay availability. Directly useful for question 2: this project can now watch that category activate in real time.
+- **GTA V's non-esports creator ecosystem turned out to have real internal structure worth its own permanent classification**: `etl/classify_gta_content_segment.py` (added 2026-09-10, user request — "NoPixel as a subdivision of GTA RP, GTA RP as a subdivision of GTA V") persists a three-tier `content_segment` (`nopixel`/`gta_rp_other`/`non_rp`) on every GTA V row in `platform_viewership_snapshots`, the same pattern `classify_broadcast_tier.py` already established for the 23 tracked titles. Headline result: NoPixel (295 channels) carries 40.6% of all GTA V viewer-time — more than the 2,945 channels spread across every *other* named RP server combined (18.6%). Full detail, including the language contrast (NoPixel 96.3% English vs. the broader RP scene's 36.0%), in `notebooks/gta_v_deep_dive.ipynb`.
+- Question 1 (esports-vs-general insularity) still needs a longer window — nothing changed there yet.
 
 ## 6. Open items
 

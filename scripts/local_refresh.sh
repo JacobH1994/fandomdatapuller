@@ -27,9 +27,15 @@
 #      you've just curated a new config/channels.yaml or added LLM
 #      aliases, re-run with --full-reclassify separately afterward — this
 #      routine's default is incremental only.
+#   7. etl/classify_gta_content_segment.py -> sets content_segment
+#      (nopixel/gta_rp_other/non_rp) on any newly unclassified GTA V rows
+#      in platform_viewership_snapshots (PRD §9.16-adjacent, the nested
+#      GTA RP taxonomy — user request, 2026-09-10). Same incremental-by-
+#      default convention as step 6; re-run with --full-reclassify if the
+#      classification ruleset itself changes.
 #
 # Usage:
-#   scripts/local_refresh.sh                  # steps 2-6, no Liquipedia crawl
+#   scripts/local_refresh.sh                  # steps 2-7, no Liquipedia crawl
 #   scripts/local_refresh.sh --with-crawl      # also runs the Liquipedia crawl first
 #   scripts/local_refresh.sh --with-llm-aliases  # step 4 uses the LLM (costs money, needs ANTHROPIC_API_KEY)
 
@@ -70,7 +76,10 @@ fi
 echo "=== 5/6: export_reference_data (data/reference/*.jsonl, for commit) ==="
 python3 etl/export_reference_data.py
 
-echo "=== 6/6: classify_broadcast_tier (incremental) ==="
+echo "=== 6/7: classify_broadcast_tier (incremental) ==="
 python3 etl/classify_broadcast_tier.py
+
+echo "=== 7/7: classify_gta_content_segment (incremental) ==="
+python3 etl/classify_gta_content_segment.py
 
 echo "=== done ==="

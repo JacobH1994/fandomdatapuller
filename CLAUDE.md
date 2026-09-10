@@ -293,6 +293,7 @@ Its individual steps, runnable on their own too:
 python etl/generate_tournament_aliases.py     # tournament_aliases; --skip-llm for rule-based only
 python etl/export_reference_data.py           # data/reference/*.jsonl, for commit
 python etl/classify_broadcast_tier.py         # viewership_snapshots.broadcast_tier; --full-reclassify to redo everything
+python etl/classify_gta_content_segment.py    # platform_viewership_snapshots.content_segment (GTA V only); --full-reclassify to redo everything
 ```
 
 Run tests:
