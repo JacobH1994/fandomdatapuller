@@ -38,6 +38,30 @@ for nb in "$@"; do
   echo "[info] $name: notebook -> html (no code input)"
   jupyter nbconvert --to html --no-input --output-dir "$TMP_HTML_DIR" "$nb"
 
+  # The default JupyterLab HTML template caps each output cell's width via
+  # .jp-OutputArea-child { table-layout: fixed; overflow: hidden; } --
+  # harmless live (a wide dataframe just gets a scrollbar), but print/PDF
+  # has no scroll interaction, so anything past that width silently
+  # vanishes. Confirmed directly (2026-09-10): a 6-column comparison table
+  # lost its rightmost column(s) this way. Appended override wins the
+  # cascade by document order (same specificity, comes last).
+  python3 - "$TMP_HTML_DIR/$name.html" <<'PY'
+import sys
+path = sys.argv[1]
+with open(path) as f:
+    html = f.read()
+override = """
+<style>
+.jp-OutputArea-child { display: block !important; table-layout: auto !important; overflow: visible !important; }
+.jp-OutputArea-output { overflow: visible !important; }
+table.dataframe { font-size: 8px; }
+</style>
+"""
+html = html.replace("</head>", override + "</head>")
+with open(path, "w") as f:
+    f.write(html)
+PY
+
   echo "[info] $name: html -> pdf (headless Chrome)"
   "$CHROME_BIN" --headless --disable-gpu --no-sandbox --no-pdf-header-footer \
     --print-to-pdf="$OUT_DIR/$name.pdf" \
