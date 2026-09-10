@@ -40,6 +40,21 @@ the `poll.yml` workflow while refactoring something else, even briefly. If a
 change risks the collector, make it in a way that keeps polling running, or
 don't make it yet.
 
+**GitHub's own `schedule` trigger cannot be trusted to actually deliver
+hourly cadence — confirmed directly, not assumed (2026-09-10).** A week of
+`poll.yml` run history showed a real average gap of **3.8 hours** against
+the configured 1-hour cron, present well before this repo had many
+concurrently-scheduled workflows (ruling out our own concurrency as the
+cause — this is GitHub deprioritizing `schedule`-triggered runs for this
+repo at the platform level). Fixed by triggering externally instead:
+`.github/workflows/dispatch_hourly.yml`/`dispatch_daily.yml` accept
+`workflow_dispatch` (API-triggered, not subject to the same delay) and fan
+out to every real collector plus the healthcheck. See `docs/
+external_scheduler_setup.md` for the (external, account-gated) setup this
+still needs, and re-run the same gap analysis periodically — if actual
+cadence ever drifts back toward the old ~4h pattern, the external cron
+service is the first thing to check, not this repo's own config.
+
 **The same applies to `collectors/youtube_poll.py` / `youtube_poll.yml`
 (PRD §9.7, built 2026-09-08)** — YouTube's live-viewer-count API is exactly
 as unbackfillable as Twitch's. Deliberately a fully separate script, config

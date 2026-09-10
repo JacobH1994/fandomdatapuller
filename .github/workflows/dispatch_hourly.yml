@@ -1,0 +1,48 @@
+name: External trigger -- hourly fan-out
+
+# Exists because GitHub's own `schedule` event was found unreliable for
+# this repo -- confirmed 2026-09-10 against a week of poll.yml run
+# history: real average gap 3.8h against a configured 1h cron, present
+# well before this repo had many concurrently-scheduled workflows (so
+# not our own concurrency; GitHub deprioritizing `schedule`-triggered
+# runs is the far more likely cause). See CLAUDE.md's "one rule" section
+# and docs/system_reference.md for the full finding.
+#
+# `workflow_dispatch` (API-triggered) runs don't appear to be subject to
+# the same best-effort delay. This workflow is meant to be called by an
+# external cron service on an hourly cadence (see docs/
+# external_scheduler_setup.md) -- the only credential that setup needs is
+# a narrowly-scoped PAT for THIS one hop; fanning out to the actual
+# collectors below uses the repo's own built-in GITHUB_TOKEN
+# (actions:write, same-repo only), not a broader token.
+#
+# Every underlying collector KEEPS its own `schedule:` trigger too, as a
+# free redundant fallback -- if GitHub's scheduler happens to fire on
+# its own, that's a bonus poll, not a conflict (the existing fetch+
+# rebase+retry push logic already handles two near-simultaneous runs).
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger every hourly-cadence collector + the healthcheck
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+          overall_status=0
+          for wf in poll.yml youtube_poll.yml steam_poll.yml twitch_platform_poll.yml healthcheck.yml; do
+            echo "[info] dispatching $wf"
+            if ! gh workflow run "$wf" --ref main; then
+              echo "[warn] failed to dispatch $wf"
+              overall_status=1
+            fi
+          done
+          exit $overall_status
