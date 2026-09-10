@@ -302,17 +302,26 @@ Export a full-detail (code stripped, everything else kept) PDF of any notebook, 
 scripts/export_notebook_pdfs.sh notebooks/<name>.ipynb
 ```
 
-Build an external-facing "Boudica" branded report PDF (`pdf_outputs/`) — turquoise
-accent, repeating watermark, clean prose only, no file paths/code/column names.
-Write the report body by hand first (`reports/<name>/report.md` + `reports/<name>/figs/`,
-not auto-derived from a notebook — see `docs/system_reference.md`'s Scripts section
-for why), then:
+**A "boudica report"** is this project's own name for an external-facing,
+"Boudica" branded PDF (`pdf_outputs/`) — turquoise accent, repeating
+"BOUDICA" watermark, Fraunces (headings) + IBM Plex Sans (body) — clean
+prose and charts only, no file paths/code/column names, closed out with
+a Sources section naming real data provenance in plain language (not
+internal table/script names). When a request uses that phrase ("give me
+a boudica report on X"), it means: build one this way. Write the report
+body by hand first (`reports/<name>/report.md` + `reports/<name>/figs/`,
+not auto-derived from a notebook — see `docs/system_reference.md`'s Scripts
+section for why), ending the markdown with a `## Sources` section, then:
 
 ```
 python scripts/build_client_report.py \
-  --title "Report Title" --meta "10 September 2026 · Research Note" \
+  --title "Report Title" --meta "10 September 2026" \
   --body reports/<name>/report.md --output pdf_outputs/<name>.pdf
 ```
+
+The kicker line under the title defaults to plain "RESEARCH NOTE" (no
+"Boudica" prefix — the watermark alone carries the brand); override with
+`--kicker` only if a specific report calls for something else.
 
 Run tests:
 

@@ -41,3 +41,9 @@ Re-plotted by time of day rather than sequence, the actual shape is a cycle: NoP
 ## Bottom line
 
 Grand Theft Auto V remains one of Twitch's largest and most durable categories, with roleplay content — not the base game — making up the majority of its audience. Within that roleplay audience, NoPixel is dramatically overrepresented relative to its creator count, drawing viewing on par with the rest of the category's roleplay ecosystem combined despite a tiny fraction of the creators. Its measured share of attention varies considerably by time of day, and any single reading of that share should be treated as a snapshot of a cycle, not a fixed figure.
+
+## Sources
+
+- **Live viewership.** Twitch's own public API, polled repeatedly over time to build a record of concurrent viewers, channel counts, stream titles, tags, and language by category — including the specific same-day morning and evening measurements behind the time-of-day finding in this report.
+- **Historical trend.** A published historical dataset of Twitch category viewing hours, covering 2016 through 2024, used for the long-run trend in Figure 1.
+- **Content classification (roleplay server, NoPixel, or neither).** Determined from each stream's own title and tags at the time it was live, using a fixed set of matching rules rather than manual review or guesswork.
