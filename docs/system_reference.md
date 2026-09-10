@@ -66,7 +66,9 @@ than hand-editing it (see CLAUDE.md).
 
 | File | What it does |
 |---|---|
-| `local_refresh.sh` | Orchestrates the local pipeline in fixed order: (optional) Liquipedia crawl → `load_snapshots.py` → `official_channel_candidates.ipynb` → `generate_tournament_aliases.py` → `export_reference_data.py` → `classify_broadcast_tier.py`. See §4. |
+| `local_refresh.sh` | Orchestrates the local pipeline in fixed order: (optional) Liquipedia crawl → `load_snapshots.py` → `official_channel_candidates.ipynb` → `generate_tournament_aliases.py` → `export_reference_data.py` → `classify_broadcast_tier.py` → `classify_gta_content_segment.py`. See §4. |
+| `export_notebook_pdfs.sh` | Added 2026-09-10. Full-detail notebook → PDF, code stripped (`jupyter nbconvert --no-input`) but every internal detail (file paths, column names, methodology notes) kept — for the researcher's own record, not external sharing. Renders via headless Chrome, no LaTeX/wkhtmltopdf/playwright dependency |
+| `build_client_report.py` + `report_template.html` | Added 2026-09-10. A genuinely separate, external-facing PDF pipeline — takes a hand-written, jargon-free markdown "report body" (no file paths, code, or internal column/table names) plus chart images, renders through the "Boudica" branded template (turquoise accent, repeating watermark) via the same headless-Chrome engine. Source content lives under `reports/<name>/report.md` + `reports/<name>/figs/`, not derived automatically from a notebook — deliberately, since notebook commentary is written for this project's own record-keeping and reads very differently from a polished external deliverable |
 
 ### Config (`config/`)
 

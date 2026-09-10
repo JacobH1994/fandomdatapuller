@@ -13,6 +13,7 @@ ruptures>=1.1
 seaborn>=0.13
 plotly>=6.0
 kaleido>=0.2  # static PNG export for plotly figures, so notebook outputs are portable (render in GitHub's preview, not just a live Jupyter kernel) -- same reasoning every other notebook already embeds matplotlib PNGs, not interactive widgets
+markdown>=3.5  # scripts/build_client_report.py -- renders clean report-body markdown to HTML for the Boudica PDF report pipeline
 
 # anthropic (LLM-derived tournament aliases, etl/generate_tournament_aliases.py)
 # is deliberately NOT listed here. This file is installed as-is by
