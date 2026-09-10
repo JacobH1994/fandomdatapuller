@@ -46,3 +46,10 @@ Mobile Legends' overall Twitch presence has grown substantially and consistently
 ## Bottom line
 
 The most accurate description of this community is a genuine, sustained, broad-based Russian-speaking following — dominant as a share of Mobile Legends' own, comparatively modest Twitch audience, but not large in absolute terms next to the platform's biggest equivalent communities. It reads as a real fragment of the platform's much larger pre-existing Russian-speaking audience engaging with this specific title, rather than evidence that Mobile Legends itself has an unusually large following there.
+
+## Sources
+
+- **Live viewership and channel language.** Twitch's own public API, polled repeatedly over time to record concurrent viewers, channel counts, and broadcast language across Mobile Legends and the comparison titles.
+- **Historical trend.** A published historical dataset of Twitch category viewing hours, covering 2020 through 2024, used for the long-run trend in Figure 3.
+- **Competitive circuits and prize pools.** Twitch's public tournament-and-team wiki, covering regional Mobile Legends competitions, their sponsors, and their prize pools.
+- **Tournament-broadcast overlap.** Cross-referencing live viewing hours against the same tournament schedule, to estimate what share of Russian-language viewing coincided with an active broadcast.

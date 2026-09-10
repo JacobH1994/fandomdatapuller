@@ -27,3 +27,8 @@ Counter-Strike and Dota 2 both show a strong, consistent concentration in Russia
 ## Reading the two maps together
 
 Neither map should be read in isolation. A title can look thin on the host-country map simply because of how its organizers name events, while still having a substantial, well-documented audience elsewhere. The two views answer different questions — where competition physically happens, and where the audience actually is — and a title's position on one map does not predict its position on the other.
+
+## Sources
+
+- **Tournament host countries.** Twitch's public tournament-and-team wiki, covering major events across all six titles and the country (or broader region, where that is all the organizer recorded) each was hosted in.
+- **Audience language and viewership.** Twitch's own public API, polled repeatedly over time to record broadcast language alongside concurrent viewers for each title, then mapped to the single country most confidently associated with each language.

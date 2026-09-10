@@ -16,11 +16,13 @@ scripts/report_template.html, and prints to PDF via headless Chrome
 Usage:
     python scripts/build_client_report.py \\
         --title "Report Title" \\
-        --kicker "BOUDICA RESEARCH NOTE" \\
         --meta "10 September 2026" \\
         --body reports/foo.md \\
-        --footer "Prepared by Boudica. Confidential." \\
         --output pdf_outputs/foo.pdf
+
+"Boudica report" is this project's own name for a PDF built this way --
+when a request uses that phrase, this is the script and template it means
+(see CLAUDE.md).
 """
 from __future__ import annotations
 
@@ -55,7 +57,7 @@ def find_chrome() -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--title", required=True)
-    parser.add_argument("--kicker", default="BOUDICA RESEARCH NOTE")
+    parser.add_argument("--kicker", default="RESEARCH NOTE")
     parser.add_argument("--meta", default="")
     parser.add_argument("--footer", default="Prepared by Boudica. Confidential — not for external distribution.")
     parser.add_argument("--body", required=True, type=Path, help="markdown file with the report's clean prose content")
