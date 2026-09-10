@@ -477,13 +477,13 @@ Phases 2 through 4 can overlap; Phase 1 should not wait for any of them.
 
 ## 19. Open decisions
 
-Reviewed 2026-09-09 against live repo/DB state (not just re-read) — several items below turned out stale; corrected in place rather than left for the next pass, per §15.
+Reviewed 2026-09-09 against live repo/DB state (not just re-read) — several items below turned out stale; corrected in place rather than left for the next pass, per §15. Re-checked again 2026-09-10 (see the struck item just below).
 
 **Priority 1 — blocked on the same unfinished prerequisite, not urgent until it's done:**
 
-- **`config/channels.yaml` curation is still empty** (0 `is_official_broadcast`/`broadcast_tier='official'` rows in `research.db`, confirmed live) — this is the shared blocker behind the next two items, not a separate one:
-  - **Individual creator vs. media-org channel** — `broadcast_tier` doesn't distinguish a single creator crossing over from a network channel simulcasting several titles' tournaments. Undesigned; affects how much to trust `creator_crossover.ipynb`'s results once channels are curated and official-org channels start appearing in that analysis.
-  - **Whether `milestone_year` should eventually gate on the viewership clause** — currently informational only, because the viewership signal is game-fandom (category-wide), not esports-specific. Literally cannot be revisited until official-broadcast-tier Twitch history exists to build an esports-specific check against, independent of how much calendar time passes.
+- ~~**`config/channels.yaml` curation is still empty**~~ Partially resolved, 2026-09-09/10: curation has started — `counter_strike` and `dota2` are now curated on both `config/channels.yaml` (Twitch) and `config/channels_youtube.yaml` (YouTube), and `viewership_snapshots.is_official_broadcast=1` has 30 real rows (was 0, confirmed live via `research.db`, 2026-09-10). The other 21 titles are still uncurated, so this is a partial unblock, not a full one — treat the two sub-items below as revisitable now for `counter_strike`/`dota2` specifically, still blocked for the rest:
+  - **Individual creator vs. media-org channel** — `broadcast_tier` doesn't distinguish a single creator crossing over from a network channel simulcasting several titles' tournaments. Still undesigned. Now revisitable in principle for `counter_strike`/`dota2` (official-org channels are in `creator_crossover.ipynb`'s data now), but hasn't actually been revisited yet — remains open.
+  - **Whether `milestone_year` should eventually gate on the viewership clause** — currently informational only, because the viewership signal is game-fandom (category-wide), not esports-specific. Official-broadcast-tier Twitch history now exists for 2 of 23 titles, technically enough to prototype an esports-specific check against — but not enough breadth to decide the general policy from. Still open; revisit once curation covers more titles.
 
 **Priority 2 — genuinely open, no urgency signal:**
 
@@ -491,6 +491,8 @@ Reviewed 2026-09-09 against live repo/DB state (not just re-read) — several it
 - **Event-mode trigger list** — which broadcasts warrant 5–15 minute polling, and who maintains that calendar.
 - **Chat message volume as an interactivity metric** — a genuinely distinct signal from viewer count (active participation vs. passive attention), directly relevant to the digital-fandom framing. Not a Phase 1 addition: Twitch doesn't expose chat volume via `Get Streams`, so it needs a persistent connection (IRC or EventSub) rather than a periodic poll — a new component, not a new field. Naturally scoped to the official-channel list only, same as the rest of §9.1's curated capture. Worth its own phase once the core collector is stable.
 - **Reddit access is blocked pending Reddit For Researchers approval** (§8) — do not build the subreddit-overlap notebook (multi-homing test, Limitation 1) or any community-signals connector against the standard API. Apply and wait; treat as a real gate, not a formality. If eligibility fails, Limitation 1 (multi-homing) has no remaining identified path and should be documented as unresolved rather than worked around.
+- **Player/roster connector (§9.15)** — scoped 2026-09-09, not built, no build date decided. The two harder pieces it depends on (a `team_history` parser for Liquipedia's `Infobox player`, and bottom-up roster reconstruction since `Infobox team` doesn't enumerate membership) are both real, scoped work, not blocked on anything external — purely a prioritization call against the rest of the backlog.
+- **`collectors/liquipedia.py`'s `{{TeamPrizePool}}` gap** — found 2026-09-09 diagnosing Dota2's prize-pool coverage (system_reference.md §6), confirmed to understate at least one real tournament series (BLAST SLAM) and likely to affect `counter_strike` too at smaller scale (not yet checked). A scoped parser extension, not yet built or prioritized.
 
 **Resolved or superseded since last written — kept here (struck through) rather than deleted, so the reasoning stays visible:**
 

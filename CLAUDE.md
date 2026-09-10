@@ -171,19 +171,44 @@ Also built: Phase 3 genre/platform classification; `get_success_milestone`'s
 import; several analysis notebooks (`notebooks/`); `tournament_aliases`
 (rule-based + LLM-derived, `etl/generate_tournament_aliases.py`);
 `viewership_snapshots.broadcast_tier` co-stream detection
-(`etl/classify_broadcast_tier.py`); `data/reference/` exports; the
-YouTube live collector (PRD §9.7, `collectors/youtube_poll.py`) — built
-but not yet collecting anything real, since `config/channels_youtube.yaml`
-still needs human curation (same bootstrap gap `config/channels.yaml`
-has had from the start); the Steam current-player collector (PRD §9.12,
-`collectors/steam_poll.py`, 11 titles pre-configured in
-`config/steam_appids.yaml`) — built and already collecting real data
-locally, blocked only on `STEAM_API_KEY` being added as a GitHub Actions
-repo secret before the scheduled workflow can run; the platform-wide,
-non-esports Twitch collector (PRD §9.16, `collectors/
-twitch_platform_poll.py`, built 2026-09-09 for `docs/
-wider_game_fandom_brief.md`) — built and tested locally, one real
-snapshot loaded, not yet run on its own GitHub Actions schedule. See
+(`etl/classify_broadcast_tier.py`); `platform_viewership_snapshots.
+content_segment` nested GTA RP/NoPixel classification (PRD §9.16,
+`etl/classify_gta_content_segment.py`, built 2026-09-10); `data/
+reference/` exports; the YouTube live collector (PRD §9.7, `collectors/
+youtube_poll.py`) — live and collecting real data on its GitHub Actions
+schedule; the Steam current-player collector (PRD §9.12, `collectors/
+steam_poll.py`, 11 titles pre-configured in `config/steam_appids.yaml`)
+— live and collecting real data on schedule (`STEAM_API_KEY` added as a
+repo secret 2026-09-08); the platform-wide, non-esports Twitch collector
+(PRD §9.16, `collectors/twitch_platform_poll.py`, built 2026-09-09 for
+`docs/wider_game_fandom_brief.md`) — live and collecting real data on
+its own GitHub Actions schedule; the "Boudica" branded external report
+pipeline (`scripts/build_client_report.py`, see Common Tasks above).
+
+`config/channels.yaml` (Twitch) and `config/channels_youtube.yaml`
+(YouTube) curation has **started but is far from complete**: `counter_strike`
+and `dota2` are curated on both (live-verified official/tournament-organizer
+channels, not guessed), the other 21 tracked titles are still empty. This
+unblocks official-broadcast-tier analysis for those two titles only —
+`viewership_snapshots.is_official_broadcast=1` went from 0 to a real,
+nonzero count, but PRD §19's two channels-curation-blocked open decisions
+are only partially revisitable, not resolved, until more titles are
+curated.
+
+GitHub's own `schedule` trigger for GitHub Actions workflows was confirmed
+unreliable for this repo (see "The one rule that overrides everything
+else" above) — `dispatch_hourly.yml`/`dispatch_daily.yml` exist as the
+fix, but need an **external** cron service hitting the GitHub API to
+actually work (`docs/external_scheduler_setup.md`). That external half is
+in progress (PAT generated, a cron-job.org hourly job created 2026-09-10)
+but **not yet confirmed actually firing on a real recurring schedule** —
+verify via `gh run list --workflow=dispatch_hourly.yml` before relying on
+it; every underlying collector still keeps its native (unreliable)
+`schedule:` trigger as a fallback in the meantime, so no data is at risk
+either way, just the reliability improvement isn't confirmed yet.
+
+See `docs/system_reference.md` for exact current row counts, config
+curation state, and workflow status (regenerated 2026-09-10), and
 `docs/milestone_reconciliation.md` and the PRD's changelog-style sections
 for the reasoning behind non-obvious calls in this area — not duplicated
 here.
