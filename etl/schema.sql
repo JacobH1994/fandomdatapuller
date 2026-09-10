@@ -498,6 +498,15 @@ CREATE TABLE IF NOT EXISTS platform_viewership_snapshots (
     language TEXT,
     source TEXT NOT NULL DEFAULT 'twitch_api',
     confidence TEXT NOT NULL DEFAULT 'verified',
+    -- Nested content classification (added 2026-09-10, `etl/
+    -- classify_gta_content_segment.py`) -- 'nopixel' / 'gta_rp_other' /
+    -- 'non_rp', NULL until classified. Deliberately named generically
+    -- (not gta_v_segment) since the column could carry a ruleset for a
+    -- different game later, the same way viewership_snapshots.broadcast_tier
+    -- is one column serving whichever title's rows it's applied to --
+    -- today only game_id='32982' (Grand Theft Auto V) has a ruleset.
+    content_segment TEXT,
+    content_segment_confidence TEXT,
     UNIQUE (channel_id, captured_at)
 );
 
