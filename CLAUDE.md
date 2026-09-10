@@ -296,6 +296,24 @@ python etl/classify_broadcast_tier.py         # viewership_snapshots.broadcast_t
 python etl/classify_gta_content_segment.py    # platform_viewership_snapshots.content_segment (GTA V only); --full-reclassify to redo everything
 ```
 
+Export a full-detail (code stripped, everything else kept) PDF of any notebook, for your own record — not for sharing externally:
+
+```
+scripts/export_notebook_pdfs.sh notebooks/<name>.ipynb
+```
+
+Build an external-facing "Boudica" branded report PDF (`pdf_outputs/`) — turquoise
+accent, repeating watermark, clean prose only, no file paths/code/column names.
+Write the report body by hand first (`reports/<name>/report.md` + `reports/<name>/figs/`,
+not auto-derived from a notebook — see `docs/system_reference.md`'s Scripts section
+for why), then:
+
+```
+python scripts/build_client_report.py \
+  --title "Report Title" --meta "10 September 2026 · Research Note" \
+  --body reports/<name>/report.md --output pdf_outputs/<name>.pdf
+```
+
 Run tests:
 
 ```

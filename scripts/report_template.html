@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 34mm 20mm 20mm 20mm; }
+
+  :root {
+    --teal-dark: #0b5f66;
+    --teal: #0e8c8f;
+    --teal-light: #d9f2f0;
+    --ink: #1c2224;
+    --muted: #5c6b6c;
+    --rule: #cfe8e6;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    font-size: 11.5pt;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Watermark: fixed position repeats on every printed page. */
+  .watermark {
+    position: fixed;
+    top: 8mm;
+    right: 20mm;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--teal);
+    opacity: 0.5;
+  }
+
+  .report-header {
+    border-bottom: 2.5px solid var(--teal);
+    padding-bottom: 14px;
+    margin-bottom: 28px;
+  }
+  .report-header .kicker {
+    font-size: 9.5pt;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal-dark);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .report-header h1 {
+    font-size: 22pt;
+    margin: 0 0 6px 0;
+    max-width: 66%;
+    color: var(--ink);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .report-header .meta {
+    font-size: 9.5pt;
+    color: var(--muted);
+  }
+
+  h1, h2, h3 { font-weight: 700; color: var(--teal-dark); }
+  h2 {
+    font-size: 14.5pt;
+    margin-top: 32px;
+    margin-bottom: 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--rule);
+  }
+  h3 {
+    font-size: 12pt;
+    margin-top: 22px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  p { margin: 0 0 12px 0; }
+  strong { color: var(--ink); font-weight: 700; }
+
+  ul, ol { margin: 0 0 12px 0; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+
+  /* General rule, not scoped to <figure> -- plain markdown image syntax
+     (![alt](src)) renders as a bare <img> inside a <p>, not a <figure>,
+     so a figure-scoped rule alone silently never applies and lets the
+     image overflow the page at its native pixel width. Confirmed
+     directly: this is what caused the tournament-map chart to run off
+     the right edge before this rule was added. */
+  img { max-width: 100%; height: auto; }
+
+  figure { margin: 20px 0; text-align: center; page-break-inside: avoid; }
+  figure img { border: 1px solid var(--rule); border-radius: 3px; }
+  p > img:only-child { border: 1px solid var(--rule); border-radius: 3px; display: block; margin: 18px auto; }
+  /* A caption written as its own italic paragraph right after an image
+     (the convention used in every report body here) -- styled to read
+     as a caption even without a real <figure>/<figcaption> wrapper. */
+  p > em:only-child {
+    display: block;
+    font-size: 9.5pt;
+    color: var(--muted);
+    margin-top: -8px;
+  }
+  figcaption {
+    font-size: 9.5pt;
+    color: var(--muted);
+    margin-top: 8px;
+    text-align: left;
+  }
+
+  .callout {
+    background: var(--teal-light);
+    border-left: 3px solid var(--teal);
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 10.8pt;
+  }
+  .callout strong:first-child { color: var(--teal-dark); }
+
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 10pt; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); }
+  th { color: var(--teal-dark); font-weight: 700; border-bottom: 1.5px solid var(--teal); }
+
+  .report-footer {
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font-size: 8.5pt;
+    color: var(--muted);
+  }
+
+  h2, h3 { page-break-after: avoid; }
+</style>
+</head>
+<body>
+  <div class="watermark">BOUDICA</div>
+
+  <div class="report-header">
+    <div class="kicker">{{KICKER}}</div>
+    <h1>{{TITLE}}</h1>
+    <div class="meta">{{META}}</div>
+  </div>
+
+  {{BODY}}
+
+  <div class="report-footer">{{FOOTER}}</div>
+</body>
+</html>
