@@ -359,6 +359,31 @@ The kicker line under the title defaults to plain "RESEARCH NOTE" (no
 "Boudica" prefix — the watermark alone carries the brand); override with
 `--kicker` only if a specific report calls for something else.
 
+**A second Boudica format — "boudica presentation"** — was added
+2026-09-11: a landscape slide-deck PDF in the Matthew Ball "State of ..."
+style, one declarative headline per slide with a single large chart doing
+the demonstrating, section-divider slides chaining the argument, a
+Sources slide to close. Built the same way as the report format —
+`scripts/build_client_presentation.py` + `scripts/presentation_template.html`
+render a hand-authored `presentations/<name>/deck.yaml` (slides: title,
+section, content — headline + image + optional source note, or closing)
+plus `presentations/<name>/figs/*.png` through the same headless-Chrome
+engine. When a request asks for a "boudica presentation" (or asks to
+present findings "in Ball's style" / as a slide deck rather than a
+report), this is the pattern — see `presentations/state_of_cs/` for a
+full worked example (21 slides synthesizing the Counter-Strike lifecycle
+brief's growth/maturity findings across audience, competitive, grassroots,
+and creator-ecosystem angles). The watermark uses a plain corner
+`position: absolute` inside each self-contained slide `<div>`, not the
+report format's `@page` margin-box trick — that trick exists to solve a
+problem (content flowing continuously across page breaks) this format
+doesn't have, since every slide is its own discrete block.
+
+```
+python scripts/build_client_presentation.py \
+  --deck presentations/<name>/deck.yaml --output pdf_outputs/<name>.pdf
+```
+
 Run tests:
 
 ```
