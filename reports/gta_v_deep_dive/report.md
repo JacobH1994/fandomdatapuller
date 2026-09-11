@@ -1,6 +1,6 @@
 ## Executive summary
 
-Grand Theft Auto V is one of Twitch's largest and most durable content categories, and a large share of its audience is watching roleplay content rather than the base game. Within that roleplay audience, a single server — NoPixel — punches far above its weight: a small fraction of the creators account for roughly as much viewing as everything else in the category combined.
+A large share of Grand Theft Auto V's Twitch audience is watching roleplay content rather than the base game. Within that roleplay audience, a single server — NoPixel — punches far above its weight: a small fraction of the creators account for roughly as much viewing as everything else in the category combined.
 
 <div class="callout">
 <strong>Key finding.</strong> NoPixel's audience share appears to follow a daily cycle tied to time zone, not a sustained growth trend. A reading built from measurements taken only in the early-morning European hours initially looked like a steady climb; a single additional measurement taken during the European evening contradicted that outright. This is presented here as the corrected, honest picture, not the first impression.
@@ -8,13 +8,13 @@ Grand Theft Auto V is one of Twitch's largest and most durable content categorie
 
 ## A durable, growing category
 
-Grand Theft Auto V's Twitch audience has grown through several distinct step-changes since 2016 and has not meaningfully declined since its 2021 peak (Figure 1) — unusual durability compared with many competitive titles, which typically show a rise, a peak, and a gradual decline.
+Grand Theft Auto V's Twitch audience has grown through several distinct step-changes since 2016 and has not meaningfully declined since its 2021 peak (Figure 1).
 
 ![Historical viewing trend](figs/historical_clean.png)
 
 *Figure 1. Grand Theft Auto V's monthly Twitch viewing hours, 2016 to 2024.*
 
-Separately, Grand Theft Auto VI already has its own dedicated category on Twitch, created well ahead of the game's release — a category with no content in it yet, but one now available to monitor as soon as real activity begins.
+Grand Theft Auto VI already has its own dedicated category on Twitch, created well ahead of the game's release — empty for now, but available to monitor as soon as real activity begins.
 
 ## Roleplay is the majority of the category, and NoPixel dominates within it
 
@@ -40,7 +40,7 @@ Re-plotted by time of day rather than sequence, the actual shape is a cycle: NoP
 
 ## Bottom line
 
-Grand Theft Auto V remains one of Twitch's largest and most durable categories, with roleplay content — not the base game — making up the majority of its audience. Within that roleplay audience, NoPixel is dramatically overrepresented relative to its creator count, drawing viewing on par with the rest of the category's roleplay ecosystem combined despite a tiny fraction of the creators. Its measured share of attention varies considerably by time of day, and any single reading of that share should be treated as a snapshot of a cycle, not a fixed figure.
+Roleplay content — not the base game — makes up the majority of Grand Theft Auto V's Twitch audience. Within that roleplay audience, NoPixel is dramatically overrepresented relative to its creator count, drawing viewing on par with the rest of the category's roleplay ecosystem combined despite a tiny fraction of the creators. Its measured share of attention varies considerably by time of day, and any single reading of that share should be treated as a snapshot of a cycle, not a fixed figure.
 
 ## Sources
 

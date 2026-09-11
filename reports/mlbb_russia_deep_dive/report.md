@@ -37,7 +37,7 @@ A second, comparable mobile title shows the same underlying pattern independentl
 
 ## Historical context
 
-Mobile Legends' overall Twitch presence has grown substantially and consistently since 2020, more than doubling by the most recent complete year of historical data (Figure 3) — this is an active, growing title on the platform, not a fringe one.
+Mobile Legends' overall Twitch presence has grown substantially and consistently since 2020, more than doubling by the most recent complete year of historical data (Figure 3).
 
 ![Historical trajectory](figs/historical_clean.png)
 

@@ -3,7 +3,31 @@
 <head>
 <meta charset="utf-8">
 <style>
-  @page { size: A4; margin: 34mm 20mm 20mm 20mm; }
+  /* The watermark lives in this @top-right margin-box rule, not a
+     position:fixed element in the body -- confirmed via direct testing
+     that position:fixed in this Chrome print pipeline is anchored to
+     each page's own CONTENT box (inside the margins), not the physical
+     page edge, so a small positive offset (which looked fine on page 1,
+     where the header block pushes real content down) lands directly on
+     top of whatever body content starts a *continuation* page, since
+     nothing pushes it down there. @page margin-boxes render in the true,
+     always-blank margin strip on every page regardless of what content
+     starts that page -- the CSS-spec-correct mechanism for exactly this,
+     and confirmed live that Chrome's --print-to-pdf does support it
+     (undocumented anywhere else in this project; a real, useful find). */
+  @page {
+    size: A4;
+    margin: 34mm 20mm 20mm 20mm;
+    @top-right {
+      content: "BOUDICA";
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      font-style: italic;
+      font-size: 13px;
+      letter-spacing: 3px;
+      color: #0e8c8f;
+    }
+  }
 
   :root {
     --teal-dark: #0b5f66;
@@ -53,24 +77,17 @@
     margin: 0;
   }
 
-  /* Watermark: fixed position repeats on every printed page. */
-  .watermark {
-    position: fixed;
-    top: 8mm;
-    right: 20mm;
-    font-family: Georgia, "Times New Roman", serif;
-    font-weight: 700;
-    font-style: italic;
-    font-size: 13px;
-    letter-spacing: 3px;
-    color: var(--teal);
-    opacity: 0.5;
-  }
-
+  /* Right-aligned, not left -- a deliberate departure from the generic
+     left-aligned-header look every default AI-generated document/slide
+     defaults to ("very Claude"), per the user's own framing (2026-09-11).
+     No one's going to mistake this for anything but AI-assisted work, and
+     that's fine -- it might as well look like its own thing rather than
+     the unstyled default. */
   .report-header {
     border-bottom: 2.5px solid var(--teal);
     padding-bottom: 14px;
     margin-bottom: 28px;
+    text-align: right;
   }
   .report-header .kicker {
     font-family: "IBM Plex Sans", sans-serif;
@@ -86,7 +103,6 @@
     font-family: "Fraunces", Georgia, "Times New Roman", serif;
     font-size: 24pt;
     margin: 0 0 6px 0;
-    max-width: 66%;
     color: var(--ink);
     font-weight: 700;
     line-height: 1.25;
@@ -172,8 +188,6 @@
 </style>
 </head>
 <body>
-  <div class="watermark">BOUDICA</div>
-
   <div class="report-header">
     <div class="kicker">{{KICKER}}</div>
     <h1>{{TITLE}}</h1>
