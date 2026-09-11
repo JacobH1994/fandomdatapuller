@@ -328,12 +328,23 @@ scripts/export_notebook_pdfs.sh notebooks/<name>.ipynb
 ```
 
 **A "boudica report"** is this project's own name for an external-facing,
-"Boudica" branded PDF (`pdf_outputs/`) — turquoise accent, repeating
-"BOUDICA" watermark, Fraunces (headings) + IBM Plex Sans (body) — clean
-prose and charts only, no file paths/code/column names, closed out with
-a Sources section naming real data provenance in plain language (not
-internal table/script names). When a request uses that phrase ("give me
-a boudica report on X"), it means: build one this way. Write the report
+"Boudica" branded PDF (`pdf_outputs/`) — turquoise accent, a "BOUDICA"
+watermark repeating in the true page margin on every page (an `@page
+{ @top-right { ... } }` CSS margin-box rule, not a `position: fixed` div
+— confirmed live that `position: fixed` in this Chrome print pipeline
+anchors to each page's *content* box, not the physical page edge, which
+only looked right on page 1 where the header pushes content down; the
+margin-box approach is genuinely page-edge-relative and doesn't collide
+with content on continuation pages), Fraunces (headings) + IBM Plex Sans
+(body), a right-aligned front-page title block (deliberately not the
+generic left-aligned default) — clean prose and charts only, no file
+paths/code/column names, closed out with a Sources section naming real
+data provenance in plain language (not internal table/script names).
+**Assume the reader already knows the shape/maturity/role of whatever
+game or platform the report covers** — don't spend sentences restating
+well-known context ("X is one of the largest titles on Y"); get to the
+finding. When a request uses the phrase "boudica report" ("give me a
+boudica report on X"), it means: build one this way. Write the report
 body by hand first (`reports/<name>/report.md` + `reports/<name>/figs/`,
 not auto-derived from a notebook — see `docs/system_reference.md`'s Scripts
 section for why), ending the markdown with a `## Sources` section, then:

@@ -22,7 +22,7 @@ Dota 2, League of Legends, and Mobile Legends: Bang Bang all show broad, many-co
 
 *Figure 2. Share of each title's audience implied by broadcast language, mapped to the single country most confidently associated with that language. Percentages show how much of each title's total audience could be confidently mapped this way — languages spoken across many countries with no single dominant one (English, Spanish, Chinese, Arabic) are deliberately excluded rather than guessed.*
 
-Counter-Strike and Dota 2 both show a strong, consistent concentration in Russia — a well-established pattern for both titles. Free Fire's audience maps least confidently of the six (only 30%), because its largest single audience segment speaks Spanish, a language that cannot be attributed to one country with confidence — the true picture for Free Fire is understated here, not absent. Mobile Legends: Bang Bang's map shows an unusually strong Russia concentration as well; a full, separate investigation into whether that is representative of a genuinely large community or a temporary artifact is presented in a companion report.
+Counter-Strike and Dota 2 both show a strong, consistent concentration in Russia. Free Fire's audience maps least confidently of the six (only 30%), because its largest single audience segment speaks Spanish, a language that cannot be attributed to one country with confidence — the true picture for Free Fire is understated here, not absent. Mobile Legends: Bang Bang's map shows an unusually strong Russia concentration as well; a full, separate investigation into whether that is representative of a genuinely large community or a temporary artifact is presented in a companion report.
 
 ## Reading the two maps together
 
