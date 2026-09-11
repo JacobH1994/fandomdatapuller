@@ -1,0 +1,104 @@
+kicker: "Research Note · Presentation"
+title: "The State of Counter-Strike"
+subtitle: "A ten-year view of growth, maturity, and where the ceiling might be."
+date: "11 September 2026"
+deck_label: "The State of Counter-Strike"
+
+slides:
+  - type: section
+    numeral: "I."
+    heading: "Is Counter-Strike Still Growing?"
+
+  - type: content
+    headline: "Twitch viewing hours have grown through repeated step-changes since 2016 — with a real shock around the 2023 engine transition, not a smooth climb toward a ceiling."
+    image: figs/fig01_hours_trajectory.png
+    note: "Monthly category-wide Twitch hours watched, all Counter-Strike. Source: a published historical Twitch dataset, 2016–2024."
+
+  - type: content
+    headline: "A logistic growth-curve fit — the standard test for a market approaching saturation — fails outright: the model cannot even identify where a ceiling would be."
+    image: figs/fig02_logistic_fit.png
+    note: "Best-fit S-curve against complete-year totals. The fitted ceiling's own uncertainty exceeds the estimate itself — shock-and-recovery, not smooth deceleration."
+
+  - type: content
+    headline: "Per-stream audience depth — the cleanest read on genuine audience growth — recovered past its 2016 level by 2022. Dota 2's, over the same years, nearly halved."
+    image: figs/fig03_viewer_ratio.png
+    note: "Hours watched ÷ hours streamed, by year. A rising total can come from more content airing rather than a bigger audience per broadcast; this metric separates the two."
+
+  - type: section
+    numeral: "II."
+    heading: "The Competitive Tier: Investment Up, Structure Narrowing"
+
+  - type: content
+    headline: "Tier-1/2 tournament count shows a real 2021–2023 trough that has only partially recovered."
+    image: figs/fig04_tier12_count.png
+    note: "Top two competitive tiers, all countries, by year."
+
+  - type: content
+    headline: "2025's real, inflation-adjusted prize pool is an all-time record — evidence of continued investment, not proof the sport's commercial value is growing."
+    image: figs/fig05_prize_pool.png
+    note: "USD-denominated tier-1/2 prize pool, nominal vs. CPI-deflated (2025 dollars)."
+
+  - type: content
+    headline: "That record is organizationally narrower than it looks: the number of distinct organizers running tier-1/2 events has fallen by nearly half since 2016."
+    image: figs/fig06_organizer_count.png
+    note: "Distinct top-level tournament organizers per year, tier-1/2 events."
+
+  - type: section
+    numeral: "III."
+    heading: "Grassroots: The Base of the Pyramid"
+
+  - type: content
+    headline: "The grassroots tier is narrowing too, for both Counter-Strike and Dota 2 — tournament counts have declined from a mid-cycle peak, not grown, through 2025."
+    image: figs/fig07_grassroots_indexed.png
+    note: "Grassroots (community-tier) tournament count, indexed to each title's own 2016 level."
+
+  - type: content
+    headline: "But within Counter-Strike, typical participation and per-event scale are holding up even as tournament count falls — fewer events, not a broadly shrinking base."
+    image: figs/fig08_typical_vs_mega.png
+    note: "Grassroots participant-slots, split into typical events and occasional massive open-bracket qualifiers (China-concentrated)."
+
+  - type: content
+    headline: "Regional composition is shifting, not simply shrinking — China has grown into a clear #1 while Brazil's and Sweden's shares have eroded."
+    image: figs/fig09_regional_composition.png
+    note: "Share of grassroots tournaments by country, in two-year periods."
+
+  - type: content
+    headline: "Once real year-by-year trajectories replace before/after snapshots, most apparent regional growth turns out to be a spike that already collapsed."
+    image: figs/fig10_regional_trajectories.png
+    note: "Argentina and South Africa both spiked in 2022–23 and have since fallen below their 2016 levels; Russia's growth is real and recent."
+
+  - type: section
+    numeral: "IV."
+    heading: "Creators and Audience"
+
+  - type: content
+    headline: "Counter-Strike's creator ecosystem has grown, but sits well below the size of the platform's newest mega-audience titles."
+    image: figs/fig11_creator_ecosystem.png
+    note: "Peak yearly distinct streamers (summed monthly counts), 2016–2024. Source: a published historical Twitch dataset."
+
+  - type: content
+    headline: "Audience geography remains heavily concentrated, not diversifying — over half of all mappable Counter-Strike viewing on Twitch is Russian-language."
+    image: figs/fig12_language_mix.png
+    note: "Current snapshot only — Twitch's live-only API cannot show a historical trend here."
+
+  - type: content
+    headline: "Where tournaments are hosted and where the audience actually is do not even agree with each other."
+    image: figs/fig13_host_vs_audience.png
+    note: "Left: tier-1/2 tournament host country. Right: current audience language share, mapped to country."
+
+  - type: section
+    numeral: "V."
+    heading: "So — Is Counter-Strike a Mature, Saturated Market?"
+
+  - type: content
+    headline: "Not in the sense of smooth deceleration — but growth, where it exists, has become narrower: fewer organizers, fewer grassroots events, more concentrated regions and audiences."
+    image: figs/fig14_scorecard.png
+    note: "A qualitative summary of the preceding sections, not a new measurement."
+
+  - type: closing
+    heading: "Sources"
+    items:
+      - "**Live viewership and audience language.** Twitch's own public API, polled by this project's collectors."
+      - "**Historical viewing and streamer counts.** A published historical dataset of Twitch category viewing hours, 2016–2024."
+      - "**Tournaments, prize pools, and organizers.** Twitch's public tournament-and-team wiki."
+      - "**Inflation adjustment.** U.S. Bureau of Labor Statistics CPI data (FRED), 2025 dollars."

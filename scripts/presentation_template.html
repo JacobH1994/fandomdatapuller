@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: 338.67mm 190.5mm; margin: 0; }
+
+  :root {
+    --teal-dark: #0b5f66;
+    --teal: #0e8c8f;
+    --teal-light: #d9f2f0;
+    --ink: #1c2224;
+    --muted: #5c6b6c;
+    --rule: #cfe8e6;
+  }
+
+  /* __FONT_FACES__ */
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "IBM Plex Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+
+  .slide {
+    position: relative;
+    width: 338.67mm;
+    height: 190.5mm;
+    padding: 14mm 16mm 10mm 16mm;
+    overflow: hidden;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+  }
+  .slide:last-child { page-break-after: auto; }
+
+  /* Corner watermark -- position:absolute within a single, self-contained
+     slide div has none of the position:fixed-across-pages quirks the
+     note-format template had to work around with an @page margin-box;
+     each slide is its own block, so this just works. */
+  .mark {
+    position: absolute;
+    top: 8mm;
+    right: 16mm;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    color: var(--teal);
+    opacity: 0.55;
+  }
+  .deck-kicker {
+    position: absolute;
+    top: 8mm;
+    left: 16mm;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .pagenum {
+    position: absolute;
+    bottom: 6mm;
+    right: 16mm;
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  /* ---- Title slide ---- */
+  .slide.title { justify-content: center; align-items: flex-start; }
+  .slide.title .kicker {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--teal-dark);
+    margin-bottom: 10px;
+  }
+  .slide.title h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: 54px;
+    line-height: 1.12;
+    color: var(--ink);
+    margin: 0 0 18px 0;
+    max-width: 82%;
+  }
+  .slide.title .subtitle {
+    font-size: 19px;
+    color: var(--muted);
+    max-width: 62%;
+    line-height: 1.5;
+  }
+  .slide.title .meta {
+    margin-top: 32px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .slide.title .rule { width: 90px; height: 3px; background: var(--teal); margin-top: 26px; }
+
+  /* ---- Section divider slide ---- */
+  .slide.section { justify-content: center; align-items: flex-start; background: var(--teal-dark); }
+  .slide.section .num {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--teal-light);
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+  .slide.section h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 700;
+    font-size: 46px;
+    line-height: 1.18;
+    color: #ffffff;
+    margin: 0;
+    max-width: 78%;
+  }
+  .slide.section .mark, .slide.section .deck-kicker, .slide.section .pagenum { color: #cfe8e6 !important; opacity: 0.7; }
+
+  /* ---- Content slide: headline + one big chart ---- */
+  .slide.content { padding-top: 20mm; }
+  .slide.content h2 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 27px;
+    line-height: 1.28;
+    color: var(--ink);
+    margin: 0 0 6mm 0;
+    max-width: 92%;
+  }
+  .slide.content .chart-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+  }
+  .slide.content .chart-wrap img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .slide.content .note {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 4mm;
+    max-width: 96%;
+  }
+
+  /* ---- Closing / sources slide ---- */
+  .slide.closing h2 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 25px;
+    color: var(--ink);
+    margin: 0 0 8mm 0;
+  }
+  .slide.closing ul { font-size: 14px; color: var(--ink); line-height: 1.9; margin: 0; padding-left: 20px; max-width: 70%; }
+  .slide.closing li strong { color: var(--teal-dark); }
+</style>
+</head>
+<body>
+__SLIDES__
+</body>
+</html>
