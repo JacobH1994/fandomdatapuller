@@ -222,6 +222,16 @@ CREATE TABLE IF NOT EXISTS viewership_snapshots (
     broadcast_tier_confidence TEXT, -- 'verified' (primary_official/general) | 'proxy_estimate' (detected_costream, PRD §9.1)
     matched_tournament_id INTEGER REFERENCES tournaments(id),
     matched_alias TEXT,
+    -- English-fandom region decomposition (PRD §9.17, added 2026-09-12):
+    -- a self-declared region marker (e.g. 'NA'/'EU'/'OCE') found by
+    -- etl/extract_stream_region_tags.py in this row's own tags/title text
+    -- — NULL until classified, and NULL stays NULL forever for a stream
+    -- whose text carries no such marker (most of them), not "not yet
+    -- checked". A rule-based regex extraction, not a measured fact, so
+    -- 'ai_assisted_unreviewed' per CLAUDE.md's provenance rule, same as
+    -- genre/platform tags — never 'verified' by this step alone.
+    self_declared_region_tag TEXT,
+    self_declared_region_tag_confidence TEXT,
     source TEXT NOT NULL DEFAULT 'twitch_api',
     confidence TEXT NOT NULL DEFAULT 'verified',
     -- Not (platform, channel_id, captured_at): channel_id formats don't
@@ -507,6 +517,13 @@ CREATE TABLE IF NOT EXISTS platform_viewership_snapshots (
     -- today only game_id='32982' (Grand Theft Auto V) has a ruleset.
     content_segment TEXT,
     content_segment_confidence TEXT,
+    -- Same self-declared-region extraction as viewership_snapshots (PRD
+    -- §9.17) — kept as a separate column here rather than a shared table
+    -- because this row's own game_id/channel_id shape differs from
+    -- viewership_snapshots' title_id shape, same reasoning content_segment
+    -- above already documents for staying a plain column, not a join.
+    self_declared_region_tag TEXT,
+    self_declared_region_tag_confidence TEXT,
     UNIQUE (channel_id, captured_at)
 );
 
@@ -527,6 +544,95 @@ CREATE TABLE IF NOT EXISTS platform_viewership_below_threshold (
     source TEXT NOT NULL DEFAULT 'twitch_api',
     confidence TEXT NOT NULL DEFAULT 'verified',
     UNIQUE (game_id, captured_at)
+);
+
+-- English-fandom region decomposition (PRD §9.17, added 2026-09-12).
+-- `subject_id` keys against config/fandom_decomposition_subjects.yaml,
+-- deliberately NOT title_id -- a subject can be a title_id-based esports
+-- title (`viewership_snapshots`) or a game_id/content_segment-based
+-- platform-wide subject like GTA V (`platform_viewership_snapshots`),
+-- and this whole subsystem exists to treat both uniformly (see the PRD
+-- section for why). None of the three tables below are unbackfillable --
+-- Wikipedia pageviews and Steam reviews are both fixed historical fact,
+-- re-fetchable at any time, so none of this needs CLAUDE.md's "one rule"
+-- schedule protection the live Twitch/YouTube/Steam-player-count
+-- collectors require.
+
+-- Wikipedia article pageviews (collectors/wikipedia_pageviews_pull.py) --
+-- an independent game-fandom signal (informational engagement, not
+-- viewership), and a secondary input to decompose_by_timezone's diurnal-
+-- pattern correlation. Official Wikimedia Pageviews REST API, confirmed
+-- live 2026-09-12 to be documented and explicitly positioned for this
+-- kind of research use -- same discipline as Liquipedia (descriptive
+-- User-Agent, respect rate limits, cache locally).
+CREATE TABLE IF NOT EXISTS wikipedia_pageview_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_id TEXT NOT NULL,
+    wiki_project TEXT NOT NULL, -- e.g. 'en.wikipedia' -- one edition per row, never blended across editions
+    article_title TEXT NOT NULL,
+    date TEXT NOT NULL, -- 'YYYY-MM-DD', the API's own daily granularity
+    views INTEGER NOT NULL,
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'wikimedia_pageviews_api',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (subject_id, wiki_project, article_title, date)
+);
+
+-- Steam review-language history (collectors/steam_review_history_pull.py)
+-- -- one row per individual review, not a periodic snapshot: confirmed
+-- live 2026-09-12 that store.steampowered.com/appreviews/<appid> returns
+-- `timestamp_created` per review alongside `language`, and a review's
+-- creation date never changes -- genuinely backfillable historical fact,
+-- named `_history` like steam_release_history for the same reason, not
+-- `_snapshots`. Only language + timestamp_created + the review's own id
+-- are stored -- no review text or vote counts, since nothing this
+-- subsystem asks needs them (same "don't build speculatively" reasoning
+-- platform_viewership_below_threshold's own header comment already
+-- states for a different table). The endpoint itself is Valve's own
+-- first-party server (powers their own store page) but UNDOCUMENTED --
+-- not covered by the Steam Web API's official terms -- flagged here
+-- explicitly so this is never mistaken for a documented guarantee the
+-- way steam_release_history's `steam_store_api` source is.
+CREATE TABLE IF NOT EXISTS steam_review_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_id TEXT NOT NULL,
+    app_id INTEGER NOT NULL,
+    review_id TEXT NOT NULL, -- Steam's own `recommendationid`
+    language TEXT NOT NULL, -- Steam's own language code (e.g. 'english', 'schinese') -- NOT the same vocabulary as Twitch's language_code, never joined directly against it
+    timestamp_created INTEGER NOT NULL, -- Unix epoch, UTC
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'steam_appreviews_undocumented',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (app_id, review_id)
+);
+
+-- Synthesis output of the whole subsystem -- one row per (method,
+-- signal_source) per region per window, deliberately NOT collapsed into
+-- a single number per region. Matches this project's existing "three
+-- metrics side by side, not one replacing another" convention
+-- (notebooks/niche_membership.ipynb's cosine_full/cosine_no_english/jsd
+-- trio) -- disagreement between methods/sources is itself the finding,
+-- not something to average away.
+-- method: 'timezone_deconvolution' | 'tag_mining' | 'language_distribution'
+-- signal_source: 'twitch_viewership' | 'steam_reviews' | 'wikipedia_pageviews'
+-- (not every method applies to every signal_source -- e.g. tag_mining
+-- only makes sense against twitch_viewership's own stream text).
+-- window_start/window_end matter most for signal_source='steam_reviews',
+-- where a title's whole review history supports a real per-year/quarter
+-- time series, not just one current window the way Twitch's ~2-week
+-- language_mix_snapshots coverage does.
+CREATE TABLE IF NOT EXISTS english_fandom_region_estimates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_id TEXT NOT NULL,
+    region_or_country TEXT NOT NULL,
+    window_start TEXT NOT NULL,
+    window_end TEXT NOT NULL,
+    method TEXT NOT NULL,
+    signal_source TEXT NOT NULL,
+    estimated_share REAL NOT NULL,
+    confidence TEXT NOT NULL DEFAULT 'ai_assisted_unreviewed', -- an inferred estimate, never 'verified' -- promoted only by explicit human review, per CLAUDE.md's provenance rule
+    computed_at TEXT NOT NULL,
+    UNIQUE (subject_id, region_or_country, window_start, window_end, method, signal_source)
 );
 
 CREATE INDEX IF NOT EXISTS idx_viewership_title_captured ON viewership_snapshots (title_id, captured_at);
