@@ -183,7 +183,15 @@ repo secret 2026-09-08); the platform-wide, non-esports Twitch collector
 (PRD §9.16, `collectors/twitch_platform_poll.py`, built 2026-09-09 for
 `docs/wider_game_fandom_brief.md`) — live and collecting real data on
 its own GitHub Actions schedule; the "Boudica" branded external report
-pipeline (`scripts/build_client_report.py`, see Common Tasks above).
+pipeline (`scripts/build_client_report.py`, see Common Tasks above); the
+English-language fandom decomposition subsystem (PRD §9.17, built
+2026-09-12 — `analysis/fandom_region_decomposition.py`,
+`notebooks/english_fandom_decomposition.ipynb`, `config/
+fandom_decomposition_subjects.yaml`) — real Twitch-timezone-deconvolution
+and self-declared-tag results for `apex_legends`/`pubg`/`counter_strike`/
+`gta_v`; the Steam-review signal is smoke-tested only (a full crawl is a
+multi-day background job not yet run, same category as the Steam
+catalog Track A backfill below).
 
 `config/channels.yaml` (Twitch) and `config/channels_youtube.yaml`
 (YouTube) curation has **started but is far from complete**: `counter_strike`
@@ -300,6 +308,26 @@ Pull tournament data from Liquipedia (on-demand, not scheduled; add
 
 ```
 python collectors/liquipedia.py
+```
+
+Run the English-language fandom decomposition subsystem (PRD §9.17 —
+subjects are configured in `config/fandom_decomposition_subjects.yaml`,
+none of this is unbackfillable so none of it needs CLAUDE.md's "one
+rule" schedule protection):
+
+```
+python etl/extract_stream_region_tags.py                # self-declared region tags from already-collected tags/titles; --full-reclassify to redo everything
+python collectors/wikipedia_pageviews_pull.py            # daily article pageviews, resumable; --subjects a,b to limit
+python collectors/steam_review_history_pull.py           # one-time/resumable Steam review crawl; --subjects a,b to limit, --refresh to re-walk full history
+```
+
+`steam_review_history_pull.py` is the slow one — a title's full review
+history can be 1M+ reviews (same category of task as
+`collectors/steam_catalog_backfill.py`'s own multi-day Track A sweep, not
+a quick command). Then, to see the decomposition itself:
+
+```
+jupyter nbconvert --to notebook --execute --inplace notebooks/english_fandom_decomposition.ipynb
 ```
 
 Run the full local refresh routine (fixed order, explicit — see the
