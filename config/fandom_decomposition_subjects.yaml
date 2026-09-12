@@ -1,0 +1,114 @@
+# English-language fandom decomposition subject registry (PRD §9.17,
+# added 2026-09-12) -- config/titles.yaml's own convention applied to a
+# new question: "what do we want to decompose by region," not "what do we
+# poll." This file is the abstraction that lets a title_id-based esports
+# title (config/titles.yaml) and a game_id/content_segment-based
+# platform-wide subject (GTA V, which has no title_id at all -- it isn't
+# in config/titles.yaml, it lives in platform_viewership_snapshots) share
+# one pipeline with no code branching: analysis/fandom_region_decomposition.py
+# and notebooks/english_fandom_decomposition.ipynb both take a subject_id
+# and look it up here, never a title_id/game_id directly.
+#
+# Adding a new subject to decompose -- a different esports title, another
+# platform-wide game, a specific content_segment within one -- is a config
+# edit here, same as adding a tracked title is a config edit to
+# config/titles.yaml. No code change needed.
+#
+# Fields:
+#   id                    subject slug, the key everything else in this
+#                         subsystem (schema, notebook, analysis module)
+#                         addresses this subject by
+#   display_name          human-readable name
+#   source_table          'viewership_snapshots' (title_id-keyed, the 23
+#                         tracked esports titles) or
+#                         'platform_viewership_snapshots' (game_id-keyed,
+#                         everything from the platform-wide collector,
+#                         PRD §9.16)
+#   title_id              required when source_table is viewership_snapshots
+#                         -- matches config/titles.yaml's own id
+#   game_id               required when source_table is
+#                         platform_viewership_snapshots -- the raw Twitch
+#                         game_id (e.g. GTA V's "32982",
+#                         etl/classify_gta_content_segment.py's
+#                         GTA_V_GAME_ID)
+#   content_segment       optional, platform_viewership_snapshots subjects
+#                         only -- narrows to one of
+#                         etl/classify_gta_content_segment.py's values
+#                         ('nopixel' | 'gta_rp_other' | 'non_rp'). Omit to
+#                         decompose the whole game_id undivided.
+#   steam_app_id          optional -- enables collectors/
+#                         steam_review_history_pull.py for this subject.
+#                         An objective fact (a Steam AppID), same
+#                         no-curation-needed status config/steam_appids.yaml
+#                         already documents for these titles.
+#   wikipedia_articles    optional list of {project, title} -- enables
+#                         collectors/wikipedia_pageviews_pull.py for this
+#                         subject. 'project' is a wiki edition slug (e.g.
+#                         'en.wikipedia'), 'title' is the exact article
+#                         title as it appears in the URL (spaces as
+#                         underscores, e.g. "Apex_Legends").
+
+subjects:
+  # The pair that motivated this whole subsystem (notebooks/
+  # niche_membership.ipynb's Apex/PUBG:BATTLEGROUNDS shared-occupancy
+  # finding, 2026-09-12) -- both title_id-based, both already have a
+  # verified Steam AppID in config/steam_appids.yaml.
+  - id: apex_legends
+    display_name: Apex Legends
+    source_table: viewership_snapshots
+    title_id: apex_legends
+    steam_app_id: 1172470
+    wikipedia_articles:
+      - project: en.wikipedia
+        title: Apex_Legends
+
+  - id: pubg
+    display_name: "PUBG: BATTLEGROUNDS"
+    source_table: viewership_snapshots
+    title_id: pubg
+    steam_app_id: 578080
+    wikipedia_articles:
+      - project: en.wikipedia
+        title: "PUBG:_Battlegrounds"
+
+  # The validation case (see plan/PRD): cross-checks the Steam-review
+  # timezone-deconvolution time series against notebooks/
+  # fastest_growing_cs_regions.ipynb's independently-derived grassroots-
+  # tournament regional growth (Russia accelerating, Czech Republic
+  # steady) -- two unrelated methods/sources, not the same claim measured
+  # twice.
+  - id: counter_strike
+    display_name: Counter-Strike 2
+    source_table: viewership_snapshots
+    title_id: counter_strike
+    steam_app_id: 730
+    wikipedia_articles:
+      - project: en.wikipedia
+        title: Counter-Strike_2
+
+  # Proves the platform-wide (game_id-keyed, not title_id-keyed) path --
+  # GTA V isn't a tracked esports title, it has no row in
+  # config/titles.yaml, and lives entirely in
+  # platform_viewership_snapshots via collectors/twitch_platform_poll.py
+  # (PRD §9.16, docs/wider_game_fandom_brief.md). No steam_app_id here:
+  # GTA V's Steam release is a late port with a much smaller, non-
+  # representative review base next to console/Rockstar-launcher sales --
+  # a real gap, not an oversight, revisit only if that changes.
+  - id: gta_v
+    display_name: Grand Theft Auto V
+    source_table: platform_viewership_snapshots
+    game_id: "32982"
+    wikipedia_articles:
+      - project: en.wikipedia
+        title: Grand_Theft_Auto_V
+
+  # Same underlying game_id, narrowed to the nested RP scene (PRD §9.16's
+  # own content_segment classification) -- a separate subject, not a
+  # variant flag, so its region estimates land as their own
+  # english_fandom_region_estimates rows rather than being conflated with
+  # GTA V's undivided total.
+  - id: gta_v_nopixel
+    display_name: "Grand Theft Auto V -- NoPixel"
+    source_table: platform_viewership_snapshots
+    game_id: "32982"
+    content_segment: nopixel
