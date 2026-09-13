@@ -10,6 +10,7 @@ import pytest
 
 from analysis.fandom_region_decomposition import (
     CANDIDATE_ENGLISH_COUNTRIES,
+    CANDIDATE_GLOBAL_COUNTRIES,
     calibrate_timezone_curve,
     decompose_by_timezone,
     get_steam_review_hourly_series,
@@ -177,6 +178,11 @@ def test_candidate_english_countries_has_no_offset_collisions():
     # with the one it collides with, never added alongside it silently.
     offsets = list(CANDIDATE_ENGLISH_COUNTRIES.values())
     assert len(offsets) == len(set(offsets)), "duplicate UTC offset(s) in CANDIDATE_ENGLISH_COUNTRIES -- merge them, see the module's own comment on this exact bug"
+
+
+def test_candidate_global_countries_has_no_offset_collisions():
+    offsets = list(CANDIDATE_GLOBAL_COUNTRIES.values())
+    assert len(offsets) == len(set(offsets)), "duplicate UTC offset(s) in CANDIDATE_GLOBAL_COUNTRIES -- merge them, see CANDIDATE_ENGLISH_COUNTRIES' comment on this exact bug"
 
 
 def test_load_subjects_has_expected_keys():

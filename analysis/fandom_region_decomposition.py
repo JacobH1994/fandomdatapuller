@@ -39,6 +39,27 @@ Acceptable for this subsystem's purpose (a directional regional-share
 estimate, explicitly not a settled finding — see every notebook this
 feeds), not acceptable if this function's output were ever treated as
 precise.
+
+**Steam reviews specifically are not a random sample of anything, in
+either dimension — checked directly 2026-09-13, not assumed.**
+- **Time**: `collectors/steam_review_history_pull.py`'s crawl is a
+  deterministic, most-recent-first walk that stops at a hard wall (a
+  real, community-documented Steam cursor-pagination bug — see that
+  collector's own docstring), not a sample spread across a title's whole
+  history. Confirmed the reached window itself has zero gap days for
+  both crawled subjects (PUBG: 994/994 days, Apex Legends: 1,450/1,450
+  days) — a complete census of that period, then a hard cliff to
+  nothing before it, not sparse coverage that happens to reach back
+  that far.
+- **Population**: reviewers are self-selected, not a random draw from
+  the playerbase. More-engaged players review more; sentiment is
+  bimodal (people write reviews when they feel strongly, not as a
+  neutral cross-section); Steam's own review-prompt UI and
+  regional review-writing norms can skew which languages/countries show
+  up, independent of actual playerbase share. Every notebook consuming
+  `steam_review_history` should treat it as "who chose to review, day by
+  day, within the reached window" — not "a random sample of who plays
+  this game."
 """
 
 from __future__ import annotations
@@ -99,6 +120,24 @@ CANDIDATE_ENGLISH_COUNTRIES: dict[str, float] = {
     "Australia_East": 10.0,
     "Nigeria": 1.0,
     "South_Africa": 2.0,
+}
+
+# General-purpose (not English-specific) candidate set for the
+# whole-playerbase pooled decomposition (language=None) -- built from the
+# top review-languages actually observed across this project's real Steam
+# review crawls (PUBG, Apex Legends) rather than guessed in the abstract.
+# Collision-checked the same way as CANDIDATE_ENGLISH_COUNTRIES: Japan and
+# South Korea are both UTC+9 (merged), Russia and Turkey are both UTC+3
+# (merged) -- see that constant's own comment for why this collision keeps
+# recurring and must be checked for every new candidate set, not just
+# assumed clear.
+CANDIDATE_GLOBAL_COUNTRIES: dict[str, float] = {
+    "China": 8.0,
+    "Japan_South_Korea": 9.0,
+    "Russia_Turkey": 3.0,
+    "Brazil": -3.0,
+    "Western_Europe": 1.0,
+    "North_America": -6.0,
 }
 
 
