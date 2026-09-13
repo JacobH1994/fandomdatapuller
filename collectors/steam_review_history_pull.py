@@ -34,6 +34,23 @@ them (same "don't build speculatively" reasoning
 `platform_viewership_below_threshold`'s own schema comment gives for a
 different table).
 
+**`filter=recent`'s cursor pagination has a real, undocumented depth
+limit — confirmed live 2026-09-13, not assumed from a clean exit code.**
+A full `--refresh` crawl of PUBG: BATTLEGROUNDS exited normally (code 0,
+no errors, cursor stopped advancing) after 536,953 reviews — but Steam's
+own `query_summary.total_reviews` for that app is 2,753,749 (checked
+directly against the live API), and the oldest review actually reached
+was from 2023-12-25, nowhere near the game's 2017-12-21 release. So a
+"complete" `--refresh` run for a very-high-review-count title reaches
+only Steam's own recent-history depth cap, not the full lifetime —
+**every consumer of `steam_review_history` must treat its date range as
+"however far back this crawl happened to reach," never assume "since
+release," and check `MIN(timestamp_created)` per subject before treating
+any early-lifetime question as answerable from this table.** No known
+workaround (`filter=all` is documented elsewhere as unreliable for deep
+pagination too) — recorded here as a hard platform limit, not a bug in
+this collector.
+
 Reads `config/fandom_decomposition_subjects.yaml` for which subjects have
 `steam_app_id` configured — a subject without one is skipped, not an
 error.

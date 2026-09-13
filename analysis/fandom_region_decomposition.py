@@ -72,14 +72,31 @@ CALIBRATION_LANGUAGES: dict[str, float] = {
 # fixed nominal UTC offset (see module docstring's DST caveat). UK and
 # Ireland are combined — both UTC+0, no way to distinguish them from
 # activity timing alone.
+#
+# **Bug found and fixed 2026-09-13, not caught until real (non-smoke-test)
+# Steam review data existed**: the original version listed "US_East" and
+# "Canada_East" as separate candidates, both at UTC-5 — genuinely
+# identical clock time, so nnls can't tell them apart and arbitrarily
+# assigns weight to one or the other on tiny numerical noise. Confirmed
+# live in `notebooks/pubg_playerbase_over_time.ipynb`'s quarterly
+# breakdown: Canada_East's estimated share alternated between ~13% and
+# 0.0% across consecutive quarters with no plausible real driver — exactly
+# what an unidentifiable pair of candidates produces, not a real signal.
+# Merged into one "US_Canada_East" candidate rather than picking an
+# arbitrary offset difference that isn't real. Any NEW candidate set built
+# for this function (e.g. a title-specific one in a notebook) must be
+# checked for offset collisions the same way — this exact mistake was
+# independently made twice more before being caught (Czech_Republic/
+# Western_Europe in the Counter-Strike cross-validation, Russia/Turkey in
+# the PUBG playerbase notebook — both share their real-world UTC+1/UTC+3
+# offsets, so the fix there is the same merge, not a workaround).
 CANDIDATE_ENGLISH_COUNTRIES: dict[str, float] = {
-    "US_East": -5.0,
+    "US_Canada_East": -5.0,
     "US_Pacific": -8.0,
     "UK_Ireland": 0.0,
     "India": 5.5,
     "Philippines": 8.0,
     "Australia_East": 10.0,
-    "Canada_East": -5.0,
     "Nigeria": 1.0,
     "South_Africa": 2.0,
 }
@@ -141,7 +158,9 @@ def get_twitch_english_hourly_series(conn: sqlite3.Connection, subject: dict) ->
 
 
 def get_steam_review_hourly_series(
-    conn: sqlite3.Connection, subject: dict, *, language: str | None = "english", year: int | None = None
+    conn: sqlite3.Connection, subject: dict, *,
+    language: str | None = "english", year: int | None = None,
+    since: int | None = None, until: int | None = None,
 ) -> np.ndarray:
     """The Steam-review-posting-time input to decompose_by_timezone -- an
     entirely independent population from get_twitch_english_hourly_series
@@ -163,29 +182,49 @@ def get_steam_review_hourly_series(
     tournament growth, which is about the whole playerbase's timing, not
     the English-speaking slice of it).
 
-    Pass `year` to compute one calendar year's bucket only -- this is
-    what makes the per-year/quarter time series described in the PRD
-    possible: steam_review_history spans a title's whole lifetime, unlike
-    Twitch's ~2-week language_mix_snapshots window, so decomposing one
-    year at a time (rather than the whole history collapsed into one
-    'typical day') is what lets estimated regional share be compared
-    against year-over-year signals like
-    notebooks/fastest_growing_cs_regions.ipynb's grassroots-tournament
-    growth findings."""
+    Pass `year` to compute one calendar year's bucket only, or `since`/
+    `until` (Unix epoch, inclusive) directly for a finer window (a
+    quarter, a month) -- `year` is convenience sugar for the common case,
+    computed into the same since/until bounds internally; pass at most
+    one of `year` or `since`/`until`. This is what makes the time-series
+    decomposition described in the PRD possible: steam_review_history can
+    span a title's whole crawled window, unlike Twitch's ~2-week
+    language_mix_snapshots coverage, so decomposing one period at a time
+    (rather than the whole history collapsed into one 'typical day') is
+    what lets estimated regional share be compared against time-varying
+    signals like notebooks/fastest_growing_cs_regions.ipynb's grassroots-
+    tournament growth findings.
+
+    **`steam_review_history`'s actual coverage window varies by subject
+    and is often NOT since a title's release** -- confirmed live 2026-09-13
+    that Steam's own `filter=recent` cursor pagination has an undocumented
+    depth cap for very-high-review-count titles (PUBG: BATTLEGROUNDS'
+    crawl reached only 536,953 of 2,753,749 total reviews, back to
+    2023-12-25, not its 2017-12-21 release -- see `collectors/
+    steam_review_history_pull.py`'s own docstring). Check
+    `MIN(timestamp_created)` for a subject before treating any `year`/
+    `since` earlier than that as meaningful -- it will just return an
+    empty (all-zero) series, not an error."""
     from datetime import timezone as _tz
     from datetime import datetime as _dt
+
+    if year is not None and (since is not None or until is not None):
+        raise ValueError("pass at most one of year or since/until")
+    if year is not None:
+        since = int(_dt(year, 1, 1, tzinfo=_tz.utc).timestamp())
+        until = int(_dt(year + 1, 1, 1, tzinfo=_tz.utc).timestamp()) - 1
 
     query = "SELECT timestamp_created FROM steam_review_history WHERE subject_id = ?"
     params: tuple = (subject["id"],)
     if language is not None:
         query += " AND language = ?"
         params += (language,)
-    if year is not None:
-        query += " AND timestamp_created BETWEEN ? AND ?"
-        params += (
-            int(_dt(year, 1, 1, tzinfo=_tz.utc).timestamp()),
-            int(_dt(year + 1, 1, 1, tzinfo=_tz.utc).timestamp()) - 1,
-        )
+    if since is not None:
+        query += " AND timestamp_created >= ?"
+        params += (since,)
+    if until is not None:
+        query += " AND timestamp_created <= ?"
+        params += (until,)
     rows = conn.execute(query, params).fetchall()
 
     buckets = np.zeros(24)
