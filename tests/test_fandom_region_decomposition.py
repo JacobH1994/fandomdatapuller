@@ -11,12 +11,16 @@ import pytest
 from analysis.fandom_region_decomposition import (
     CANDIDATE_ENGLISH_COUNTRIES,
     CANDIDATE_GLOBAL_COUNTRIES,
+    _offset_hours,
     calibrate_timezone_curve,
     decompose_by_timezone,
     get_steam_review_hourly_series,
     get_twitch_english_hourly_series,
     load_subjects,
 )
+
+WINTER = datetime(2026, 1, 15, tzinfo=timezone.utc)  # Northern Hemisphere standard time
+SUMMER = datetime(2026, 7, 15, tzinfo=timezone.utc)  # Northern Hemisphere daylight time
 
 SCHEMA_PATH = Path(__file__).resolve().parent.parent / "etl" / "schema.sql"
 
@@ -57,29 +61,75 @@ def test_calibrate_timezone_curve_flat_when_no_calibration_data(conn):
 
 def test_decompose_by_timezone_recovers_known_mixture():
     # A one-hot calibration curve (all activity at local hour 12) makes
-    # the recovered mixture exact and easy to reason about: US_East
-    # (UTC-5) predicts a UTC peak at hour 17, UK_Ireland (UTC+0) predicts
-    # a UTC peak at hour 12.
+    # the recovered mixture exact and easy to reason about: America/
+    # New_York in January (EST, UTC-5) predicts a UTC peak at hour 17;
+    # Africa/Lagos (UTC+1 year-round) predicts a UTC peak at hour 11.
     calibration_curve = np.zeros(24)
     calibration_curve[12] = 1.0
-    candidates = {"US_East": -5.0, "UK_Ireland": 0.0}
+    candidates = {"US_East": "America/New_York", "Nigeria": "Africa/Lagos"}
 
     observed = np.zeros(24)
-    observed[17] = 0.7  # US_East's predicted peak
-    observed[12] = 0.3  # UK_Ireland's predicted peak
+    observed[17] = 0.7  # US_East's predicted peak (EST, winter)
+    observed[11] = 0.3  # Nigeria's predicted peak
 
-    shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve)
+    shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=WINTER)
     assert shares["US_East"] == pytest.approx(0.7, abs=1e-6)
-    assert shares["UK_Ireland"] == pytest.approx(0.3, abs=1e-6)
+    assert shares["Nigeria"] == pytest.approx(0.3, abs=1e-6)
 
 
 def test_decompose_by_timezone_no_signal_returns_empty():
-    assert decompose_by_timezone(np.zeros(24), calibration_curve=np.full(24, 1.0 / 24)) == {}
+    assert decompose_by_timezone(np.zeros(24), calibration_curve=np.full(24, 1.0 / 24), reference_datetime=WINTER) == {}
 
 
 def test_decompose_by_timezone_requires_exactly_one_of_calibration_curve_or_conn():
     with pytest.raises(ValueError):
-        decompose_by_timezone(np.ones(24))
+        decompose_by_timezone(np.ones(24), reference_datetime=WINTER)
+
+
+def test_decompose_by_timezone_requires_reference_datetime():
+    with pytest.raises(TypeError):
+        decompose_by_timezone(np.ones(24), calibration_curve=np.full(24, 1.0 / 24))
+
+
+def test_decompose_by_timezone_merges_permanent_same_offset_candidates():
+    # Japan and South Korea are both UTC+9 year-round -- neither observes
+    # DST -- so they must merge regardless of reference_datetime.
+    calibration_curve = np.zeros(24)
+    calibration_curve[12] = 1.0
+    candidates = {"Japan": "Asia/Tokyo", "South_Korea": "Asia/Seoul"}
+    observed = np.zeros(24)
+    observed[3] = 1.0  # both predict a UTC peak at hour 3 (12 - 9)
+
+    shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=WINTER)
+    assert set(shares) == {"Japan+South_Korea"}
+    assert shares["Japan+South_Korea"] == pytest.approx(1.0, abs=1e-6)
+
+
+def test_decompose_by_timezone_merges_seasonal_same_offset_candidates():
+    # UK_Ireland (Europe/London) and Nigeria (Africa/Lagos, no DST) both
+    # land on UTC+1 only during British Summer Time -- found live
+    # 2026-09-14 while fixing the fixed-offset design's DST bug.
+    calibration_curve = np.zeros(24)
+    calibration_curve[12] = 1.0
+    candidates = {"UK_Ireland": "Europe/London", "Nigeria": "Africa/Lagos"}
+    observed = np.zeros(24)
+    observed[11] = 1.0
+
+    winter_shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=WINTER)
+    assert set(winter_shares) == {"UK_Ireland", "Nigeria"}  # GMT (+0) vs +1 -- distinguishable in winter
+
+    summer_shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=SUMMER)
+    assert set(summer_shares) == {"Nigeria+UK_Ireland"}  # BST (+1) vs +1 -- indistinguishable in summer; labels sorted alphabetically
+
+
+def test_offset_hours_is_dst_aware():
+    # Confirms the actual bug: America/New_York is -5 in January (EST)
+    # but -4 in July (EDT) -- a fixed nominal offset can't represent both.
+    assert _offset_hours("America/New_York", WINTER) == pytest.approx(-5.0)
+    assert _offset_hours("America/New_York", SUMMER) == pytest.approx(-4.0)
+    # South Africa never observes DST -- same offset year-round.
+    assert _offset_hours("Africa/Johannesburg", WINTER) == pytest.approx(2.0)
+    assert _offset_hours("Africa/Johannesburg", SUMMER) == pytest.approx(2.0)
 
 
 def test_get_twitch_english_hourly_series_title_id_subject(conn):
@@ -170,19 +220,18 @@ def test_get_steam_review_hourly_series_since_until(conn):
     assert q_error is not None
 
 
-def test_candidate_english_countries_has_no_offset_collisions():
-    # Two candidates at the same UTC offset are mathematically
-    # indistinguishable to decompose_by_timezone (nnls arbitrarily splits
-    # weight between them) -- exactly the US_East/Canada_East bug found
-    # 2026-09-13. Any new candidate must get its own offset or be merged
-    # with the one it collides with, never added alongside it silently.
-    offsets = list(CANDIDATE_ENGLISH_COUNTRIES.values())
-    assert len(offsets) == len(set(offsets)), "duplicate UTC offset(s) in CANDIDATE_ENGLISH_COUNTRIES -- merge them, see the module's own comment on this exact bug"
-
-
-def test_candidate_global_countries_has_no_offset_collisions():
-    offsets = list(CANDIDATE_GLOBAL_COUNTRIES.values())
-    assert len(offsets) == len(set(offsets)), "duplicate UTC offset(s) in CANDIDATE_GLOBAL_COUNTRIES -- merge them, see CANDIDATE_ENGLISH_COUNTRIES' comment on this exact bug"
+def test_candidate_dicts_resolve_to_valid_offsets_in_both_seasons():
+    # Not a "no collisions allowed" check any more -- decompose_by_timezone
+    # merges collisions automatically now (see the merge tests above), and
+    # some (UK_Ireland/Nigeria) are only real part of the year. This just
+    # confirms every candidate's IANA zone name is valid and resolves to a
+    # sane offset in both DST states, so a typo'd zone name fails loudly
+    # here rather than silently in a notebook.
+    for candidates in (CANDIDATE_ENGLISH_COUNTRIES, CANDIDATE_GLOBAL_COUNTRIES):
+        for name, zone_name in candidates.items():
+            for reference_datetime in (WINTER, SUMMER):
+                offset = _offset_hours(zone_name, reference_datetime)
+                assert -12.0 <= offset <= 14.0, f"{name} ({zone_name}) resolved to an implausible offset {offset} at {reference_datetime}"
 
 
 def test_load_subjects_has_expected_keys():
