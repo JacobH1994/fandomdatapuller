@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from analysis.fandom_region_decomposition import (
+    CANDIDATE_ENGLISH_COUNTRIES,
     calibrate_timezone_curve,
     decompose_by_timezone,
     get_steam_review_hourly_series,
@@ -140,6 +141,42 @@ def test_get_steam_review_hourly_series_filters_language_and_year(conn):
     assert series_all[14] == 2  # r1 and r3, both English
     series_pooled = get_steam_review_hourly_series(conn, subject, language=None)
     assert series_pooled[14] == 3  # r1, r2, r3 — every language pooled
+
+
+def test_get_steam_review_hourly_series_since_until(conn):
+    def ts(y, m, d):
+        return int(datetime(y, m, d, 14, tzinfo=timezone.utc).timestamp())
+
+    conn.execute(
+        "INSERT INTO steam_review_history (subject_id, app_id, review_id, language, timestamp_created, fetched_at) "
+        "VALUES ('pubg', 1, 'r1', 'english', ?, '2026-01-01T00:00:00Z')",
+        (ts(2024, 3, 1),),
+    )
+    conn.execute(
+        "INSERT INTO steam_review_history (subject_id, app_id, review_id, language, timestamp_created, fetched_at) "
+        "VALUES ('pubg', 1, 'r2', 'english', ?, '2026-01-01T00:00:00Z')",
+        (ts(2024, 7, 1),),
+    )
+    conn.commit()
+    subject = {"id": "pubg"}
+    q1 = get_steam_review_hourly_series(conn, subject, since=ts(2024, 1, 1), until=ts(2024, 4, 1))
+    assert q1[14] == 1  # only r1
+    q_error = None
+    try:
+        get_steam_review_hourly_series(conn, subject, year=2024, since=ts(2024, 1, 1))
+    except ValueError as e:
+        q_error = e
+    assert q_error is not None
+
+
+def test_candidate_english_countries_has_no_offset_collisions():
+    # Two candidates at the same UTC offset are mathematically
+    # indistinguishable to decompose_by_timezone (nnls arbitrarily splits
+    # weight between them) -- exactly the US_East/Canada_East bug found
+    # 2026-09-13. Any new candidate must get its own offset or be merged
+    # with the one it collides with, never added alongside it silently.
+    offsets = list(CANDIDATE_ENGLISH_COUNTRIES.values())
+    assert len(offsets) == len(set(offsets)), "duplicate UTC offset(s) in CANDIDATE_ENGLISH_COUNTRIES -- merge them, see the module's own comment on this exact bug"
 
 
 def test_load_subjects_has_expected_keys():
