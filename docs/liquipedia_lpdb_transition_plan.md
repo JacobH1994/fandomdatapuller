@@ -150,6 +150,6 @@ a first build.
 - Live viewership data (Twitch/YouTube/Steam) — entirely unrelated to
   Liquipedia/LPDB, unaffected by any of the above.
 - Esports Charts / peak-viewership data — LPDB is tournament/match/prize-pool
-  data only; the championship-concentration work (Gause's Law brief H3's
+  data only; the championship-concentration work (inter_esports_dynamics/questions/platform_attention_concentration's
   demand-side sub-test) stays blocked on Esports Charts regardless of LPDB
   access. Don't read LPDB landing as unblocking that too.

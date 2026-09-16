@@ -1,12 +1,18 @@
-# Digital Fandoms: Research Area
+# Wider Game Fandoms: Research Area
+
+Renamed 2026-09-16 from "Digital Fandoms" — "digital fandom" turned out
+to be the project's own overarching frame (see `../foundations/brief.md`),
+not one area's private name; this area is specifically the non-esports
+case studies within that frame. Content and section numbering otherwise
+unchanged by the rename.
 
 ## 1. Context
 
-The third research area in this project (added 2026-09-09 as "How Do Wider
-Game Fandoms Operate on Twitch?"; restructured 2026-09-16 into this umbrella
-plus two subprojects — see §2) — and the first whose subject isn't esports
-at all. It exists because both other research areas kept running into the
-edge of what a 23-esports-title-only dataset can answer:
+The third research area in this project (added 2026-09-09 as "How Do
+Wider Game Fandoms Operate on Twitch?") — and the first whose subject
+isn't esports at all. It exists because both other research areas kept
+running into the edge of what a 23-esports-title-only dataset can
+answer:
 
 - `research/inter_esports_dynamics/notebooks/esports_share_of_twitch.ipynb`
   already found that Just Chatting and GTA V — neither an esports title —
@@ -24,36 +30,34 @@ edge of what a 23-esports-title-only dataset can answer:
 - Separately, the user is tracking an anticipated GTA 6 launch as a live
   case study — now `gta_launch_case_study/` (§2).
 
-**This area is deliberately broader and less settled than the other two.**
-It doesn't have named hypotheses the way `research/inter_esports_dynamics/`
-does (H1–H3) — closer to a genuine open area expected to grow its own
-sub-questions and subprojects as data accumulates, not a single claim to
-prove or retract. The two subprojects below are the first two such
-sub-questions to mature enough to deserve their own brief; more may follow.
+**This area is deliberately broader and less settled than the other
+esports-focused two.** It doesn't have named hypotheses — closer to a
+genuine open area expected to grow its own sub-questions and subprojects
+as data accumulates, not a single claim to prove or retract. It's also
+this project's designated on-ramp for broadening scope beyond esports
+once the esports-focused areas mature — see `../foundations/brief.md`
+for how that long-term trajectory relates to this area's near-term,
+esports-industry-facing output.
 
 ## 2. Subprojects
 
 - **`gta_launch_case_study/`** — does a non-esports blockbuster launch show
-  the same lifecycle shape (rapid rise, peak, plateau-or-decline) the
-  `esports_lifecycle_and_maturity` area already characterizes for esports
+  the same lifecycle shape (rapid rise, peak, plateau-or-decline)
+  `esports_lifecycle_and_maturity` already characterizes for esports
   titles? GTA 6 as the live, motivating case. See that subproject's own
   `brief.md`.
-- **`fandom_historical_contingency/`** — does a title's era of emergence
-  structurally shape its fandom/creator ecosystem, using esports as the
-  primary case study (this project's best-instrumented population), with
-  room to extend beyond esports later given this area's own broader remit.
-  Split out 2026-09-16 from this brief's original question 3 once it
-  became clear the question was really about historical contingency in
-  fandom formation generally, not just "does genre-comparison hold outside
-  esports." See that subproject's own `brief.md`.
 
-Both subprojects share this brief's data infrastructure (§4) and both
-report back into this umbrella's open questions (§5) where their findings
-connect to something not yet owned by either one specifically.
+**`fandom_historical_contingency/` moved out 2026-09-16**, elevated to
+`../foundations/technological_contingency_of_fandom_formation/` once it
+became clear its actual claim (fandom formation is contingent on the
+technological/social conditions present when a fandom forms) isn't
+esports-specific or wider-game-fandom-specific either — it's prior to
+and larger than any one area. This area's own GTA 6 work is flagged
+there as a candidate second case study, not owned by this document.
 
 ## 3. Open, umbrella-level questions
 
-Not yet owned by either subproject — either genuinely cross-cutting, or not
+Not yet owned by a subproject — either genuinely cross-cutting, or not
 mature enough to be split out yet.
 
 1. **Are esports creator communities more insular than the wider Twitch
@@ -67,15 +71,15 @@ mature enough to be split out yet.
    (§4) accumulates a comparable window. **Still needs a longer window —
    nothing has changed here since this brief was first written.**
 2. **General, open-ended**: what does "attention concentrating even as
-   production fragments" (`research/inter_esports_dynamics/brief.md`'s H3)
+   production fragments" (`inter_esports_dynamics/questions/platform_attention_concentration/`)
    look like one level up, across all of Twitch rather than within the 23
    tracked titles? Doesn't commit to a specific test yet — recorded here
    as the connective thread to keep in mind as findings accumulate.
 
 ## 4. Data source: `collectors/twitch_platform_poll.py` (built 2026-09-09)
 
-Shared infrastructure for this whole research area — both subprojects and
-both open questions above draw on it, not duplicated per-subproject.
+Shared infrastructure for this whole research area — both the subproject
+and both open questions above draw on it, not duplicated per-subproject.
 
 **The core constraint, same as everywhere else in this project (CLAUDE.md's
 "one rule," now covering a fourth live collector alongside Twitch/YouTube/
@@ -138,9 +142,5 @@ category IDs explicitly rather than assume every `game_id` in
   check once there's real data, not decided in advance.
 - A non-game category exclusion list (§4's known limitation) — not yet
   built.
-- Whether this area eventually needs its own named hypotheses (H-something)
-  once question 2 has an actual test design, the way
-  `research/inter_esports_dynamics/`'s H1–H3 emerged from its own original
-  open questions.
-- Whether a third subproject emerges as this area's own work accumulates —
-  deliberately left open, not scoped in advance (§1).
+- Whether a second subproject emerges as this area's own work
+  accumulates — deliberately left open, not scoped in advance (§1).

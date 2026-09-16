@@ -12,7 +12,7 @@ game, using the same tiered full-detail/aggregate-below-threshold policy
 config/capture.yaml already proved out for the tracked titles, just
 re-derived for this much larger, much more power-law-skewed population
 (see config/twitch_platform_capture.yaml for that derivation). Feeds
-research/digital_fandoms/brief.md (added 2026-09-09) -- first use case:
+research/wider_game_fandoms/brief.md (added 2026-09-09) -- first use case:
 comparing esports creator insularity against the wider Twitch creator
 population, and tracking non-esports blockbuster launches (GTA 6 being
 the motivating case) the same way collectors/twitch_poll.py tracks

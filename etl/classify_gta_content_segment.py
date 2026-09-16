@@ -7,7 +7,7 @@ NoPixel-vs-everything-else.
 
 Segments (checked in this order, most specific first):
   - nopixel: title or tags mention "nopixel"/"no pixel" (the same test
-    already used ad hoc in research/digital_fandoms/gta_launch_case_study/notebooks/gta_v_deep_dive.ipynb and
+    already used ad hoc in research/wider_game_fandoms/gta_launch_case_study/notebooks/gta_v_deep_dive.ipynb and
     research/exploratory/notebooks/mlbb_russia_deep_dive.ipynb-adjacent investigation, now
     persisted instead of re-derived per-notebook).
   - gta_rp_other: roleplay-indicating, but not NoPixel specifically --

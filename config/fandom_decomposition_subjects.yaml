@@ -50,7 +50,7 @@
 
 subjects:
   # The pair that motivated this whole subsystem
-  # (research/inter_esports_dynamics/notebooks/niche_membership.ipynb's
+  # (research/foundations/fandom_and_niche_model/notebooks/niche_membership.ipynb's
   # Apex/PUBG:BATTLEGROUNDS shared-occupancy
   # finding, 2026-09-12) -- both title_id-based, both already have a
   # verified Steam AppID in config/steam_appids.yaml.
@@ -89,7 +89,8 @@ subjects:
         title: Counter-Strike_2
 
   # Added 2026-09-15, at the user's direct request, to disambiguate the
-  # tac_fps/pc niche cell's (esports_gauses_law_brief.md H1) `en`-tagged
+  # tac_fps/pc niche cell's (inter_esports_dynamics/questions/
+  # competitive_exclusion_in_niches) `en`-tagged
   # audience the same way the founding Apex/PUBG pair already is --
   # Counter-Strike was already a subject; Siege and VALORANT complete the
   # cell. No wikipedia_articles yet (unverified article-title spelling,
@@ -112,7 +113,7 @@ subjects:
   # GTA V isn't a tracked esports title, it has no row in
   # config/titles.yaml, and lives entirely in
   # platform_viewership_snapshots via collectors/twitch_platform_poll.py
-  # (PRD §9.16, research/digital_fandoms/brief.md). No steam_app_id here:
+  # (PRD §9.16, research/wider_game_fandoms/brief.md). No steam_app_id here:
   # GTA V's Steam release is a late port with a much smaller, non-
   # representative review base next to console/Rockstar-launcher sales --
   # a real gap, not an oversight, revisit only if that changes.

@@ -1,6 +1,6 @@
 # GTA 6 Launch: A Live Digital-Fandom Case Study
 
-Part of the `digital_fandoms` research area — see `../brief.md` for the
+Part of the `wider_game_fandoms` research area — see `../brief.md` for the
 area's shared context, data infrastructure (`collectors/twitch_platform_poll.py`),
 and how this subproject relates to `fandom_historical_contingency/`.
 
