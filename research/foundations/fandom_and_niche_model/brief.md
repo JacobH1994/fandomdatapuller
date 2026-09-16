@@ -62,16 +62,17 @@ whether niches behave as real, coherent units:
   a direct reading of whether *region*, one leg of the niche-cell
   triangle, actually differentiates the way the model assumes.
 - `../esports_vs_game_fandom_signal_model/`'s own infrastructure —
-  `analysis/fandom_region_decomposition.py`, `notebooks/english_fandom_decomposition.ipynb`,
-  `notebooks/steam_review_playerbase_over_time.ipynb` — built to answer
+  `analysis/fandom_region_decomposition.py` plus two notebooks that live
+  in `../../inter_esports_dynamics/notebooks/` (`english_fandom_decomposition.ipynb`,
+  `steam_review_playerbase_over_time.ipynb`) — built to answer
   whether "two titles' audiences look similar" means "actually the same
   people," which bears directly on whether a niche cell is a real shared
   resource pool or an artifact of coarse categorization. See §4 for the
   UTC-offset finding this produced.
-- `notebooks/creator_crossover.ipynb` — the creator-side (not
-  viewer-side) analogue: does a niche cell's *creator* population
-  overlap the way the audience-side evidence above suggests, or
-  differently.
+- `../../inter_esports_dynamics/notebooks/creator_crossover.ipynb` — the
+  creator-side (not viewer-side) analogue: does a niche cell's *creator*
+  population overlap the way the audience-side evidence above suggests,
+  or differently.
 
 ## 4. Is the resource actually shared? (multi-homing)
 

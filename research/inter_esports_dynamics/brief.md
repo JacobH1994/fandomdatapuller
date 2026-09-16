@@ -65,7 +65,7 @@ New research questions land in one of these, or justify a new bucket:
 
 | Question-brief | Status | Notes |
 |---|---|---|
-| `competitive_exclusion_in_niches/` | Active — primary evidence (tac-FPS cohort story) written, tests not yet run | Waits on `foundations/fandom_and_niche_model` reaching ADOPTED before its own niche-level claims can be trusted |
+| `competitive_exclusion_in_niches/` | Active — primary evidence (tac-FPS cohort story) written, tests not yet run | Waits on `../foundations/fandom_and_niche_model` reaching ADOPTED before its own niche-level claims can be trusted |
 | `fandom_value_resilience/` | Named, not tested | Needs multi-year per-title volatility data not yet in hand |
 | `platform_attention_concentration/` | Active — one sub-test paused (Esports Charts blocked), one not yet started | |
 
