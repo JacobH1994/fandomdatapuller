@@ -73,8 +73,11 @@ def test_decompose_by_timezone_recovers_known_mixture():
     observed[11] = 0.3  # Nigeria's predicted peak
 
     shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=WINTER)
-    assert shares["US_East"] == pytest.approx(0.7, abs=1e-6)
-    assert shares["Nigeria"] == pytest.approx(0.3, abs=1e-6)
+    # Labels are the resolved UTC offset itself since 2026-09-15, not the
+    # candidate name -- US_East (America/New_York) is UTC-5 in January,
+    # Nigeria (Africa/Lagos) is UTC+1 year-round.
+    assert shares["UTC-5"] == pytest.approx(0.7, abs=1e-6)
+    assert shares["UTC+1"] == pytest.approx(0.3, abs=1e-6)
 
 
 def test_decompose_by_timezone_no_signal_returns_empty():
@@ -101,8 +104,10 @@ def test_decompose_by_timezone_merges_permanent_same_offset_candidates():
     observed[3] = 1.0  # both predict a UTC peak at hour 3 (12 - 9)
 
     shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=WINTER)
-    assert set(shares) == {"Japan+South_Korea"}
-    assert shares["Japan+South_Korea"] == pytest.approx(1.0, abs=1e-6)
+    # Merged candidates still collapse to one column/label, but the label
+    # is the resolved offset itself now, not a "Name+Name" join.
+    assert set(shares) == {"UTC+9"}
+    assert shares["UTC+9"] == pytest.approx(1.0, abs=1e-6)
 
 
 def test_decompose_by_timezone_merges_seasonal_same_offset_candidates():
@@ -116,10 +121,10 @@ def test_decompose_by_timezone_merges_seasonal_same_offset_candidates():
     observed[11] = 1.0
 
     winter_shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=WINTER)
-    assert set(winter_shares) == {"UK_Ireland", "Nigeria"}  # GMT (+0) vs +1 -- distinguishable in winter
+    assert set(winter_shares) == {"UTC+0", "UTC+1"}  # GMT (+0) vs +1 -- distinguishable in winter
 
     summer_shares = decompose_by_timezone(observed, candidates, calibration_curve=calibration_curve, reference_datetime=SUMMER)
-    assert set(summer_shares) == {"Nigeria+UK_Ireland"}  # BST (+1) vs +1 -- indistinguishable in summer; labels sorted alphabetically
+    assert set(summer_shares) == {"UTC+1"}  # BST (+1) vs +1 -- indistinguishable in summer, merge to one offset label
 
 
 def test_offset_hours_is_dst_aware():

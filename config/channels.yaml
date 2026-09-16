@@ -117,3 +117,61 @@ channels:
     # directly parallel already-verified channels). Worth a different
     # search angle (BLAST's own site/socials) if this needs resolving
     # rather than guessed at.
+
+  street_fighter:
+    # Curated 2026-09-16, from config/channels.draft.yaml's ranked
+    # candidates (research/other/notebooks/official_channel_candidates.ipynb),
+    # live-verified via Twitch Helix (Get Users) — both channels' own bios
+    # explicitly self-identify as Capcom's official channels, not inferred
+    # from naming alone. Every other draft candidate for this title
+    # (mistermv, akarindao, fps_shaka, naru0419045, kokujintv,
+    # stylishnoob4) is a personal streamer/caster bio, correctly excluded.
+    - capcomfighters    # Capcom's main channel — bio: "Home to all of your favorite Capcom fighting games... the number one destination to watch all Capcom Pro Tour and Street Fighter League events"
+    - capcomfighters_jp # Capcom's Japanese-language channel — bio (JP): official channel operated by Capcom Co., Ltd. for Capcom Pro Tour / Street Fighter League esports content
+
+    # NOT added: "streetfighterleague" exists but its bio self-identifies
+    # as an unofficial Xbox 360-era fan community ("Check us o[ut]"), not
+    # Capcom's own channel — a real, checked-not-guessed exclusion, not an
+    # oversight (the name alone would have looked plausible).
+
+  valorant:
+    # Curated 2026-09-16, from config/channels.draft.yaml's ranked
+    # candidates plus a live Twitch Helix search for VCT regional
+    # siblings not captured in the draft's top-8-by-viewer-time cutoff
+    # (the same discovery pattern already used for CS's PGL/BLAST feeds
+    # and Dota2's ESL/PGL regional feeds). All three below are Twitch
+    # `partner`/`affiliate` accounts with real follower counts and a bio
+    # that explicitly self-identifies as the official VCT broadcast for
+    # that region — not inferred from naming alone.
+    - valorant_americas # Official VCT Americas broadcast — partner, 954K followers
+    - valorant_emea     # Official VCT EMEA broadcast — partner, 793K followers
+    - valorant_pacific  # Official VCT Pacific broadcast — affiliate, 468K followers
+
+    # NOT added: vct_emea / vct_pacific / vct_americas all exist (same
+    # naming pattern, would have looked equally plausible) but checked
+    # and rejected — 1-5 followers each, no partner/affiliate status,
+    # created 2023-03-23 (all three on the same day, consistent with a
+    # squatted/decoy set) vs. the real channels' 2020 creation dates and
+    # six-figure follower counts. A real, checked distinction, not a
+    # guess. No VCT China channel found under any tried naming pattern —
+    # not pursued further given China's own platform-access limitations
+    # already documented elsewhere in this project (PRD §9.8).
+    # Every other draft candidate (kato_junichi0817, gofns, s0mcs,
+    # kant0211, assentw, itachi, supertf) is a personal player/caster
+    # bio, correctly excluded.
+
+  pubg:
+    # Curated 2026-09-16, from config/channels.draft.yaml's ranked
+    # candidates plus a live Twitch Helix search for regional siblings
+    # (same method as valorant above). Only one real official channel
+    # found — PUBG's esports broadcast structure does not appear to run
+    # separate regional Twitch channels the way VALORANT's does.
+    - pubg_battlegrounds # Official PUBG channel — partner, 1.22M followers, bio references a live PUBG EMEA Championship broadcast window
+
+    # NOT added: pubgesports / pubg_esports / pubg_global all exist (same
+    # plausible-looking naming) but checked and rejected — 2-20 followers
+    # each, no partner/affiliate status, empty bios. Every other draft
+    # candidate (kato_junichi0817, recrent, chocotaco, tgltn,
+    # indegnasen0706, hibako, hollywoodbob) is a personal streamer bio,
+    # several with talent-agency business-contact emails — correctly
+    # excluded.
