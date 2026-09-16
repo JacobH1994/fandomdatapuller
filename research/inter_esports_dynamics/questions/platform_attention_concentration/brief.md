@@ -21,7 +21,7 @@ individual scale) showing up one level up, as a general property of
 digital-fandom production and attention rather than something specific
 to esports.
 
-**Directly extended, one level further, by `wider_game_fandoms/brief.md`**
+**Directly extended, one level further, by `../../../wider_game_fandoms/brief.md`**
 §3 (its own open question 2): what does this look like across all of
 Twitch, not just the 23 tracked titles. Not yet a named sub-test there —
 a live connection, not duplicated as a second hypothesis until there's
