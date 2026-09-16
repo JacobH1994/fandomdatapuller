@@ -480,7 +480,7 @@ CREATE TABLE IF NOT EXISTS collector_runs (
 
 -- Platform-wide, non-esports Twitch viewership (PRD §9.16, added
 -- 2026-09-09) -- collectors/twitch_platform_poll.py's full-detail tier,
--- for research/digital_fandoms/brief.md. Deliberately NOT keyed on
+-- for research/wider_game_fandoms/brief.md. Deliberately NOT keyed on
 -- title_id: these are arbitrary Twitch game categories this project
 -- doesn't otherwise track (GTA V, Minecraft, Just Chatting, ...), so
 -- game_id (Twitch's own id) is the natural key, same reasoning
@@ -610,7 +610,7 @@ CREATE TABLE IF NOT EXISTS steam_review_history (
 -- signal_source) per region per window, deliberately NOT collapsed into
 -- a single number per region. Matches this project's existing "three
 -- metrics side by side, not one replacing another" convention
--- (research/inter_esports_dynamics/notebooks/niche_membership.ipynb's cosine_full/cosine_no_english/jsd
+-- (research/foundations/fandom_and_niche_model/notebooks/niche_membership.ipynb's cosine_full/cosine_no_english/jsd
 -- trio) -- disagreement between methods/sources is itself the finding,
 -- not something to average away.
 -- method: 'timezone_deconvolution' | 'tag_mining' | 'language_distribution'

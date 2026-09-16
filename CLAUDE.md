@@ -1,13 +1,21 @@
 # fandomdatapuller
 
-A personal research platform tracking digital-fandom metrics, built to serve
-three active research areas and designed so future ones mostly need new
-queries, not new pipelines:
+A personal research platform tracking digital-fandom metrics. **The
+overarching intellectual project is digital fandom formation** — esports
+is the first, deepest case study (richest data, and the near-term
+audience for this project's output is esports industry professionals),
+not the only subject this project will ever cover; see
+`research/foundations/brief.md`. Built to serve three active research
+areas and designed so future ones mostly need new queries, not new
+pipelines:
 
 - **`research/inter_esports_dynamics/brief.md`** (originally "Gause's Law,"
-  renamed 2026-09-16 to reflect a broader scope than the one framework) —
-  does competitive exclusion sort esports titles *within* a niche, across
-  titles?
+  renamed 2026-09-16 to reflect a broader scope than the one hypothesis,
+  which now lives as one of several question-briefs under
+  `questions/` — see "Research area layout" below) — dynamics *between*
+  esports titles: does one crowd another out of a shared niche, does
+  fandom durability affect resilience, does attention concentrate even
+  as production fragments.
 - **`research/esports_lifecycle_and_maturity/brief.md`** (originally "the
   Counter-Strike lifecycle brief," renamed same day — the method is
   title-agnostic even though Counter-Strike is still its primary case, see
@@ -15,37 +23,67 @@ queries, not new pipelines:
   *single* title's own growth trajectory reached a ceiling, independent of
   its competitors? See that brief's §3 for why it's kept separate rather
   than folded into the first.
-- **`research/digital_fandoms/brief.md`** (originally "the wider game
-  fandom brief," split 2026-09-16 into an umbrella plus two subprojects —
-  see "Research area layout" below) — how do non-esports game fandoms
-  behave on Twitch and, more generally, how does historical context shape
-  fandom formation? The first area whose subject isn't esports at all.
+- **`research/wider_game_fandoms/brief.md`** (originally "the wider game
+  fandom brief," renamed 2026-09-16 alongside the "digital fandoms" →
+  "digital fandom formation" rename above, since that term turned out to
+  be the project's own overarching frame, not one area's private name) —
+  how do non-esports game fandoms behave on Twitch — this area's
+  designated on-ramp for broadening scope beyond esports once that work
+  matures.
+
+`research/foundations/` sits above all three — models and definitions
+(what a niche is, esports fandom vs. game fandom, why fandom formation is
+technologically contingent) genuinely shared across areas, not owned by
+one. See "Research area layout" below.
 
 Full spec: `docs/esports_fandom_platform_prd_v2.md`.
 
 ## Research area layout
 
 Each research area is a folder under `research/`: a `brief.md` (the
-formal research document — questions, hypotheses, findings, open items)
-alongside a `notebooks/` subfolder holding every notebook that's actual
-evidence for that area, plus `reports/`/`presentations/` subfolders for
-any external-facing deliverables built from that area's own work.
-Restructured 2026-09-16 from a flat `docs/`+`notebooks/`+`reports/` layout
-specifically so a brief and its evidence sit next to each other.
+formal research document) alongside a `notebooks/` subfolder holding
+every notebook that's actual evidence, plus `reports/`/`presentations/`
+subfolders for any external-facing deliverables built from that work.
+Restructured 2026-09-16 from a flat `docs/`+`notebooks/`+`reports/`
+layout so a brief and its evidence sit next to each other.
 
-- `research/inter_esports_dynamics/` and `research/esports_lifecycle_and_maturity/`
-  are flat: one `brief.md`, one `notebooks/`.
-- `research/digital_fandoms/` is two levels: `brief.md` is the umbrella
-  (open, cross-cutting questions not yet owned by either subproject below),
-  and two subprojects each carry their own `brief.md` + `notebooks/`:
-  - `gta_launch_case_study/` — the GTA 6 launch as a live natural
-    experiment, using the lifecycle-and-maturity area's own method adapted
-    for a non-esports, non-tournament-driven title.
-  - `fandom_historical_contingency/` — whether a title's era of emergence
-    (per `research/inter_esports_dynamics/brief.md`'s own Classic/
-    Console/Second-Coming framework) structurally shapes its creator
-    ecosystem, seeded by `streamer_ecosystem_by_phase.ipynb`'s finding
-    that this isn't a simple "newer titles have bigger ecosystems" story.
+**A post is the project's actual output** — personal research-in-progress
+published on Substack, written manually from a question-brief's
+notebooks (data + commentary) as raw material. There is no automated
+post-builder; a question-brief's job ends at being post-ready, not at
+producing a draft.
+
+**`research/foundations/` sits above the three research areas, not
+beside them** — see its own `brief.md` for why. It holds models and
+definitions genuinely shared across areas (what a niche is, what esports
+fandom means as distinct from game fandom, why fandom formation is
+technologically contingent), each with an explicit `PENDING`/`ADOPTED`
+status. An area brief cites a foundations model; it never redefines one.
+
+**Within an area, a `questions/` subfolder holds individual
+question-briefs** — one research question, driving one eventual post,
+each with its own `brief.md` (and `notebooks/` only if it has evidence
+genuinely exclusive to that question; shared area-wide evidence stays in
+the area's own top-level `notebooks/`). This is the actual mechanism for
+"unlimited posts per area without re-scoping the area each time" — new
+work adds a `questions/<slug>/` folder and a row to the area brief's own
+index table, not a rewrite of the area brief. `research/inter_esports_dynamics/questions/`
+is the first area built this way (retiring the old flat H1/H2/H3 naming
+in favor of descriptive slugs — `competitive_exclusion_in_niches`,
+`fandom_value_resilience`, `platform_attention_concentration`); the other
+two areas haven't been migrated to this pattern yet.
+
+- `research/esports_lifecycle_and_maturity/` is still flat: one
+  `brief.md`, one `notebooks/` — not yet split into question-briefs.
+- `research/wider_game_fandoms/` is two levels: `brief.md` is the
+  umbrella (open, cross-cutting questions not yet owned by a subproject),
+  and `gta_launch_case_study/` carries its own `brief.md` + `notebooks/`
+  — the GTA 6 launch as a live natural experiment, using
+  `esports_lifecycle_and_maturity`'s own method adapted for a
+  non-esports, non-tournament-driven title. (`fandom_historical_contingency/`
+  used to be a second subproject here; elevated to `foundations/` 2026-09-16
+  once its actual claim turned out not to be esports- or
+  wider-game-fandom-specific.)
 - `research/exploratory/` holds standalone investigations that don't
   advance any one area's own named questions (e.g. the Mobile Legends
   Russia deep dive) — real findings, just not owned by a brief.
@@ -56,7 +94,7 @@ specifically so a brief and its evidence sit next to each other.
 
 A notebook that's genuinely evidence for more than one area (e.g.
 `creator_crossover.ipynb`, cited by both `inter_esports_dynamics` and
-`digital_fandoms`) lives in the one area it was built for and gets
+`wider_game_fandoms`) lives in the one area it was built for and gets
 cross-referenced by name from the other's brief — never duplicated or
 symlinked.
 
@@ -129,7 +167,7 @@ schedule to protect.
 
 **And to `collectors/twitch_platform_poll.py` / `twitch_platform_poll.yml`
 (PRD §9.16, built 2026-09-09)** — the platform-wide, non-esports Twitch
-collector feeding `research/digital_fandoms/brief.md`. Same unbackfillable
+collector feeding `research/wider_game_fandoms/brief.md`. Same unbackfillable
 property as `collectors/twitch_poll.py` (it's the same API), and the same
 fully-separate-file discipline as YouTube/Steam before it — imports
 `twitch_poll.py`'s auth/retry helpers but never modifies that file, and
@@ -228,7 +266,7 @@ steam_poll.py`, 11 titles pre-configured in `config/steam_appids.yaml`)
 — live and collecting real data on schedule (`STEAM_API_KEY` added as a
 repo secret 2026-09-08); the platform-wide, non-esports Twitch collector
 (PRD §9.16, `collectors/twitch_platform_poll.py`, built 2026-09-09 for
-`research/digital_fandoms/brief.md`) — live and collecting real data on
+`research/wider_game_fandoms/brief.md`) — live and collecting real data on
 its own GitHub Actions schedule; the "Boudica" branded external report
 pipeline (`scripts/build_client_report.py`, see Common Tasks above); the
 English-language fandom decomposition subsystem (PRD §9.17, built
@@ -288,7 +326,7 @@ window) from the GitHub Actions UI: run the "Twitch live-viewership poll"
 workflow manually with `duration_minutes` / `interval_minutes` set.
 
 Run the platform-wide, non-esports Twitch collector locally (PRD §9.16,
-`research/digital_fandoms/brief.md` — same `TWITCH_CLIENT_ID`/
+`research/wider_game_fandoms/brief.md` — same `TWITCH_CLIENT_ID`/
 `TWITCH_CLIENT_SECRET` as above; a completely separate script/config/
 workflow from `twitch_poll.py`, by design — see `collectors/
 twitch_platform_poll.py`'s own docstring):
@@ -422,7 +460,7 @@ finding. When a request uses the phrase "boudica report" ("give me a
 boudica report on X"), it means: build one this way. Write the report
 body by hand first — `research/<area>/[<subproject>/]reports/<name>/report.md`
 + `.../figs/` for a report that belongs to one research area (the normal
-case; see `research/digital_fandoms/gta_launch_case_study/reports/gta_v_deep_dive/`
+case; see `research/wider_game_fandoms/gta_launch_case_study/reports/gta_v_deep_dive/`
 for an example), or plain top-level `reports/<name>/report.md` for a
 report that isn't itself research output (e.g. `reports/liquipedia_preview/`,
 built as a demonstration for an external party, not a research finding) —

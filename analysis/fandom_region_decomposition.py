@@ -1,5 +1,5 @@
 """English-language fandom region decomposition (PRD §9.17, added
-2026-09-12). Built after `research/inter_esports_dynamics/notebooks/niche_membership.ipynb` found Apex
+2026-09-12). Built after `research/foundations/fandom_and_niche_model/notebooks/niche_membership.ipynb` found Apex
 Legends and PUBG: BATTLEGROUNDS sharing a Japanese-speaking audience, but
 could say nothing about their `en`-tagged viewers — English spans the US,
 UK, India, the Philippines, Canada, Australia and more with no finer tag
