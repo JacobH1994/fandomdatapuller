@@ -1,7 +1,7 @@
 # fandomdatapuller
 
 A personal research platform for tracking digital-fandom metrics, starting
-with esports live-viewership data. See `docs/esports_gauses_law_brief.md`
+with esports live-viewership data. See `research/inter_esports_dynamics/brief.md`
 for the research question and `docs/esports_fandom_platform_prd_v2.md` for
 the full build spec.
 

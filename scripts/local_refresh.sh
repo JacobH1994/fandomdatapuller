@@ -8,7 +8,7 @@
 #   2. etl/load_snapshots.py -> loads Twitch raw snapshots AND
 #      data/reference/*.jsonl (tournaments/tournament_aliases) into
 #      research.db. Always safe to run, natural-key upserts throughout.
-#   3. notebooks/official_channel_candidates.ipynb -> regenerates
+#   3. research/other/notebooks/official_channel_candidates.ipynb -> regenerates
 #      config/channels.draft.yaml. Re-executed automatically (touches only
 #      the draft, never the real config), but config/channels.yaml itself
 #      is NOT auto-updated from it — that step needs a human to review and
@@ -63,7 +63,7 @@ echo "=== 2/6: load_snapshots (Twitch raw + data/reference/) ==="
 python3 etl/load_snapshots.py
 
 echo "=== 3/6: official_channel_candidates.ipynb (draft only, not applied) ==="
-jupyter nbconvert --to notebook --execute --inplace notebooks/official_channel_candidates.ipynb
+jupyter nbconvert --to notebook --execute --inplace research/other/notebooks/official_channel_candidates.ipynb
 echo "    -> review config/channels.draft.yaml and curate config/channels.yaml by hand if it changed."
 
 echo "=== 4/6: generate_tournament_aliases ==="

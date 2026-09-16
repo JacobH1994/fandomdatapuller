@@ -5,8 +5,8 @@
 # Chrome in headless mode (no LaTeX/wkhtmltopdf/playwright dependency).
 #
 # Usage:
-#   scripts/export_notebook_pdfs.sh notebooks/foo.ipynb notebooks/bar.ipynb
-#   scripts/export_notebook_pdfs.sh notebooks/*.ipynb
+#   scripts/export_notebook_pdfs.sh research/<area>/notebooks/foo.ipynb research/<area>/notebooks/bar.ipynb
+#   scripts/export_notebook_pdfs.sh research/<area>/notebooks/*.ipynb
 #
 # Requires: jupyter nbconvert (already in requirements.txt) and a Chrome/
 # Chromium binary on PATH or at one of the common install locations below.

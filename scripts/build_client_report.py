@@ -60,6 +60,13 @@ def main() -> int:
     parser.add_argument("--kicker", default="RESEARCH NOTE")
     parser.add_argument("--meta", default="")
     parser.add_argument("--footer", default="Prepared by Boudica. Confidential — not for external distribution.")
+    parser.add_argument(
+        "--watermark", default="BOUDICA",
+        help="Repeating page-margin watermark text (@page top-right, report_template.html). "
+        "Pass '' to render this report with no watermark at all -- for a non-Boudica-branded "
+        "use of the same layout/pipeline, e.g. a report meant to be shared outside this "
+        "project's own 'client report' identity.",
+    )
     parser.add_argument("--body", required=True, type=Path, help="markdown file with the report's clean prose content")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
@@ -88,6 +95,7 @@ def main() -> int:
         .replace("{{KICKER}}", args.kicker)
         .replace("{{META}}", args.meta)
         .replace("{{FOOTER}}", args.footer)
+        .replace("{{WATERMARK}}", args.watermark)
         .replace("{{BODY}}", body_html)
     )
 

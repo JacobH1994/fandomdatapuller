@@ -250,7 +250,7 @@ def _viewership_trend(conn: sqlite3.Connection, title_id: str, start_year: int, 
 
 
 def get_championship_windows(conn: sqlite3.Connection, title_id: str | None = None) -> list[dict]:
-    """Brief H3's championship-concentration test (docs/esports_gauses_law_brief.md),
+    """Brief H3's championship-concentration test (research/inter_esports_dynamics/brief.md),
     added 2026-09-08: for each (title, calendar year), the tier-1
     tournament with the highest prize_pool — the "world championship
     window" for that title-year. Deliberately objective, no name-matching

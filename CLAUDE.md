@@ -1,28 +1,74 @@
 # fandomdatapuller
 
 A personal research platform tracking digital-fandom metrics, built to serve
-three active research questions and designed so future ones mostly need new
+three active research areas and designed so future ones mostly need new
 queries, not new pipelines:
-`docs/esports_gauses_law_brief.md` (does competitive exclusion sort esports
-titles *within* a niche, across titles?), `docs/counter_strike_lifecycle_brief.md`
-(added 2026-09-09 — has a *single* title's own growth trajectory reached a
-ceiling, independent of its competitors — see that brief's §3 for why it's
-kept separate rather than folded into the first), and
-`docs/wider_game_fandom_brief.md` (added 2026-09-09 — how do non-esports
-game fandoms behave on Twitch, starting from an esports-vs-general creator-
-insularity comparison and an anticipated GTA 6 launch as a live case study;
-the first brief whose subject isn't esports at all — see its §3 for how it
-relates to the other two). Full spec: `docs/esports_fandom_platform_prd_v2.md`.
+
+- **`research/inter_esports_dynamics/brief.md`** (originally "Gause's Law,"
+  renamed 2026-09-16 to reflect a broader scope than the one framework) —
+  does competitive exclusion sort esports titles *within* a niche, across
+  titles?
+- **`research/esports_lifecycle_and_maturity/brief.md`** (originally "the
+  Counter-Strike lifecycle brief," renamed same day — the method is
+  title-agnostic even though Counter-Strike is still its primary case, see
+  §11 of that brief for the Dota 2 comparison already run) — has a
+  *single* title's own growth trajectory reached a ceiling, independent of
+  its competitors? See that brief's §3 for why it's kept separate rather
+  than folded into the first.
+- **`research/digital_fandoms/brief.md`** (originally "the wider game
+  fandom brief," split 2026-09-16 into an umbrella plus two subprojects —
+  see "Research area layout" below) — how do non-esports game fandoms
+  behave on Twitch and, more generally, how does historical context shape
+  fandom formation? The first area whose subject isn't esports at all.
+
+Full spec: `docs/esports_fandom_platform_prd_v2.md`.
+
+## Research area layout
+
+Each research area is a folder under `research/`: a `brief.md` (the
+formal research document — questions, hypotheses, findings, open items)
+alongside a `notebooks/` subfolder holding every notebook that's actual
+evidence for that area, plus `reports/`/`presentations/` subfolders for
+any external-facing deliverables built from that area's own work.
+Restructured 2026-09-16 from a flat `docs/`+`notebooks/`+`reports/` layout
+specifically so a brief and its evidence sit next to each other.
+
+- `research/inter_esports_dynamics/` and `research/esports_lifecycle_and_maturity/`
+  are flat: one `brief.md`, one `notebooks/`.
+- `research/digital_fandoms/` is two levels: `brief.md` is the umbrella
+  (open, cross-cutting questions not yet owned by either subproject below),
+  and two subprojects each carry their own `brief.md` + `notebooks/`:
+  - `gta_launch_case_study/` — the GTA 6 launch as a live natural
+    experiment, using the lifecycle-and-maturity area's own method adapted
+    for a non-esports, non-tournament-driven title.
+  - `fandom_historical_contingency/` — whether a title's era of emergence
+    (per `research/inter_esports_dynamics/brief.md`'s own Classic/
+    Console/Second-Coming framework) structurally shapes its creator
+    ecosystem, seeded by `streamer_ecosystem_by_phase.ipynb`'s finding
+    that this isn't a simple "newer titles have bigger ecosystems" story.
+- `research/exploratory/` holds standalone investigations that don't
+  advance any one area's own named questions (e.g. the Mobile Legends
+  Russia deep dive) — real findings, just not owned by a brief.
+- `research/other/` holds notebooks that are pipeline QA or config
+  generation, not research findings at all (`reconciliation.ipynb`
+  against the hand-built milestone table, `official_channel_candidates.ipynb`
+  for `config/channels.yaml` curation).
+
+A notebook that's genuinely evidence for more than one area (e.g.
+`creator_crossover.ipynb`, cited by both `inter_esports_dynamics` and
+`digital_fandoms`) lives in the one area it was built for and gets
+cross-referenced by name from the other's brief — never duplicated or
+symlinked.
 
 `docs/system_reference.md` describes present state (what's actually
 built, wired up, populated, or broken, read straight from the code and
 data) — the PRD describes intent and decisions. When it drifts,
 regenerate it rather than hand-editing it.
 
-**The PRD and both research briefs are edited directly, the same as code**
-(PRD §15, added 2026-09-08) — they aren't maintained elsewhere and copied
-in. When a research decision, data-source design, or connection to an
-existing hypothesis comes up in conversation, write it into these
+**The PRD and every research brief are edited directly, the same as
+code** (PRD §15, added 2026-09-08) — they aren't maintained elsewhere and
+copied in. When a research decision, data-source design, or connection to
+an existing hypothesis comes up in conversation, write it into these
 documents as part of doing the work, not as a separate step to remember
 later. If a request doesn't obviously connect to what's currently
 written, that's the documents lagging the conversation (scope has grown
@@ -83,7 +129,7 @@ schedule to protect.
 
 **And to `collectors/twitch_platform_poll.py` / `twitch_platform_poll.yml`
 (PRD §9.16, built 2026-09-09)** — the platform-wide, non-esports Twitch
-collector feeding `docs/wider_game_fandom_brief.md`. Same unbackfillable
+collector feeding `research/digital_fandoms/brief.md`. Same unbackfillable
 property as `collectors/twitch_poll.py` (it's the same API), and the same
 fully-separate-file discipline as YouTube/Steam before it — imports
 `twitch_poll.py`'s auth/retry helpers but never modifies that file, and
@@ -168,7 +214,8 @@ rest (`get_niche_share`, `get_concentration`, `get_official_broadcast_share`,
 
 Also built: Phase 3 genre/platform classification; `get_success_milestone`'s
 `qualifying_window_scale`/`viewership_check`; the Kaggle historical-viewership
-import; several analysis notebooks (`notebooks/`); `tournament_aliases`
+import; several analysis notebooks (organized by research area under
+`research/`, see "Research area layout" below); `tournament_aliases`
 (rule-based + LLM-derived, `etl/generate_tournament_aliases.py`);
 `viewership_snapshots.broadcast_tier` co-stream detection
 (`etl/classify_broadcast_tier.py`); `platform_viewership_snapshots.
@@ -181,12 +228,12 @@ steam_poll.py`, 11 titles pre-configured in `config/steam_appids.yaml`)
 — live and collecting real data on schedule (`STEAM_API_KEY` added as a
 repo secret 2026-09-08); the platform-wide, non-esports Twitch collector
 (PRD §9.16, `collectors/twitch_platform_poll.py`, built 2026-09-09 for
-`docs/wider_game_fandom_brief.md`) — live and collecting real data on
+`research/digital_fandoms/brief.md`) — live and collecting real data on
 its own GitHub Actions schedule; the "Boudica" branded external report
 pipeline (`scripts/build_client_report.py`, see Common Tasks above); the
 English-language fandom decomposition subsystem (PRD §9.17, built
 2026-09-12 — `analysis/fandom_region_decomposition.py`,
-`notebooks/english_fandom_decomposition.ipynb`, `config/
+`research/inter_esports_dynamics/notebooks/english_fandom_decomposition.ipynb`, `config/
 fandom_decomposition_subjects.yaml`) — real Twitch-timezone-deconvolution
 and self-declared-tag results for `apex_legends`/`pubg`/`counter_strike`/
 `gta_v`; the Steam-review signal is smoke-tested only (a full crawl is a
@@ -241,7 +288,7 @@ window) from the GitHub Actions UI: run the "Twitch live-viewership poll"
 workflow manually with `duration_minutes` / `interval_minutes` set.
 
 Run the platform-wide, non-esports Twitch collector locally (PRD §9.16,
-`docs/wider_game_fandom_brief.md` — same `TWITCH_CLIENT_ID`/
+`research/digital_fandoms/brief.md` — same `TWITCH_CLIENT_ID`/
 `TWITCH_CLIENT_SECRET` as above; a completely separate script/config/
 workflow from `twitch_poll.py`, by design — see `collectors/
 twitch_platform_poll.py`'s own docstring):
@@ -327,7 +374,7 @@ history can be 1M+ reviews (same category of task as
 a quick command). Then, to see the decomposition itself:
 
 ```
-jupyter nbconvert --to notebook --execute --inplace notebooks/english_fandom_decomposition.ipynb
+jupyter nbconvert --to notebook --execute --inplace research/inter_esports_dynamics/notebooks/english_fandom_decomposition.ipynb
 ```
 
 Run the full local refresh routine (fixed order, explicit — see the
@@ -352,7 +399,7 @@ python etl/classify_gta_content_segment.py    # platform_viewership_snapshots.co
 Export a full-detail (code stripped, everything else kept) PDF of any notebook, for your own record — not for sharing externally:
 
 ```
-scripts/export_notebook_pdfs.sh notebooks/<name>.ipynb
+scripts/export_notebook_pdfs.sh research/<area>/notebooks/<name>.ipynb
 ```
 
 **A "boudica report"** is this project's own name for an external-facing,
@@ -373,14 +420,19 @@ game or platform the report covers** — don't spend sentences restating
 well-known context ("X is one of the largest titles on Y"); get to the
 finding. When a request uses the phrase "boudica report" ("give me a
 boudica report on X"), it means: build one this way. Write the report
-body by hand first (`reports/<name>/report.md` + `reports/<name>/figs/`,
-not auto-derived from a notebook — see `docs/system_reference.md`'s Scripts
+body by hand first — `research/<area>/[<subproject>/]reports/<name>/report.md`
++ `.../figs/` for a report that belongs to one research area (the normal
+case; see `research/digital_fandoms/gta_launch_case_study/reports/gta_v_deep_dive/`
+for an example), or plain top-level `reports/<name>/report.md` for a
+report that isn't itself research output (e.g. `reports/liquipedia_preview/`,
+built as a demonstration for an external party, not a research finding) —
+not auto-derived from a notebook (see `docs/system_reference.md`'s Scripts
 section for why), ending the markdown with a `## Sources` section, then:
 
 ```
 python scripts/build_client_report.py \
   --title "Report Title" --meta "10 September 2026" \
-  --body reports/<name>/report.md --output pdf_outputs/<name>.pdf
+  --body research/<area>/reports/<name>/report.md --output pdf_outputs/<name>.pdf
 ```
 
 The kicker line under the title defaults to plain "RESEARCH NOTE" (no
@@ -393,23 +445,23 @@ style, one declarative headline per slide with a single large chart doing
 the demonstrating, section-divider slides chaining the argument, a
 Sources slide to close. Built the same way as the report format —
 `scripts/build_client_presentation.py` + `scripts/presentation_template.html`
-render a hand-authored `presentations/<name>/deck.yaml` (slides: title,
-section, content — headline + image + optional source note, or closing)
-plus `presentations/<name>/figs/*.png` through the same headless-Chrome
+render a hand-authored `research/<area>/presentations/<name>/deck.yaml`
+(slides: title, section, content — headline + image + optional source
+note, or closing) plus `.../figs/*.png` through the same headless-Chrome
 engine. When a request asks for a "boudica presentation" (or asks to
 present findings "in Ball's style" / as a slide deck rather than a
-report), this is the pattern — see `presentations/state_of_cs/` for a
-full worked example (21 slides synthesizing the Counter-Strike lifecycle
-brief's growth/maturity findings across audience, competitive, grassroots,
-and creator-ecosystem angles). The watermark uses a plain corner
-`position: absolute` inside each self-contained slide `<div>`, not the
-report format's `@page` margin-box trick — that trick exists to solve a
-problem (content flowing continuously across page breaks) this format
+report), this is the pattern — see `research/esports_lifecycle_and_maturity/presentations/state_of_cs/` for a
+full worked example (21 slides synthesizing the esports-lifecycle-and-
+maturity brief's growth/maturity findings across audience, competitive,
+grassroots, and creator-ecosystem angles). The watermark uses a plain
+corner `position: absolute` inside each self-contained slide `<div>`, not
+the report format's `@page` margin-box trick — that trick exists to solve
+a problem (content flowing continuously across page breaks) this format
 doesn't have, since every slide is its own discrete block.
 
 ```
 python scripts/build_client_presentation.py \
-  --deck presentations/<name>/deck.yaml --output pdf_outputs/<name>.pdf
+  --deck research/<area>/presentations/<name>/deck.yaml --output pdf_outputs/<name>.pdf
 ```
 
 Run tests:

@@ -11,7 +11,7 @@ document is that record; short per-title pointers also live in
 `milestone_table.csv`'s own `notes` column (added by `data/manual/
 normalize_original_export.py`'s `RECONCILIATION_NOTES`).
 
-Reproduce this yourself: `notebooks/reconciliation.ipynb`, re-run top to
+Reproduce this yourself: `research/other/notebooks/reconciliation.ipynb`, re-run top to
 bottom. Its final cell shows the same categorization mechanically,
 alongside each title's `viewership_check` and `qualifying_window_scale`.
 
