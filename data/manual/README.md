@@ -11,7 +11,7 @@ data/manual/milestone_table.csv
 ```
 
 The original hand-built success-milestone table (one row per title, from
-before this pipeline existed), used by `notebooks/reconciliation.ipynb` to
+before this pipeline existed), used by `research/other/notebooks/reconciliation.ipynb` to
 check `analysis/metrics.py:get_success_milestone`'s output against
 independently-produced numbers. Columns:
 

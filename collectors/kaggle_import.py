@@ -54,7 +54,7 @@ ambiguous name predates our tracked title entirely, and guessing which
 generation a given month's figures belong to is exactly the kind of
 silent misattribution collectors/liquipedia.py's own docstring already
 flags as a past mistake for this same wiki/title group. 2026-09-07: found
-live in notebooks/esports_share_of_twitch.ipynb that "Street Fighter 6"
+live in research/inter_esports_dynamics/notebooks/esports_share_of_twitch.ipynb that "Street Fighter 6"
 was being excluded entirely even though it's unambiguous — fixed, and the
 other three checked at the same time.
 """

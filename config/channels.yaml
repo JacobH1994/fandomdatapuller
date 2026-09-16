@@ -24,7 +24,7 @@
 
 channels:
   counter_strike:
-    # Curated 2026-09-09 from notebooks/official_channel_candidates.ipynb's
+    # Curated 2026-09-09 from research/other/notebooks/official_channel_candidates.ipynb's
     # draft (config/channels.draft.yaml), human-reviewed — not a blind
     # copy. Tournament organizers' own broadcast channels, kept distinct
     # from popular personality/co-stream channels the draft also surfaced

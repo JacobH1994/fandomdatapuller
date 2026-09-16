@@ -19,7 +19,7 @@
     size: A4;
     margin: 34mm 20mm 20mm 20mm;
     @top-right {
-      content: "BOUDICA";
+      content: "{{WATERMARK}}";
       font-family: Georgia, "Times New Roman", serif;
       font-weight: 700;
       font-style: italic;
@@ -175,6 +175,12 @@
   table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 10pt; }
   th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); }
   th { color: var(--teal-dark); font-weight: 700; border-bottom: 1.5px solid var(--teal); }
+  /* Opt-in via class, not applied to every table: keeps a long data
+     table's rows (many pages, e.g. a full pairwise appendix) from
+     splitting a single row's wrapped text awkwardly across a page
+     break -- confirmed live 2026-09-16 that an unstyled long table can
+     do this ugly. Plain markdown-table output (no class) is unaffected. */
+  .data-table tr { break-inside: avoid; }
 
   .report-footer {
     margin-top: 40px;

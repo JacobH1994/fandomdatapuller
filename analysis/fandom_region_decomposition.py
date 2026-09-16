@@ -1,5 +1,5 @@
 """English-language fandom region decomposition (PRD §9.17, added
-2026-09-12). Built after `notebooks/niche_membership.ipynb` found Apex
+2026-09-12). Built after `research/inter_esports_dynamics/notebooks/niche_membership.ipynb` found Apex
 Legends and PUBG: BATTLEGROUNDS sharing a Japanese-speaking audience, but
 could say nothing about their `en`-tagged viewers — English spans the US,
 UK, India, the Philippines, Canada, Australia and more with no finer tag
@@ -258,7 +258,7 @@ def get_steam_review_hourly_series(
     see steam_review_history's schema comment) for the main English-
     decomposition use case. Pass `language=None` to pool every language
     together -- this is what a language-INDEPENDENT playerbase-location
-    check needs (e.g. notebooks/english_fandom_decomposition.ipynb's
+    check needs (e.g. research/inter_esports_dynamics/notebooks/english_fandom_decomposition.ipynb's
     Counter-Strike cross-validation against Russia/CIS grassroots-
     tournament growth, which is about the whole playerbase's timing, not
     the English-speaking slice of it).
@@ -273,7 +273,7 @@ def get_steam_review_hourly_series(
     language_mix_snapshots coverage, so decomposing one period at a time
     (rather than the whole history collapsed into one 'typical day') is
     what lets estimated regional share be compared against time-varying
-    signals like notebooks/fastest_growing_cs_regions.ipynb's grassroots-
+    signals like research/esports_lifecycle_and_maturity/notebooks/fastest_growing_cs_regions.ipynb's grassroots-
     tournament growth findings.
 
     **`steam_review_history`'s actual coverage window varies by subject
@@ -357,6 +357,57 @@ def _offset_hours(zone_name: str, reference_datetime: datetime) -> float:
     return local.utcoffset().total_seconds() / 3600.0
 
 
+def _format_utc_offset(offset: int) -> str:
+    """'UTC+2' / 'UTC-5' / 'UTC+0' -- the stable, permanent label for a
+    resolved integer-hour offset. Never changes as candidates are added
+    or removed, unlike a name built from candidate labels (see module
+    docstring's 2026-09-15 section) -- this is what actually gets
+    persisted as `english_fandom_region_estimates.region_or_country`."""
+    return f"UTC{offset:+d}"
+
+
+def _group_candidates_by_offset(
+    candidate_countries: dict[str, str], reference_datetime: datetime,
+) -> dict[int, list[str]]:
+    """Groups candidate names by their resolved integer-hour UTC offset at
+    `reference_datetime` -- the one place this grouping is computed, shared
+    by decompose_by_timezone (which only needs the offsets) and
+    reference_cities_for_offsets (which only needs the names)."""
+    groups: dict[int, list[str]] = defaultdict(list)
+    for name, zone_name in candidate_countries.items():
+        offset = int(round(_offset_hours(zone_name, reference_datetime)))
+        groups[offset].append(name)
+    return groups
+
+
+def reference_cities_for_offsets(
+    candidate_countries: dict[str, str], reference_datetime: datetime,
+) -> dict[str, str]:
+    """Display-only lookup: {'UTC+2': 'Johannesburg/Berlin', ...} -- the
+    illustrative reference cities currently sharing each resolved offset,
+    derived straight from each candidate's own IANA zone name (the part
+    after the '/'; no separate city field needed).
+
+    Deliberately NOT part of decompose_by_timezone's own return value, and
+    never persisted alongside it (2026-09-15, at the user's direct
+    request): a share belongs with real, measured categories (self-
+    declared tags, language codes) that decompose_by_timezone's caller is
+    free to mix into the same table without a caveat; a reference-city
+    annotation is illustrative rendering sugar for a timezone-inferred
+    bucket and reads very differently -- keeping the two in genuinely
+    separate outputs stops a future chart/table from silently blending
+    'we measured this' and 'here's an example of what this offset might
+    be' into one undifferentiated row. Call this only when actually
+    building a display for timezone-deconvolution results specifically,
+    never merged into a table of tag/language shares."""
+    groups = _group_candidates_by_offset(candidate_countries, reference_datetime)
+    result: dict[str, str] = {}
+    for offset, names in groups.items():
+        cities = [candidate_countries[name].rsplit("/", 1)[-1].replace("_", " ") for name in names]
+        result[_format_utc_offset(offset)] = "/".join(cities)
+    return result
+
+
 def decompose_by_timezone(
     hourly_series: np.ndarray,
     candidate_countries: dict[str, str] = CANDIDATE_ENGLISH_COUNTRIES,
@@ -382,9 +433,24 @@ def decompose_by_timezone(
     Two or more candidates that resolve to the IDENTICAL offset at this
     reference_datetime -- permanently (Japan/South_Korea, Russia/Turkey)
     or only seasonally (UK_Ireland/Nigeria, for the months UK observes
-    BST) -- are automatically merged into one combined output entry
-    (name joined with "+", e.g. "Japan+South_Korea"), never silently
-    split between them or left to a rank-deficient regression.
+    BST) -- are automatically merged, since nnls has no way to split
+    weight between two indistinguishable columns.
+
+    **Output is keyed by the resolved UTC offset itself (e.g. "UTC+2"),
+    not by candidate name (changed 2026-09-15).** A candidate-name label
+    like "South_Africa" claims more precision than clock-time-of-day
+    activity can actually support -- see the module docstring's DST
+    section, which found this exact bucket structurally indistinguishable
+    from Central/Western Europe for roughly seven months a year. The
+    offset is the actual thing being measured and is permanently stable
+    regardless of which candidates get added or removed later, so it's
+    safe to persist as a natural key. For a human-readable rendering of
+    which candidates currently share a given offset (e.g. "Johannesburg/
+    Berlin" for "UTC+2"), call reference_cities_for_offsets() separately
+    -- deliberately not folded into this function's own return value, so
+    a caller never accidentally mixes a real, measured category (a
+    self-declared tag, a language code) with an inferred-and-illustrative
+    one in the same table without choosing to.
 
     Pass `calibration_curve` directly (recommended when decomposing many
     subjects/windows against the same calibration) or `conn` to compute
@@ -413,14 +479,10 @@ def decompose_by_timezone(
 
     # Group candidates by resolved integer-hour offset first -- two names
     # landing on the same offset become one design-matrix column and one
-    # combined output label, never two indistinguishable columns handed
-    # to nnls.
-    groups: dict[int, list[str]] = defaultdict(list)
-    for name, zone_name in candidate_countries.items():
-        offset = int(round(_offset_hours(zone_name, reference_datetime)))
-        groups[offset].append(name)
+    # output label, never two indistinguishable columns handed to nnls.
+    groups = _group_candidates_by_offset(candidate_countries, reference_datetime)
 
-    labels = ["+".join(sorted(names)) for names in groups.values()]
+    labels = [_format_utc_offset(offset) for offset in groups]
     design_matrix = np.column_stack([
         np.roll(calibration_curve, -offset) for offset in groups
     ])

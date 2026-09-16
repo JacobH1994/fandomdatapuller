@@ -6,7 +6,7 @@
 # platform-wide subject (GTA V, which has no title_id at all -- it isn't
 # in config/titles.yaml, it lives in platform_viewership_snapshots) share
 # one pipeline with no code branching: analysis/fandom_region_decomposition.py
-# and notebooks/english_fandom_decomposition.ipynb both take a subject_id
+# and research/inter_esports_dynamics/notebooks/english_fandom_decomposition.ipynb both take a subject_id
 # and look it up here, never a title_id/game_id directly.
 #
 # Adding a new subject to decompose -- a different esports title, another
@@ -49,8 +49,9 @@
 #                         underscores, e.g. "Apex_Legends").
 
 subjects:
-  # The pair that motivated this whole subsystem (notebooks/
-  # niche_membership.ipynb's Apex/PUBG:BATTLEGROUNDS shared-occupancy
+  # The pair that motivated this whole subsystem
+  # (research/inter_esports_dynamics/notebooks/niche_membership.ipynb's
+  # Apex/PUBG:BATTLEGROUNDS shared-occupancy
   # finding, 2026-09-12) -- both title_id-based, both already have a
   # verified Steam AppID in config/steam_appids.yaml.
   - id: apex_legends
@@ -72,8 +73,9 @@ subjects:
         title: "PUBG:_Battlegrounds"
 
   # The validation case (see plan/PRD): cross-checks the Steam-review
-  # timezone-deconvolution time series against notebooks/
-  # fastest_growing_cs_regions.ipynb's independently-derived grassroots-
+  # timezone-deconvolution time series against
+  # research/esports_lifecycle_and_maturity/notebooks/fastest_growing_cs_regions.ipynb's
+  # independently-derived grassroots-
   # tournament regional growth (Russia accelerating, Czech Republic
   # steady) -- two unrelated methods/sources, not the same claim measured
   # twice.
@@ -86,11 +88,31 @@ subjects:
       - project: en.wikipedia
         title: Counter-Strike_2
 
+  # Added 2026-09-15, at the user's direct request, to disambiguate the
+  # tac_fps/pc niche cell's (esports_gauses_law_brief.md H1) `en`-tagged
+  # audience the same way the founding Apex/PUBG pair already is --
+  # Counter-Strike was already a subject; Siege and VALORANT complete the
+  # cell. No wikipedia_articles yet (unverified article-title spelling,
+  # out of scope of this specific ask -- add once actually needed).
+  - id: rainbow_six_siege
+    display_name: Rainbow Six Siege
+    source_table: viewership_snapshots
+    title_id: rainbow_six_siege
+    steam_app_id: 359550
+
+  # No steam_app_id: VALORANT is Riot-launcher-only, never released on
+  # Steam -- not a gap, a fact about the title (same reasoning gta_v's
+  # own comment below gives for a different reason).
+  - id: valorant
+    display_name: VALORANT
+    source_table: viewership_snapshots
+    title_id: valorant
+
   # Proves the platform-wide (game_id-keyed, not title_id-keyed) path --
   # GTA V isn't a tracked esports title, it has no row in
   # config/titles.yaml, and lives entirely in
   # platform_viewership_snapshots via collectors/twitch_platform_poll.py
-  # (PRD §9.16, docs/wider_game_fandom_brief.md). No steam_app_id here:
+  # (PRD §9.16, research/digital_fandoms/brief.md). No steam_app_id here:
   # GTA V's Steam release is a late port with a much smaller, non-
   # representative review base next to console/Rockstar-launcher sales --
   # a real gap, not an oversight, revisit only if that changes.

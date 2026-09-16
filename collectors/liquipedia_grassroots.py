@@ -4,7 +4,7 @@ tournament tiers Liquipedia tracks below the tier-1/2 scope `collectors/
 liquipedia.py` deliberately restricts itself to (that file's own
 docstring: TIER_CONVENTIONS only tries S/A-Tier or Tier-1/2 categories).
 
-Built 2026-09-08 for `docs/counter_strike_lifecycle_brief.md`'s grassroots-
+Built 2026-09-08 for `research/esports_lifecycle_and_maturity/brief.md`'s grassroots-
 scene question (is the base of the competitive pyramid narrowing too, not
 just tier-1/2) — the notebook's own §15 proxy (extracting a year from each
 page's title, no per-page fetch) undercounts 44-47% of pages and was

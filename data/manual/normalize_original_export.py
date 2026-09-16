@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One-time normalization of the original hand-built milestone sheet export
 (data/manual/milestone_table_original_export.csv, preserved exactly as
-delivered) into the title_id-keyed schema notebooks/reconciliation.ipynb
+delivered) into the title_id-keyed schema research/other/notebooks/reconciliation.ipynb
 expects (see data/manual/README.md).
 
 The original export uses free-text game names instead of config/titles.yaml

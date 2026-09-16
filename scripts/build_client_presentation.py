@@ -6,8 +6,8 @@ demonstrating (the Matthew Ball "State of ..." deck pattern, adopted
 format scripts/build_client_report.py builds).
 
 Mirrors that script's own separation of engine vs. content: a slide deck
-is defined in presentations/<name>/deck.yaml (hand-authored, references
-chart images under presentations/<name>/figs/) and rendered through
+is defined in research/<area>/presentations/<name>/deck.yaml (hand-authored,
+references chart images under .../figs/) and rendered through
 scripts/presentation_template.html via the same headless-Chrome
 print-to-pdf engine every other PDF pipeline in this project uses.
 
@@ -32,7 +32,7 @@ deck.yaml shape:
 
 Usage:
     python scripts/build_client_presentation.py \\
-        --deck presentations/state_of_cs/deck.yaml \\
+        --deck research/esports_lifecycle_and_maturity/presentations/state_of_cs/deck.yaml \\
         --output pdf_outputs/state_of_cs.pdf
 """
 from __future__ import annotations
