@@ -159,6 +159,138 @@ CREATE TABLE IF NOT EXISTS tournaments_lpdb (
     UNIQUE (liquipedia_wiki, liquipedia_page)
 );
 
+-- Pro player bio/career data (docs/liquipedia_lpdb_transition_plan.md
+-- Phase 4, built 2026-10-01 following a direct user request for a player
+-- database and cohort analysis). LPDB's `player` resource, confirmed live
+-- 2026-09-30 to carry real `birthdate`, `nationality`/`region`, team
+-- affiliation, `status` (Active/Retired/Inactive), and `earnings`/
+-- `earningsbyyear` -- no equivalent data exists anywhere else in this
+-- project (no roster/player connector was built before this). `role`
+-- varies by game (e.g. "rifle" for Counter-Strike) and is kept as raw
+-- JSON text in `extradata_json` rather than a dedicated column, since its
+-- shape isn't uniform across titles.
+CREATE TABLE IF NOT EXISTS players_lpdb (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    liquipedia_wiki TEXT NOT NULL,
+    liquipedia_page TEXT NOT NULL, -- LPDB's own `pagename`
+    player_id TEXT, -- LPDB's own `id` field -- the in-game handle (e.g. "Sico"), distinct from `name` (real name)
+    name TEXT,
+    nationality TEXT,
+    nationality2 TEXT,
+    nationality3 TEXT,
+    region TEXT, -- LPDB's own region scheme, same caveat as tournaments_lpdb.region -- not this project's COUNTRY_TO_REGION
+    birthdate TEXT, -- normalized: LPDB's "0000-01-01" sentinel (confirmed live, same pattern as tournaments_lpdb dates) becomes NULL, not stored as a literal date
+    deathdate TEXT, -- same normalization
+    team_pagename TEXT, -- current team, if any -- LPDB's own `teampagename`
+    status TEXT, -- 'Active' / 'Retired' / 'Inactive' -- the primary field for cohort/career-duration analysis
+    total_earnings REAL,
+    extradata_json TEXT, -- raw LPDB `extradata` (role, roles, banned, ...) -- shape varies by title, not normalized into columns
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (liquipedia_wiki, liquipedia_page)
+);
+
+-- Per-year earnings, normalized out of players_lpdb's `earningsbyyear`
+-- object into its own table so a cohort query (e.g. "median career
+-- earnings trajectory by debut-year cohort") doesn't have to parse JSON
+-- per row.
+CREATE TABLE IF NOT EXISTS player_earnings_by_year_lpdb (
+    player_row_id INTEGER NOT NULL REFERENCES players_lpdb(id),
+    year INTEGER NOT NULL,
+    earnings REAL NOT NULL,
+    PRIMARY KEY (player_row_id, year)
+);
+
+-- Roster tenure history -- LPDB's `squadplayer` resource, confirmed live
+-- 2026-09-30 to carry real `joindate`/`leavedate` per team stint, which
+-- `players_lpdb` alone (current team only) can't reconstruct. This is the
+-- actual source for career-duration and team-hopping/regionalization
+-- cohort analysis, not `players_lpdb.status` alone. Keyed on LPDB's own
+-- `objectname` (e.g. "100044_Allu_2012-12-04__former"), which is already
+-- unique per roster stint -- confirmed live, not assumed.
+CREATE TABLE IF NOT EXISTS squadplayers_lpdb (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    liquipedia_wiki TEXT NOT NULL,
+    objectname TEXT NOT NULL, -- LPDB's own unique row identifier for this roster stint
+    team_pagename TEXT NOT NULL, -- LPDB's own `pagename` on this resource -- the TEAM's page, not the player's
+    player_id TEXT, -- LPDB's own `id` -- matches players_lpdb.player_id, not a hard FK (squadplayer can reference a player never separately pulled)
+    player_link TEXT, -- LPDB's own `link` -- the player's actual wiki page, when it differs from `id`
+    nationality TEXT,
+    position TEXT,
+    role TEXT,
+    new_team_pagename TEXT, -- where the player went next, if known
+    status TEXT, -- 'active' / 'former'
+    join_date TEXT, -- normalized 0000-01-01 -> NULL, same as elsewhere
+    leave_date TEXT,
+    inactive_date TEXT,
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (liquipedia_wiki, objectname)
+);
+
+-- Structured per-match broadcast channel data -- LPDB's `match` resource's
+-- `stream` field, confirmed live 2026-09-30 to return real Twitch channel
+-- identifiers per match (e.g. {"twitch_en_1": "Fragbite", "twitch":
+-- "Fragbite"} on a real Svenska Cupen 2026 match) -- a Phase 0 "bonus
+-- finding" (docs/liquipedia_lpdb_transition_plan.md), built out here
+-- following a direct user request to evaluate it as a structured
+-- alternative/supplement to config/channels.yaml's manually-curated list
+-- and classify_broadcast_tier.py's text-matching `detected_costream`
+-- heuristic. One row per (match, stream key) -- a match with
+-- language-specific feeds produces multiple rows.
+--
+-- IMPORTANT, stated here so it isn't lost: `channel_name` is LPDB's own
+-- Liquipedia-template value (e.g. "Fragbite") -- there is NO confirmation
+-- yet that this is the exact lowercase Twitch LOGIN config/channels.yaml's
+-- own header comment requires as its match key (display name and login
+-- can differ). Treat every row here as `ai_assisted_unreviewed` candidate
+-- data requiring the same live Twitch Helix verification step already
+-- used to curate the 5 titles currently in config/channels.yaml -- do NOT
+-- promote straight into that file's 'verified' entries without it.
+CREATE TABLE IF NOT EXISTS match_streams_lpdb (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    liquipedia_wiki TEXT NOT NULL,
+    match_objectname TEXT NOT NULL, -- LPDB's own unique match identifier
+    tournament_pagename TEXT, -- LPDB's own `tournament` field (a display name, not necessarily `tournaments_lpdb.liquipedia_page` -- not joined automatically, a Phase where-this-goes-next item)
+    match_date TEXT,
+    stream_key TEXT NOT NULL, -- e.g. "twitch", "twitch_en_1", "twitch_ru_1" -- LPDB's own key naming, not normalized
+    channel_name TEXT NOT NULL, -- see the caveat above -- NOT confirmed to be a Twitch login
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
+    confidence TEXT NOT NULL DEFAULT 'ai_assisted_unreviewed', -- deliberately NOT 'verified', unlike this project's other LPDB tables -- see the table comment above
+    UNIQUE (liquipedia_wiki, match_objectname, stream_key)
+);
+
+-- Broadcast TALENT (casters/analysts/hosts), not channels -- LPDB's
+-- `broadcasters` resource, a different signal from match_streams_lpdb
+-- above. Captured because the user asked to "capture stream channel
+-- information from tournaments" broadly; kept as its own table since it
+-- answers a genuinely different question (who casts, not which channel
+-- airs it) and isn't part of the channel-tiering refit this Phase 4 work
+-- is primarily scoped for.
+CREATE TABLE IF NOT EXISTS broadcasters_lpdb (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    liquipedia_wiki TEXT NOT NULL,
+    objectname TEXT NOT NULL, -- LPDB's own unique row identifier
+    tournament_pagename TEXT NOT NULL, -- LPDB's own `parent` field
+    person_id TEXT, -- LPDB's own `id`
+    person_name TEXT,
+    position TEXT, -- e.g. "Analyst", "Host", "Caster"
+    language TEXT,
+    nationality TEXT, -- LPDB's own `flag`
+    broadcast_date TEXT,
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (liquipedia_wiki, objectname)
+);
+
 -- Populated by etl/generate_tournament_aliases.py, keyed on (title_id,
 -- series_key) rather than a specific tournament_id: an alias identifies a
 -- recurring SERIES ("The International", "TI"), not one edition — the
@@ -748,6 +880,16 @@ CREATE INDEX IF NOT EXISTS idx_tournaments_title ON tournaments (title_id);
 CREATE INDEX IF NOT EXISTS idx_tournaments_lpdb_title ON tournaments_lpdb (title_id);
 CREATE INDEX IF NOT EXISTS idx_tournaments_lpdb_title_dates ON tournaments_lpdb (title_id, start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_tournaments_lpdb_tier_start ON tournaments_lpdb (tier, start_date);
+CREATE INDEX IF NOT EXISTS idx_players_lpdb_title ON players_lpdb (title_id);
+CREATE INDEX IF NOT EXISTS idx_players_lpdb_status ON players_lpdb (title_id, status);
+CREATE INDEX IF NOT EXISTS idx_players_lpdb_birthdate ON players_lpdb (birthdate);
+CREATE INDEX IF NOT EXISTS idx_player_earnings_year ON player_earnings_by_year_lpdb (year);
+CREATE INDEX IF NOT EXISTS idx_squadplayers_lpdb_title ON squadplayers_lpdb (title_id);
+CREATE INDEX IF NOT EXISTS idx_squadplayers_lpdb_player ON squadplayers_lpdb (title_id, player_id);
+CREATE INDEX IF NOT EXISTS idx_squadplayers_lpdb_dates ON squadplayers_lpdb (join_date, leave_date);
+CREATE INDEX IF NOT EXISTS idx_match_streams_lpdb_title ON match_streams_lpdb (title_id);
+CREATE INDEX IF NOT EXISTS idx_match_streams_lpdb_channel ON match_streams_lpdb (channel_name);
+CREATE INDEX IF NOT EXISTS idx_broadcasters_lpdb_title ON broadcasters_lpdb (title_id);
 CREATE INDEX IF NOT EXISTS idx_tournament_aliases_series ON tournament_aliases (title_id, series_key);
 CREATE INDEX IF NOT EXISTS idx_viewership_broadcast_tier ON viewership_snapshots (broadcast_tier);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title_dates ON tournaments (title_id, start_date, end_date);

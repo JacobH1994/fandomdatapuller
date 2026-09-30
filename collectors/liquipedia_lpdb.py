@@ -226,14 +226,46 @@ class RequestBudget:
         self.log_path.write_text(json.dumps(self.timestamps))
 
 
+OFFSET_STATE_PATH = REPO_ROOT / "data" / "cache" / "liquipedia_lpdb" / "tournament_offsets.json"
+_OFFSET_DONE = "done"  # sentinel: this wiki+conditions key's pagination reached a natural end (page < PAGE_LIMIT), not a budget cutoff
+
+
+def _load_offset_state() -> dict:
+    if not OFFSET_STATE_PATH.is_file():
+        return {}
+    try:
+        return json.loads(OFFSET_STATE_PATH.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def _save_offset_state(state: dict) -> None:
+    OFFSET_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OFFSET_STATE_PATH.write_text(json.dumps(state, indent=2))
+
+
 def fetch_tournaments(
-    client: httpx.Client, budget: RequestBudget, wiki: str, game_codes: list[str] | None
+    client: httpx.Client, budget: RequestBudget, wiki: str, game_codes: list[str] | None,
+    resume_key: str | None = None,
 ) -> list[dict]:
     """Paginates GET /v3/tournament for one wiki (optionally filtered to a
     set of `game` codes, for shared wikis), stopping when a page returns
-    fewer than PAGE_LIMIT results or the request budget runs out."""
+    fewer than PAGE_LIMIT results or the request budget runs out.
+
+    If `resume_key` is given, resumes from the last offset persisted in
+    OFFSET_STATE_PATH for that key rather than always starting at 0 --
+    added so the overnight sync orchestrator (scripts/lpdb_overnight_sync.py)
+    doesn't re-pay for pages a prior, budget-cut-off run already fetched
+    and upserted. A key already marked _OFFSET_DONE is skipped entirely
+    (returns immediately) -- its pagination already reached a natural end,
+    re-querying it would cost a request for zero new rows every time."""
     results: list[dict] = []
-    offset = 0
+    offset_state = _load_offset_state() if resume_key else {}
+    stored = offset_state.get(resume_key) if resume_key else None
+    if stored == _OFFSET_DONE:
+        return results
+    offset = stored if isinstance(stored, int) else 0
+
     conditions = None
     if game_codes:
         conditions = " OR ".join(f"[[game::{g}]]" for g in game_codes)
@@ -256,8 +288,14 @@ def fetch_tournaments(
         page = body.get("result", [])
         results.extend(page)
         if len(page) < PAGE_LIMIT:
+            if resume_key:
+                offset_state[resume_key] = _OFFSET_DONE
+                _save_offset_state(offset_state)
             break
         offset += PAGE_LIMIT
+        if resume_key:
+            offset_state[resume_key] = offset
+            _save_offset_state(offset_state)
     return results
 
 
@@ -306,6 +344,7 @@ def main() -> int:
     parser.add_argument("--titles", help="comma-separated title ids (default: all is_active titles)")
     parser.add_argument("--max-requests", type=int, default=MAX_REQUESTS_PER_RUN, help=f"safety cap (default {MAX_REQUESTS_PER_RUN}, confirmed limit is 60/hour)")
     parser.add_argument("--status", action="store_true", help="report rolling-window request usage and reset ETA, then exit -- makes no API calls")
+    parser.add_argument("--refresh", action="store_true", help="ignore persisted per-wiki pagination offsets (OFFSET_STATE_PATH) and re-pull from offset 0")
     args = parser.parse_args()
 
     if args.status:
@@ -350,7 +389,8 @@ def main() -> int:
             if not budget.check():
                 errors.append(f"{t['id']}: skipped, request budget exhausted for this run")
                 continue
-            rows = fetch_tournaments(client, budget, wiki, game_codes)
+            resume_key = None if args.refresh else f"{wiki}|{','.join(game_codes) if game_codes else ''}"
+            rows = fetch_tournaments(client, budget, wiki, game_codes, resume_key=resume_key)
             written_for_title = 0
             for row in rows:
                 if upsert_tournament(conn, t["id"], wiki, row):
