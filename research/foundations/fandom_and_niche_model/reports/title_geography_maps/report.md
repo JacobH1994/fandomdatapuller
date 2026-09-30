@@ -30,5 +30,5 @@ Neither map should be read in isolation. A title can look thin on the host-count
 
 ## Sources
 
-- **Tournament host countries.** Twitch's public tournament-and-team wiki, covering major events across all six titles and the country (or broader region, where that is all the organizer recorded) each was hosted in.
+- **Tournament host countries.** [Liquipedia](https://liquipedia.net/) — an independent, community-maintained esports wiki, used here under its CC BY-SA license — covering major events across all six titles and the country (or broader region, where that is all the organizer recorded) each was hosted in.
 - **Audience language and viewership.** Twitch's own public API, polled repeatedly over time to record broadcast language alongside concurrent viewers for each title, then mapped to the single country most confidently associated with each language.

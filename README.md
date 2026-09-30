@@ -5,6 +5,12 @@ with esports live-viewership data. See `research/inter_esports_dynamics/brief.md
 for the research question and `docs/esports_fandom_platform_prd_v2.md` for
 the full build spec.
 
+This repo's own code is [MIT-licensed](LICENSE). That covers the
+collectors, ETL, and analysis code only — it does not extend to
+third-party data collected or derived by that code, which remains subject
+to its original source's own terms (see `data/reference/README.md` for
+the Liquipedia-derived data specifically, CC BY-SA).
+
 ## Status
 
 **Phase 1 + 2:** the Twitch live-viewership collector, tracked-title config,
@@ -58,16 +64,24 @@ python etl/load_snapshots.py --rebuild   # wipe and reload everything
 ## Liquipedia connector
 
 On-demand (not scheduled — historical tournament data doesn't change on a
-clock). Uses the standard MediaWiki API, not LPDB (which needs an approved
-registration this project doesn't have) — see `collectors/liquipedia.py`'s
-docstring for the full rationale and a known gap (fighting-game titles
-aren't covered yet).
+clock). Currently uses the standard MediaWiki API — see
+`collectors/liquipedia.py`'s docstring for the full rationale and a known
+gap (fighting-game titles aren't covered yet). LPDB access was formally
+approved 2026-09-30; migrating this connector to LPDB is planned but not
+yet built — see `docs/liquipedia_lpdb_transition_plan.md`.
 
 ```
 python collectors/liquipedia.py                      # all active titles
 python collectors/liquipedia.py --titles dota2,valorant
 python collectors/liquipedia.py --refresh             # bypass the local cache
 ```
+
+Tournament data in this repo (`data/reference/tournaments.jsonl` and
+related files) is sourced from [Liquipedia](https://liquipedia.net/),
+an independent, community-maintained esports wiki, and used under
+Liquipedia's [CC BY-SA license](https://liquipedia.net/commons/Liquipedia:Copyrights) —
+see `data/reference/README.md` for the full attribution and per-file
+provenance.
 
 ## Tests
 
