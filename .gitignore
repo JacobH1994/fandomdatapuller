@@ -1,6 +1,10 @@
 # Secrets
 .env
 
+# Confidential external documents (third-party pricing decks, WIP pitch
+# decks) — never for this repo, regardless of what gets dropped in here.
+docs/Other/
+
 # Databases (derived and disposable — rebuilt from data/raw/, see CLAUDE.md)
 *.db
 *.db-journal
@@ -28,6 +32,9 @@ venv/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Local run logs (e.g. scripts/lpdb_overnight_sync.py) -- disposable, not a permanent record
+logs/
 
 # OS
 .DS_Store
