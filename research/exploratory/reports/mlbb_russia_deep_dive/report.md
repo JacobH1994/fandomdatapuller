@@ -51,5 +51,5 @@ The most accurate description of this community is a genuine, sustained, broad-b
 
 - **Live viewership and channel language.** Twitch's own public API, polled repeatedly over time to record concurrent viewers, channel counts, and broadcast language across Mobile Legends and the comparison titles.
 - **Historical trend.** A published historical dataset of Twitch category viewing hours, covering 2020 through 2024, used for the long-run trend in Figure 3.
-- **Competitive circuits and prize pools.** Twitch's public tournament-and-team wiki, covering regional Mobile Legends competitions, their sponsors, and their prize pools.
+- **Competitive circuits and prize pools.** [Liquipedia](https://liquipedia.net/mobilelegends/) — an independent, community-maintained esports wiki, used here under its CC BY-SA license — covering regional Mobile Legends competitions, their sponsors, and their prize pools.
 - **Tournament-broadcast overlap.** Cross-referencing live viewing hours against the same tournament schedule, to estimate what share of Russian-language viewing coincided with an active broadcast.
