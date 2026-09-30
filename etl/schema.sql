@@ -125,6 +125,40 @@ CREATE TABLE IF NOT EXISTS tournaments (
     UNIQUE (liquipedia_wiki, liquipedia_page)
 );
 
+-- LPDB v3 API staging table (docs/liquipedia_lpdb_transition_plan.md Phase
+-- 1), deliberately SEPARATE from `tournaments` above rather than sharing
+-- it: `tournaments`'s own UNIQUE (liquipedia_wiki, liquipedia_page)
+-- constraint does not include `source`, so an LPDB-sourced row for a
+-- tournament the MediaWiki-sourced collector already has would silently
+-- collide (or require a schema change to the live table) rather than
+-- landing as a clearly source-flagged, side-by-side row the way the
+-- transition plan's Phase 1 explicitly calls for ("a staging area... not
+-- a blind merge into the live table"). Reconciled against `tournaments` in
+-- Phase 2; only Phase 3 (cutover, not yet done) decides what happens to
+-- this table and the live one long-term.
+CREATE TABLE IF NOT EXISTS tournaments_lpdb (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    liquipedia_wiki TEXT NOT NULL,
+    liquipedia_page TEXT NOT NULL, -- LPDB's own `pagename` field
+    name TEXT,
+    tier TEXT, -- raw liquipediatier, e.g. "1" — confirmed live as a clean, uniform digit string across every wiki tested (2026-09-30), unlike the per-wiki label variance `_normalize_tier()` exists to handle for the MediaWiki-sourced table
+    game TEXT, -- LPDB's own `game` sub-field (e.g. "cs2", "t8") — not present on the MediaWiki-sourced table; the structured replacement for category-name-based generational-continuity filtering on shared wikis
+    status TEXT, -- LPDB's own `status` field (e.g. "unconfirmed") — lets a forecast/reporting query distinguish a confirmed event from a projected/rumored one; not present on the MediaWiki-sourced table
+    prize_pool REAL,
+    currency TEXT, -- always NULL for now — confirmed live (2026-09-30) that LPDB v3 has no currency field anywhere in the tournament or placement schema; prize figures are presumably pre-normalized to USD by Liquipedia's own display convention, but that's an inference, not something the API states
+    start_date TEXT,
+    end_date TEXT,
+    country TEXT, -- LPDB's own `locations.country1`, a lowercase ISO-2 code (e.g. "es") — NOT the same convention as `tournaments.country`'s full country names; left as-is rather than silently normalized, a Phase 2 reconciliation item
+    region TEXT, -- LPDB's own `locations.region1` (e.g. "Europe", "Middle East", "World") — LPDB's own region scheme, NOT this project's COUNTRY_TO_REGION taxonomy (which has no "World"/"Middle East" categories) — also left as-is, also a Phase 2 item
+    region_confidence TEXT DEFAULT 'liquipedia_lpdb_native', -- distinct from `tournaments.region_confidence`'s 'proxy_estimate'/'manual_judgment_call' values on purpose: this is LPDB's own direct claim, not this project's inference — just on a scheme not yet reconciled with the rest of the project
+    team_number INTEGER,
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (liquipedia_wiki, liquipedia_page)
+);
+
 -- Populated by etl/generate_tournament_aliases.py, keyed on (title_id,
 -- series_key) rather than a specific tournament_id: an alias identifies a
 -- recurring SERIES ("The International", "TI"), not one edition — the
@@ -232,6 +266,20 @@ CREATE TABLE IF NOT EXISTS viewership_snapshots (
     -- genre/platform tags — never 'verified' by this step alone.
     self_declared_region_tag TEXT,
     self_declared_region_tag_confidence TEXT,
+    -- Session-duration fields (added 2026-09-20) -- Twitch's own Get
+    -- Streams response already carries both (collectors/twitch_poll.py's
+    -- FULL_DETAIL_FIELDS has always kept them; they simply weren't loaded
+    -- into this table until now). stream_id is Twitch's own identifier for
+    -- THIS specific broadcast session -- changes every time a channel goes
+    -- offline and comes back, which is what makes it possible to group
+    -- polls into sessions cleanly rather than inferring session boundaries
+    -- from gaps in polling. started_at is when that session began, per
+    -- Twitch, not inferred from our own poll cadence. NULL for any row
+    -- loaded before this column existed until the one-time backfill
+    -- (etl/backfill_stream_session_fields.py) re-processes existing raw
+    -- files -- NULL means "not backfilled yet," not "no session."
+    stream_id TEXT,
+    started_at TEXT,
     source TEXT NOT NULL DEFAULT 'twitch_api',
     confidence TEXT NOT NULL DEFAULT 'verified',
     -- Not (platform, channel_id, captured_at): channel_id formats don't
@@ -462,6 +510,28 @@ CREATE TABLE IF NOT EXISTS failed_challengers (
     confidence TEXT NOT NULL DEFAULT 'manual_judgment_call'
 );
 
+-- Twitch account-creation dates (added 2026-09-20, ad-hoc rather than a
+-- numbered PRD phase) -- a static, always-re-fetchable fact per channel
+-- (Helix `Get Users`' own `created_at` field), NOT live/unbackfillable
+-- data. Does NOT fall under CLAUDE.md's "one rule" schedule protection --
+-- collectors/twitch_account_backfill.py is on-demand/resumable, same
+-- category as collectors/steam_catalog_backfill.py's Track A, not a
+-- scheduled poller. Built specifically to test whether a title community's
+-- apparent "era" effect is really creator tenure (crossover channels
+-- having existed longer) rather than conditions-of-formation -- the
+-- collector's own first-seen date can't distinguish those (19 days of
+-- polling history vs. years of real account age), this can.
+CREATE TABLE IF NOT EXISTS twitch_account_metadata (
+    channel_id TEXT PRIMARY KEY,
+    login TEXT,
+    display_name TEXT,
+    broadcaster_type TEXT,
+    account_created_at TEXT,
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'twitch_api',
+    confidence TEXT NOT NULL DEFAULT 'verified'
+);
+
 -- Every collector run, scheduled or on-demand (PRD §10). For
 -- twitch_poll.py, raw_file is the data/raw path loaded and doubles as the
 -- ETL's idempotency key — a file already present here is skipped on
@@ -544,6 +614,42 @@ CREATE TABLE IF NOT EXISTS platform_viewership_below_threshold (
     source TEXT NOT NULL DEFAULT 'twitch_api',
     confidence TEXT NOT NULL DEFAULT 'verified',
     UNIQUE (game_id, captured_at)
+);
+
+-- Arabic-language stream snapshots (research/wider_game_fandoms/
+-- arabic_gaming_scene/, collectors/twitch_arabic_snapshot.py, added
+-- 2026-09-24). Deliberately NOT title_id-keyed and NOT excluding the 23
+-- tracked titles' game IDs the way platform_viewership_snapshots does --
+-- this table's whole purpose is to see Arabic-language activity across
+-- every game at once, tracked or not, since that comparison is the point
+-- (e.g. EA Sports FC 27 showing real Arabic volume despite not being a
+-- tracked title at all). No viewer-count tiering either -- the
+-- language='ar' population is small enough (325 concurrent streams at
+-- first check) that full detail for every stream doesn't carry
+-- platform_viewership_snapshots' "tens of thousands of ordinary
+-- streamers" concern. `tags` is the main self-declared-geography signal
+-- this table carries (e.g. "SaudiArabia"/"KSA"-family tags) -- extracted
+-- into `self_declared_country_tag` at load time, same
+-- inferred-until-reviewed discipline as every other derived column here.
+CREATE TABLE IF NOT EXISTS arabic_language_stream_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stream_id TEXT,
+    channel_id TEXT NOT NULL,
+    channel_login TEXT,
+    game_id TEXT,
+    game_name TEXT,
+    stream_title TEXT,
+    viewer_count INTEGER NOT NULL,
+    started_at TEXT,
+    language TEXT NOT NULL DEFAULT 'ar',
+    tags TEXT, -- comma-joined, same convention as viewership_snapshots.tags
+    self_declared_country_tag TEXT, -- extracted from tags via keyword match, NULL if no country-like tag found
+    self_declared_country_tag_confidence TEXT,
+    is_mature INTEGER,
+    captured_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'twitch_api',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (channel_id, captured_at)
 );
 
 -- English-fandom region decomposition (PRD §9.17, added 2026-09-12).
@@ -639,6 +745,10 @@ CREATE INDEX IF NOT EXISTS idx_viewership_title_captured ON viewership_snapshots
 CREATE INDEX IF NOT EXISTS idx_platform_viewership_game_captured ON platform_viewership_snapshots (game_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_language_mix_title_captured ON language_mix_snapshots (title_id, captured_at);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title ON tournaments (title_id);
+CREATE INDEX IF NOT EXISTS idx_tournaments_lpdb_title ON tournaments_lpdb (title_id);
+CREATE INDEX IF NOT EXISTS idx_tournaments_lpdb_title_dates ON tournaments_lpdb (title_id, start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_tournaments_lpdb_tier_start ON tournaments_lpdb (tier, start_date);
 CREATE INDEX IF NOT EXISTS idx_tournament_aliases_series ON tournament_aliases (title_id, series_key);
 CREATE INDEX IF NOT EXISTS idx_viewership_broadcast_tier ON viewership_snapshots (broadcast_tier);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title_dates ON tournaments (title_id, start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_arabic_stream_game_captured ON arabic_language_stream_snapshots (game_id, captured_at);
