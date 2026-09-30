@@ -13,7 +13,16 @@ top of it. A first real reconciliation pass against those four titles'
 `tournaments` data is written up under Phase 2. 19 of 23 titles still need
 their first LPDB pull; `collectors/liquipedia_lpdb.py --status` reports the
 live rolling-window request budget before starting more.
-Drafted 2026-09-16, probed 2026-09-30, connector built 2026-09-30.
+**Phase 4 started 2026-10-01**: player/roster data
+(`collectors/liquipedia_lpdb_players.py`) and broadcast/channel data
+(`collectors/liquipedia_lpdb_broadcasts.py`, `scripts/
+build_channel_candidates_from_lpdb.py`) are built; `scripts/
+lpdb_overnight_sync.py` is running unattended (23h window, started
+2026-09-30 20:34 UTC) to finish the remaining 19 titles' tournament pulls,
+pull player data, and sample broadcast data for already-ready titles —
+see `logs/lpdb_overnight_sync.log` (gitignored) for live progress.
+Drafted 2026-09-16, probed 2026-09-30, connector built 2026-09-30, Phase 4
+started 2026-10-01.
 
 Liquipedia has also directly advised against continuing to rely on the
 standard MediaWiki API long-term — quoted risk: "timeouts and bans" — which
@@ -382,23 +391,101 @@ with the new source — the old one can't answer it for League at all.
 
 ## Phase 4 — Capture the benefits
 
-- [ ] **Player/roster connector (PRD §9.15)** — previously blocked
-      specifically on `Infobox player`'s nested transfer-history wikitext
-      and `Infobox team` not enumerating membership. Re-scope once it's
-      known what LPDB actually exposes here; this could go from "scoped,
-      not built" to genuinely tractable.
+- [x] **Player/roster connector (PRD §9.15) — built 2026-10-01**,
+      following a direct request for a player database to support
+      playerbase cohort analysis (age, career duration, regionalization —
+      extending the streamer/community cohort work already done for
+      post 3). Confirmed live what LPDB's `player` and `squadplayer`
+      resources actually expose, previously unknown: `player` gives
+      `birthdate`, `nationality`/`region`, current team, `status`
+      (Active/Retired/Inactive), and `earnings`/`earningsbyyear`;
+      `squadplayer` gives real `joindate`/`leavedate` per roster stint —
+      the actual source for career-duration/team-hopping cohort work,
+      which `player.status` alone can't reconstruct. New tables:
+      `players_lpdb`, `player_earnings_by_year_lpdb`, `squadplayers_lpdb`
+      (`etl/schema.sql`); new collector: `collectors/liquipedia_lpdb_players.py`.
+      **Deliberately excludes the shared `fighters` wiki (4 titles)** —
+      confirmed live that `player` has no per-title `game` field, only a
+      multi-game list in `extradata.games` (a real sampled player listed
+      Mortal Kombat, Street Fighter, Injustice, and 2XKO simultaneously),
+      so no safe per-title split exists yet without risking the same
+      cross-game attribution error the tournament collector's
+      `GAME_CODES_BY_TITLE` was built specifically to avoid.
 - [ ] **Per-tournament participant lists** — the qualifier-normalized
       entry-rate question (`research/esports_lifecycle_and_maturity/brief.md` §10)
-      was flagged as needing this and "not yet scoped at all." Same story.
-- [ ] **`series_key`/`tournament_aliases`** — check whether LPDB has a
-      native tournament-series identifier more reliable than the current
-      rule-based name-minus-year/acronym approach; could simplify or retire
-      half of `generate_tournament_aliases.py` (the LLM nickname pass stays
-      useful regardless).
-- [ ] **Full grassroots crawl for all 23 titles** — currently a ~8-10 hour
-      rate-limited MediaWiki job, only ever run for CS/Dota2. If LPDB
-      reaches B/C-Tier cleanly, this becomes realistic project-wide — a
-      real capacity unlock, not just a risk-reduction one.
+      was flagged as needing this and "not yet scoped at all." Still open
+      — not the same thing as player/roster data above.
+- [ ] **`series_key`/`tournament_aliases`** — see Phase 2's own finding:
+      LPDB has NO native tournament-series identifier — confirmed, not
+      still open. `series_key_and_depth()`'s rule-based approach would
+      need re-running against LPDB's `liquipedia_page` values (after the
+      page-name format fix) rather than being retired. Still a real Phase
+      3 item, just resolved in the opposite direction this checklist item
+      originally expected.
+- [ ] **Full grassroots crawl for all 23 titles** — in progress via
+      `scripts/lpdb_overnight_sync.py` (below), not yet complete for all
+      titles as of 2026-10-01.
+- [x] **Broadcast/channel data — built 2026-10-01**, following a direct
+      request to evaluate LPDB as a structured alternative to
+      `config/channels.yaml`'s manually-curated list (5 of 23 titles
+      curated as of 2026-10-01: counter_strike, dota2, street_fighter,
+      valorant, pubg) and `classify_broadcast_tier.py`'s text-matching
+      `detected_costream` heuristic. Confirmed live: the `match` resource's
+      `stream` field gives real, structured per-match Twitch channel
+      identifiers (e.g. `{"twitch_en_1": "Fragbite", "twitch": "Fragbite"}`)
+      — ground truth ("this channel broadcasts this specific match"), not
+      an inference from stream-title text. New table: `match_streams_lpdb`
+      (`ai_assisted_unreviewed` by construction — LPDB's value is a
+      display-name-shaped template parameter, not confirmed to be the
+      exact Twitch login `config/channels.yaml` needs); new collector:
+      `collectors/liquipedia_lpdb_broadcasts.py`, scoped to a sample of
+      each title's most recent tier-1/2 tournaments rather than an
+      exhaustive pull (Counter-Strike alone already has 1,293 tier-1/2
+      tournament pages — exhaustively pulling match data for all of them
+      across 23 titles would cost several thousand requests, far beyond
+      what's responsible against the confirmed 60/hour ceiling in any
+      short window). `scripts/build_channel_candidates_from_lpdb.py` takes
+      the most-referenced channel names per title, live-verifies each
+      against Twitch Helix (the same standard `research/other/notebooks/
+      official_channel_candidates.ipynb` already established), and writes
+      a draft (`config/channels_lpdb_candidates.yaml`) for the same human
+      review `config/channels.yaml`'s existing entries already went
+      through — does NOT write `channels.yaml` directly.
+      **Also captured**: `broadcasters_lpdb` (cast talent — analysts/hosts/
+      casters — a different signal from channel identity, not analyzed
+      further here).
+      **The channel-tiering refit itself (making `classify_broadcast_tier.py`
+      actually use this new signal) is not yet built** — real match-stream
+      data needs to accumulate first (the overnight sync only just started
+      pulling it), and rewriting a pipeline several existing notebooks
+      depend on (`cs_growth_trajectory.ipynb`, `dota2_growth_trajectory.ipynb`,
+      the `title_geography_maps` report, ...) without validated real data
+      behind it would be premature. Proposed design once data exists: a
+      third, higher-precision tier — `match_streams_lpdb` gives direct
+      per-match channel ground truth, strictly better than `channels.yaml`'s
+      static list (which only ever proves "this channel exists," not "this
+      channel aired this match") or `detected_costream`'s title-text
+      inference — sitting alongside, not replacing, the existing two
+      signals until it's been checked against known cases the way every
+      other LPDB field in this plan has been.
+- [x] **`scripts/lpdb_overnight_sync.py` — unattended sync loop, built
+      2026-10-01**, following a direct request to keep pulling data
+      automatically as the rate-limit window resets rather than requiring
+      a person to re-trigger collectors by hand. Works through tournament
+      pulls (remaining 19+ titles), then player pulls, with broadcast
+      sampling for already-tournament-complete titles given a 1-in-3-cycle
+      priority slot so channel data doesn't wait behind the entire player
+      phase. Every invocation shares the same persisted, cross-process
+      request budget `collectors/liquipedia_lpdb.py` already tracks
+      (`data/cache/liquipedia_lpdb/request_log.json`) — this script cannot
+      cause the combined tools to exceed the real 60/hour ceiling, and
+      deliberately runs each invocation below it
+      (`MAX_REQUESTS_PER_INVOCATION`), not constantly saturating it.
+      `collectors/liquipedia_lpdb.py` and `_players.py` both gained
+      offset-based resume (`tournament_offsets.json`) so a budget-
+      interrupted pull continues next cycle instead of re-paying for
+      already-fetched pages. Launched 2026-09-30 for a 23-hour window;
+      check `logs/lpdb_overnight_sync.log` (gitignored) for progress.
 
 ## What this plan deliberately does not cover
 
