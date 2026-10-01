@@ -111,17 +111,33 @@ def players_done(title: dict, offset_state: dict) -> bool:
     return offset_state.get(f"player:{wiki}") == "done" and offset_state.get(f"squadplayer:{wiki}") == "done"
 
 
-def run_collector(args: list[str]) -> tuple[bool, str]:
-    """Runs a collector subprocess, returns (fully_completed, combined_output).
+NETWORK_ERROR_MARKERS = (
+    "ConnectError", "ConnectTimeout", "name resolution", "Network is unreachable",
+    "Temporary failure", "ReadTimeout", "RemoteProtocolError",
+)
+
+
+def run_collector(args: list[str]) -> tuple[bool, bool, str]:
+    """Runs a collector subprocess, returns (fully_completed, is_network_error, combined_output).
     fully_completed is False if the output shows the run was cut short by
-    the shared request budget (status=partial)."""
+    the shared request budget (status=partial) or crashed outright.
+    is_network_error flags a transient connectivity failure specifically --
+    found live 2026-10-01 (a real DNS outage made the orchestrator spin
+    through 12 cycles in under 3 seconds with no backoff, each one still
+    calling budget.wait_and_count() before the failed connection attempt
+    and so burning a real slot in the shared request-count ledger for a
+    request that never reached LPDB at all -- harmless for staying under
+    LPDB's own real limit since it only makes this script MORE
+    conservative than necessary, never less, but wasteful and noisy.
+    Callers should back off on this, not immediately retry."""
     result = subprocess.run(
         [sys.executable, *args],
         cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
     )
     output = (result.stdout or "") + (result.stderr or "")
     completed = result.returncode == 0 and "status=partial" not in output
-    return completed, output
+    is_network_error = result.returncode != 0 and any(m in output for m in NETWORK_ERROR_MARKERS)
+    return completed, is_network_error, output
 
 
 def budget_remaining() -> int:
@@ -156,6 +172,7 @@ def main() -> int:
     overnight_state = load_overnight_state()
 
     cycles = 0
+    consecutive_network_errors = 0
     while datetime.now(timezone.utc) < deadline:
         cycles += 1
         offset_state = load_tournament_offset_state()
@@ -178,10 +195,34 @@ def main() -> int:
             sleep_until_reset()
             continue
 
-        if pending_tournaments:
+        # Priority: finishing remaining titles' tournament pulls is the
+        # primary ask, but broadcast/channel data was asked for "now," not
+        # "after all 23 titles' tournaments and all 19 titles' players are
+        # done" -- which, at this rate limit, could be most of the 24h
+        # budget on its own. Broadcasts only ever cover titles whose
+        # tournament pull is ALREADY done, so giving it 1-in-3 cycles here
+        # doesn't slow down the other 19 titles' tournament completion,
+        # it just stops already-ready titles' channel data from waiting
+        # behind the entire player-database phase.
+        do_broadcasts_this_cycle = pending_broadcasts and (cycles % 3 == 0)
+
+        if do_broadcasts_this_cycle or (not pending_tournaments and not pending_players and pending_broadcasts):
+            title = pending_broadcasts[0]
+            log(f"broadcasts{' (priority slot)' if do_broadcasts_this_cycle else ''}: {title['id']}")
+            completed, is_network_error, output = run_collector([
+                "collectors/liquipedia_lpdb_broadcasts.py", "--titles", title["id"],
+                "--max-requests", str(MAX_REQUESTS_PER_INVOCATION),
+            ])
+            for line in output.strip().splitlines()[-4:]:
+                log(f"  {line}")
+            if completed:
+                overnight_state.setdefault("broadcasts_done", []).append(title["id"])
+                save_overnight_state(overnight_state)
+            log(f"  -> {'complete' if completed else 'partial, will retry next cycle'}")
+        elif pending_tournaments:
             title = pending_tournaments[0]
             log(f"tournaments: {title['id']}")
-            _, output = run_collector([
+            _, is_network_error, output = run_collector([
                 "collectors/liquipedia_lpdb.py", "--titles", title["id"],
                 "--max-requests", str(MAX_REQUESTS_PER_INVOCATION),
             ])
@@ -192,7 +233,7 @@ def main() -> int:
         elif pending_players:
             title = pending_players[0]
             log(f"players: {title['id']}")
-            _, output = run_collector([
+            _, is_network_error, output = run_collector([
                 "collectors/liquipedia_lpdb_players.py", "--titles", title["id"],
                 "--max-requests", str(MAX_REQUESTS_PER_INVOCATION),
             ])
@@ -201,18 +242,15 @@ def main() -> int:
             still_pending = not players_done(title, load_tournament_offset_state())
             log(f"  -> {'partial, will resume next cycle (offset persisted)' if still_pending else 'complete'}")
         else:
-            title = pending_broadcasts[0]
-            log(f"broadcasts: {title['id']}")
-            completed, output = run_collector([
-                "collectors/liquipedia_lpdb_broadcasts.py", "--titles", title["id"],
-                "--max-requests", str(MAX_REQUESTS_PER_INVOCATION),
-            ])
-            for line in output.strip().splitlines()[-4:]:
-                log(f"  {line}")
-            if completed:
-                overnight_state.setdefault("broadcasts_done", []).append(title["id"])
-                save_overnight_state(overnight_state)
-            log(f"  -> {'complete' if completed else 'partial, will retry next cycle'}")
+            is_network_error = False  # nothing pending -- loop will exit via the all-done check next iteration
+
+        if is_network_error:
+            consecutive_network_errors += 1
+            backoff_s = min(300, 15 * (2 ** (consecutive_network_errors - 1)))  # 15s, 30s, 60s, ... capped at 5 min
+            log(f"  transient network error (#{consecutive_network_errors} in a row) -- backing off {backoff_s}s before retrying, not hot-looping")
+            time.sleep(backoff_s)
+        else:
+            consecutive_network_errors = 0
 
     log(f"wall-clock budget ({args.hours}h) reached -- stopping. Re-run this script to continue where it left off (all progress is persisted).")
     return 0
