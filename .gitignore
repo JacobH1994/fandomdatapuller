@@ -11,6 +11,7 @@ docs/Other/
 # docs/Other/ rule doesn't reach. Added 2026-10-01 specifically so a
 # future `git add docs/` can't accidentally commit it.
 docs/humanoid_robot_entertainment_episode.zip
+docs/humanoid_robot_entertainment_episode/
 
 # Databases (derived and disposable — rebuilt from data/raw/, see CLAUDE.md)
 *.db
