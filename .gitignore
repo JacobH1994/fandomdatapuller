@@ -5,6 +5,13 @@
 # decks) — never for this repo, regardless of what gets dropped in here.
 docs/Other/
 
+# Zipped archive of the humanoid-robot-entertainment episode -- bundles
+# the same confidential PDFs docs/Other/ excludes above (RFKW pricing
+# deck, PDEV pitch deck), but as a single file one level up that the
+# docs/Other/ rule doesn't reach. Added 2026-10-01 specifically so a
+# future `git add docs/` can't accidentally commit it.
+docs/humanoid_robot_entertainment_episode.zip
+
 # Databases (derived and disposable — rebuilt from data/raw/, see CLAUDE.md)
 *.db
 *.db-journal
