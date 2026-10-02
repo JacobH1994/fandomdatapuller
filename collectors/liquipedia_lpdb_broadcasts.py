@@ -12,11 +12,29 @@ Cupen 2026 match) -- a fundamentally different, more precise signal than
 `etl/classify_broadcast_tier.py`'s `detected_costream` text-matching
 heuristic against stream titles. This is ground truth ("this channel
 broadcasts this specific match"), not an inference from title text.
+**Not Twitch-only** -- a real sampled match (StarLadder StarSeries Fall
+2026) streamed on Kick, not Twitch (`{"kick_en_1": "StarLadder", "kick":
+"StarLadder"}`) -- any downstream channel-candidate/verification work
+needs to handle multiple platforms, not assume Twitch.
+
+**A real bug lived here 2026-10-01 through 2026-10-02, found and fixed via
+a live diagnostic**: this collector filtered the `match` resource by
+`conditions=[[tournament::<page>]]`, which returned zero results for
+every one of 9 titles sampled. Confirmed live why: `match.tournament` is
+a human-readable DISPLAY NAME ("ESEA Season 58: Advanced Division - North
+America"), not the page-slug `tournaments_lpdb.liquipedia_page` holds --
+so the filter could never match anything. `match.parent`, by contrast, IS
+the page slug (confirmed identical format to `broadcasters.parent`, which
+is why `broadcasters_lpdb` was getting real data the whole time while
+`match_streams_lpdb` sat at zero). Fixed by filtering on `parent` instead
+-- confirmed live against the same StarLadder tournament, 10 real
+stream-bearing matches returned. The 9 titles already sampled under the
+broken filter need re-running to backfill their stream data.
 
 **Why this collector is scoped to tier-1/2 tournaments, and samples rather
 than exhaustively backfills, stated plainly**: LPDB has no per-title
 "all matches" shortcut -- pulling stream data means querying the `match`
-resource once per TOURNAMENT page (conditions=[[tournament::<page>]]), not
+resource once per TOURNAMENT page (conditions=[[parent::<page>]]), not
 once per wiki. Counter-Strike alone already has 1,293 tier-1/2 tournament
 pages in `tournaments_lpdb` -- exhaustively pulling match data for every
 tier-1/2 tournament across all 23 titles would need several thousand
@@ -208,7 +226,7 @@ def main() -> int:
                 if not budget.check():
                     errors.append(f"{t['id']}: stopped early, request budget exhausted (covered {pages.index(page)}/{len(pages)} sampled tournaments)")
                     break
-                match_rows = fetch_for_tournament(client, budget, "match", wiki, page, "tournament")
+                match_rows = fetch_for_tournament(client, budget, "match", wiki, page, "parent")
                 title_streams += upsert_match_streams(conn, t["id"], wiki, match_rows)
                 if not budget.check():
                     errors.append(f"{t['id']}: stopped early after match pull, request budget exhausted")
