@@ -108,7 +108,11 @@ RECURRING_SERIES_RE = re.compile(
     # regex order) specifically so a numbered EXHIBITION ("FishStix Invitational #1")
     # still classifies as showmatch_exhibition, not recurring_series -- a bare
     # number is a weaker signal than an explicit exhibition keyword.
-    r"|#\d+\b",
+    r"|#\d+\b"
+    # "CGL" (a known amateur ladder platform) numbered regional divisions --
+    # "CGL GOATs - EU 6", "CGL Lucioball - NA", "CGL Stadium - SA 1" -- found
+    # 2026-10-02 as Overwatch's last remaining extractable pattern (~16 rows).
+    r"|\bCGL\s+(GOATs|Lucioball|Stadium)\b",
     re.I,
 )
 
