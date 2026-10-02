@@ -156,10 +156,52 @@ CREATE TABLE IF NOT EXISTS tournaments_lpdb (
     fetched_at TEXT NOT NULL,
     source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
     confidence TEXT NOT NULL DEFAULT 'verified',
-    special_tier_category TEXT, -- NULL for every normal-tiered row; populated only for tier='-1' rows by etl/classify_special_tiers.py (built 2026-10-02) as one of 'season_wrapper' / 'showmatch_exhibition' / 'informal' / 'unclassified'. Confirmed live that tier=-1 is NOT one thing -- StarCraft II's $400K "2017 DreamHack Season" and Overwatch's official $225K OWL All-Stars sit in the same raw bucket as Age of Empires II's zero-prize 1v1 community pickup games. This column is a DIFFERENT provenance tier than the row's own `confidence` above, always -- it's a keyword/threshold heuristic classification, ai_assisted_unreviewed regardless of what `confidence` says, not an LPDB-native field. 'unclassified' means the heuristic didn't confidently match any category; treat those as needing a manual look, not as a fourth real category.
+    special_tier_category TEXT, -- NULL for every normal-tiered row; populated only for tier='-1' rows by etl/classify_special_tiers.py (built 2026-10-02) as one of 'season_wrapper' / 'recurring_series' / 'special_mode_circuit' / 'showmatch_exhibition' / 'informal' / 'likely_real_mistiered' / 'unclassified' -- see that script's own module docstring for what each means and real examples. Confirmed live that tier=-1 is NOT one thing -- StarCraft II's $400K "2017 DreamHack Season" and Overwatch's official $225K OWL All-Stars sit in the same raw bucket as Age of Empires II's zero-prize 1v1 community pickup games. This column is a DIFFERENT provenance tier than the row's own `confidence` above, always -- it's a keyword/threshold heuristic classification, ai_assisted_unreviewed regardless of what `confidence` says, not an LPDB-native field.
     special_tier_category_confidence TEXT DEFAULT 'ai_assisted_unreviewed',
     UNIQUE (liquipedia_wiki, liquipedia_page)
 );
+
+-- The settled default for "is this a real competitive tournament" across
+-- tournaments_lpdb, closing out the tier=-1 investigation above (2026-10-02)
+-- so this question doesn't get re-litigated by every future notebook that
+-- touches this table. Decision, by special_tier_category (checked against
+-- real per-title dollar and row-count materiality, not guessed):
+--   - Always included: tier IN ('1','2','3','4') (normal tiers, unaffected
+--     by any of this), recurring_series (real organized, often-paid
+--     content, just high-frequency/minor -- Rocket League's Hoops League,
+--     R6's FACEIT Pro League), special_mode_circuit (real, officially-
+--     branded, well-resourced tournaments in an alternate game mode, not
+--     the flagship ladder -- confirmed real, just never tiered),
+--     likely_real_mistiered (cleared a real-tournament scale threshold
+--     with no exhibition/informal signal -- the more defensible read is
+--     "real event, missing a tier," not "ambiguous").
+--   - Always excluded: season_wrapper (an aggregate season/tour record,
+--     not a discrete tournament -- risks double-counting prize money
+--     against sub-events already captured separately elsewhere, a risk
+--     checked but not resolved either way), informal (by construction,
+--     the fallback for small-stakes 1-2-player pickup-game-scale
+--     content), unclassified (the heuristic found no confident signal --
+--     defaulting to exclude is the safer failure mode, undercounting
+--     rather than risking contamination; after three rounds of
+--     classifier refinement this is down to 289 rows / 0.79% of the
+--     combined normal-tier baseline across the 5 affected titles --
+--     genuinely negligible combined, though AoE2 at 2.13% and Overwatch
+--     at 3.12% specifically carry more of it than the others and are
+--     worth remembering if a finding there looks sensitive to a few
+--     percent of missing tournaments).
+--   - Title-dependent: showmatch_exhibition is included everywhere EXCEPT
+--     age_of_empires_ii, where it's ~1,600 rows of overwhelmingly casual,
+--     near-zero-prize community 1v1s ("Fox vs Taiwan Aoe Gamer") that
+--     would otherwise roughly double that title's grassroots-tier
+--     tournament count if counted as real tournaments. Everywhere else
+--     (Overwatch's $225K OWL All-Stars, Rocket League's Twitch Rivals)
+--     the same category skews toward real official content.
+CREATE VIEW IF NOT EXISTS tournaments_lpdb_competitive AS
+SELECT *
+FROM tournaments_lpdb
+WHERE tier IN ('1', '2', '3', '4')
+   OR (tier = '-1' AND special_tier_category IN ('recurring_series', 'special_mode_circuit', 'likely_real_mistiered'))
+   OR (tier = '-1' AND special_tier_category = 'showmatch_exhibition' AND title_id != 'age_of_empires_ii');
 
 -- Pro player bio/career data (docs/liquipedia_lpdb_transition_plan.md
 -- Phase 4, built 2026-10-01 following a direct user request for a player
