@@ -24,19 +24,30 @@ reference `prize_pool`/`team_number` separately for that.
     is one real qualifier, not a season in aggregate).
   - recurring_series: numbered/dated installments of an ongoing minor
     ladder (e.g. "Ranked Hoops 2v2: Week 127", "FACEIT Pro League -
-    Europe: October 2020"). Distinct from season_wrapper (not an
-    aggregate) and informal (these are organized, recurring, often
-    real-money content, not pickup games).
+    Europe: October 2020", "CEA Spring 2021"). Distinct from
+    season_wrapper (not an aggregate) and informal (these are organized,
+    recurring, often real-money content, not pickup games).
+  - special_mode_circuit: organized, officially-branded tournaments in an
+    ALTERNATE competitive mode, not the main ladder (Rocket League's
+    "Champions Road"/"Offseason Open" Hoops/Rumble/Jump Jam series,
+    Overwatch's "Flash Ops:" experimental-mode series) -- real
+    tournaments, well-resourced (up to 582 teams, $54K), just not the
+    flagship format, which is likely exactly why they never got a
+    standard tier.
   - showmatch_exhibition: explicit exhibition/special-format signals
     (Showmatch, All-Star, Invitational, Rivals, Charity, Showdown,
     Takedown, Celebration) or an explicit "X vs Y" 1v1/2v2 naming
     pattern.
   - informal: fallback for small-stakes 1-2-player content that matched
     nothing above -- genuine pickup-game-scale records.
-  - unclassified: matched nothing above with confidence -- includes
-    likely-real, plainly-under-tiered events (e.g. a bare "X Qualifier"
-    with no other signal). Treat as "needs a manual look," not a fifth
-    real category.
+  - likely_real_mistiered: no keyword matched, but prize_pool/team_number
+    are at real-tournament scale (>= $1,000, >= 8 teams) -- e.g.
+    StarCraft II's "DreamHack EIZO Open 2012" at $211K. Separated from
+    'unclassified' so that bucket stays honestly small rather than padded
+    with events that are almost certainly real.
+  - unclassified: matched nothing above with confidence, and doesn't
+    clear the likely_real_mistiered scale threshold either. Treat as
+    "needs a manual look," not a sixth real category.
 
 Writes `special_tier_category` + `special_tier_category_confidence`
 ('ai_assisted_unreviewed', always, regardless of the row's own
@@ -66,7 +77,38 @@ RECURRING_SERIES_RE = re.compile(
     r"\bWeek\s*\d+\b"
     r"|\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b"
     r"|\bBi-Weekly\b"
-    r"|\bHUB\b",
+    r"|\bHUB\b"
+    # Broadened after a direct request to dig further into 'unclassified' rather than
+    # leave it as a dead end: named series recurring with a bare YYYY or 'Spring/Fall
+    # YYYY' suffix across multiple editions (e.g. StarCraft II's "CEA Spring 2019" /
+    # "CEA Spring 2021" / "CEA Fall 2019", "High School Starleague 2014-2015") --
+    # confirmed live these are real dated installments of an ongoing league, same
+    # structural category as the Week-N/month-year patterns above, not a one-off.
+    r"|\b(Spring|Summer|Fall|Autumn|Winter)\s+\d{4}\b"
+    r"|\b\d{4}-\d{4}\b",
+    re.I,
+)
+
+# Real, identifiable official special-GAME-MODE circuits -- found 2026-10-02 by
+# digging into the 'unclassified' bucket specifically (the thing this pass exists
+# to fix): Rocket League's "Champions Road"/"Offseason Open" regional series
+# ($16K-$54K, 26-347 teams per edition) and Overwatch's "Flash Ops:" experimental-
+# mode series ($7K-$25K, up to 582 teams) are organized, well-resourced, officially
+# branded tournaments in an ALTERNATE competitive mode (Rocket League's Hoops/
+# Rumble/Jump Jam party modes; Overwatch's experimental/arcade modes) -- not
+# exhibitions, not informal, not the main ladder. Real tournaments, just not the
+# flagship competitive format, which is exactly why they likely never got a
+# standard tier. Kept as their own category rather than folded into
+# showmatch_exhibition specifically so a "real tournament, alternate mode" question
+# can be answered separately from a "real exhibition/showmatch" one.
+SPECIAL_MODE_CIRCUIT_RE = re.compile(
+    r"\bChampions\s*Road\b"
+    r"|\bOffseason\s*Open\b"
+    r"|\bRumble\s*Open\b"
+    r"|\bJump\s*Jam\b"
+    r"|\bHoops\s*League\b"
+    r"|\bFlash\s*Ops\b"
+    r"|\bFreestyle\s*(Tournament|Invitational)\b",
     re.I,
 )
 
@@ -88,6 +130,17 @@ VS_PATTERN_RE = re.compile(r"^[\w'.\s]{2,40}\s+vs\.?\s+[\w'.\s]{2,40}$", re.I)
 INFORMAL_PRIZE_CEILING = 500.0
 INFORMAL_TEAM_CEILING = 2
 
+# A second fallback threshold, checked only after every keyword rule above has
+# already failed to match -- added 2026-10-02 after finding that several
+# high-prize unclassified rows (StarCraft II's "DreamHack EIZO Open 2012" at
+# $211K, "NetEase Starcraft2 League 2012: Race Challenge" at $24K) have no
+# distinguishing keyword at all, just the scale of a genuinely real tournament.
+# Separate from 'unclassified' specifically so the remaining true fallback is
+# smaller and more honestly "needs a human," not padded with events that are
+# almost certainly real.
+LIKELY_REAL_PRIZE_FLOOR = 1000.0
+LIKELY_REAL_TEAM_FLOOR = 8
+
 
 def classify(name: str, prize_pool: float | None, team_number: int | None) -> str:
     name = name or ""
@@ -98,6 +151,9 @@ def classify(name: str, prize_pool: float | None, team_number: int | None) -> st
     if RECURRING_SERIES_RE.search(name):
         return "recurring_series"
 
+    if SPECIAL_MODE_CIRCUIT_RE.search(name):
+        return "special_mode_circuit"
+
     if SHOWMATCH_RE.search(name) or VS_PATTERN_RE.match(name.strip()):
         return "showmatch_exhibition"
 
@@ -105,6 +161,9 @@ def classify(name: str, prize_pool: float | None, team_number: int | None) -> st
     teams = team_number if (team_number is not None and team_number >= 0) else None
     if prize <= INFORMAL_PRIZE_CEILING and (teams is None or teams <= INFORMAL_TEAM_CEILING):
         return "informal"
+
+    if prize >= LIKELY_REAL_PRIZE_FLOOR and (teams is None or teams >= LIKELY_REAL_TEAM_FLOOR):
+        return "likely_real_mistiered"
 
     return "unclassified"
 
