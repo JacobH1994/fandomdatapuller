@@ -195,16 +195,16 @@ def main() -> int:
             sleep_until_reset()
             continue
 
-        # Priority: finishing remaining titles' tournament pulls is the
-        # primary ask, but broadcast/channel data was asked for "now," not
-        # "after all 23 titles' tournaments and all 19 titles' players are
-        # done" -- which, at this rate limit, could be most of the 24h
-        # budget on its own. Broadcasts only ever cover titles whose
-        # tournament pull is ALREADY done, so giving it 1-in-3 cycles here
-        # doesn't slow down the other 19 titles' tournament completion,
-        # it just stops already-ready titles' channel data from waiting
-        # behind the entire player-database phase.
-        do_broadcasts_this_cycle = pending_broadcasts and (cycles % 3 == 0)
+        # Priority: tournaments are 100% done (all 23 titles) as of
+        # 2026-10-02, so the original rationale for weighting players over
+        # broadcasts (don't slow down remaining tournament pulls) no
+        # longer applies -- nothing left to protect. Bumped from 1-in-3 to
+        # 1-in-2 cycles following a direct request to prioritize getting
+        # broadcast/channel data into a good state, now that the
+        # match_streams_lpdb condition-field bug (collectors/
+        # liquipedia_lpdb_broadcasts.py, fixed 2026-10-02) no longer makes
+        # every broadcast cycle a wasted one.
+        do_broadcasts_this_cycle = pending_broadcasts and (cycles % 2 == 0)
 
         if do_broadcasts_this_cycle or (not pending_tournaments and not pending_players and pending_broadcasts):
             title = pending_broadcasts[0]
