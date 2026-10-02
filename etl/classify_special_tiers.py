@@ -73,6 +73,14 @@ from etl.db import get_connection  # noqa: E402
 SUBEVENT_WORDS = re.compile(r"\b(Week|Qualifier|Stage|Round|Finals?|Playoffs?|Group\s*Stage|Last-Chance)\b", re.I)
 SEASON_WRAPPER_RE = re.compile(r"\b(Season|Tour|Circuit)\b", re.I)
 
+# A brand name + "Season N" + a sub-event word (e.g. "RHL Season 3 - Qualifier 1",
+# "RHL Season 10 - Finals") is NOT a season-wrapper (it's excluded by SUBEVENT_WORDS
+# above) -- it's one real installment of an ongoing numbered-season ladder. Found
+# 2026-10-02 digging into Rocket League's 'unclassified' remainder: ~25 "RHL Season
+# N - ..." rows this exact pattern was falling through to unclassified for lack of
+# a positive rule, not just correctly failing the wrapper check.
+SEASONED_SUBEVENT_RE = re.compile(r"\bSeason\s*\d+\b.{0,20}\b(Finals?|Playoffs?|Qualifiers?|Round|Stage)\b", re.I)
+
 RECURRING_SERIES_RE = re.compile(
     r"\bWeek\s*\d+\b"
     r"|\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}\b"
@@ -85,7 +93,22 @@ RECURRING_SERIES_RE = re.compile(
     # confirmed live these are real dated installments of an ongoing league, same
     # structural category as the Week-N/month-year patterns above, not a one-off.
     r"|\b(Spring|Summer|Fall|Autumn|Winter)\s+\d{4}\b"
-    r"|\b\d{4}-\d{4}\b",
+    r"|\b\d{4}\s*-\s*(Spring|Summer|Fall|Autumn|Winter)\b"  # year-then-season order, e.g. "Ant League 2023 - Autumn Edition"
+    r"|\b\d{4}-\d{4}\b"
+    # Numeric M-D-YY / MM-DD-YYYY dates -- found 2026-10-02: Rocket League's "Ranked
+    # Hoops 1v1 M-D-YY" / "Ranked Hoops 2v2 MM-DD-YY" pattern alone accounts for
+    # several hundred rows, almost all of which were falling through to
+    # unclassified because the existing rule only recognized month NAMES, not
+    # numeric dates.
+    r"|\b\d{1,2}-\d{1,2}-\d{2,4}\b"
+    # Bare "#N" numbered installment of an otherwise-named series (e.g. Overwatch's
+    # "Duck Squad Widow 1v1 #7", "LA3EB Overwatch 2 1V1 Cup #14", "Crazy Raccoon Cup
+    # #3") -- found 2026-10-02 as Overwatch's single largest unclassified pattern.
+    # Checked AFTER the showmatch/vs-pattern checks below in rule order (not here in
+    # regex order) specifically so a numbered EXHIBITION ("FishStix Invitational #1")
+    # still classifies as showmatch_exhibition, not recurring_series -- a bare
+    # number is a weaker signal than an explicit exhibition keyword.
+    r"|#\d+\b",
     re.I,
 )
 
@@ -125,7 +148,13 @@ SHOWMATCH_RE = re.compile(
     r"|\bExhibition\b",
     re.I,
 )
-VS_PATTERN_RE = re.compile(r"^[\w'.\s]{2,40}\s+vs\.?\s+[\w'.\s]{2,40}$", re.I)
+# Broadened 2026-10-02: the original anchored ^...$ form required the ENTIRE name
+# to be just "X vs Y", so any trailing suffix broke the match -- found live that
+# AoE2's "GamerLegion vs White Wolf Palace (2)", "coRe vs LaSh #2", and "komtan vs
+# kei - Who is No. 2 in Japan?" were all falling through to unclassified for
+# exactly this reason. A bare "search" for the vs-pattern anywhere in the name is
+# a strong enough signal on its own; no need to anchor it.
+VS_PATTERN_RE = re.compile(r"\b[\w'.]+(?:\s+[&,]\s*[\w'.]+)*\s+vs\.?\s+[\w'.]+", re.I)
 
 INFORMAL_PRIZE_CEILING = 500.0
 INFORMAL_TEAM_CEILING = 2
@@ -148,14 +177,20 @@ def classify(name: str, prize_pool: float | None, team_number: int | None) -> st
     if SEASON_WRAPPER_RE.search(name) and not SUBEVENT_WORDS.search(name):
         return "season_wrapper"
 
-    if RECURRING_SERIES_RE.search(name):
-        return "recurring_series"
+    # Explicit keyword/semantic checks run BEFORE the structural recurring_series
+    # check below, specifically because that check's broadened "#N" pattern
+    # (added 2026-10-02) would otherwise swallow a numbered EXHIBITION like
+    # "FishStix Invitational #1" before its "Invitational" keyword ever gets
+    # checked. A named keyword match is a stronger, more specific signal than a
+    # bare trailing number.
+    if SHOWMATCH_RE.search(name) or VS_PATTERN_RE.search(name):
+        return "showmatch_exhibition"
 
     if SPECIAL_MODE_CIRCUIT_RE.search(name):
         return "special_mode_circuit"
 
-    if SHOWMATCH_RE.search(name) or VS_PATTERN_RE.match(name.strip()):
-        return "showmatch_exhibition"
+    if SEASONED_SUBEVENT_RE.search(name) or RECURRING_SERIES_RE.search(name):
+        return "recurring_series"
 
     prize = prize_pool or 0.0
     teams = team_number if (team_number is not None and team_number >= 0) else None
