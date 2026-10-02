@@ -209,22 +209,36 @@ complete LPDB pull (`league_of_legends`, `dota2`, `counter_strike` —
       Phase 1's own docstring) to compare against `tournaments.prize_pool`'s
       known gap, not just the `tournament`-resource `prizepool` field
       already pulled.
-- [x] **Currency: does NOT improve, confirmed absent from the schema
-      entirely** (not merely sparse) — already flagged in Phase 0's probe
-      findings and re-confirmed here: `tournaments_lpdb.currency` is `NULL`
-      on every one of the 39,140 rows pulled so far, by construction (no
-      currency field exists anywhere in LPDB v3's schema). This is a real
-      loss, not a wash: `tournaments.currency` is genuinely populated on
-      about half of rows across the three reconciled titles, including
-      meaningful non-USD volume (EUR, CNY, RUB, KRW, UAH, BRL, KZT, AUD,
-      GBP, SEK, INR, PLN, and more, each in the dozens-to-hundreds of rows).
-      Any notebook that aggregates `prize_pool` assuming USD unless flagged
-      otherwise (`cs_growth_trajectory.ipynb`, `dota2_growth_trajectory.ipynb`,
-      `china_cs_scene.ipynb`, `grassroots_scene_comparison.ipynb`) would
-      silently lose its non-USD exclusion/flagging ability on a straight
-      swap to `tournaments_lpdb`. No LPDB-side fix exists; needs either a
-      separate currency-lookup pass or an explicit decision to accept USD-only
-      prize-pool aggregation going forward.
+- [x] **Currency: the field is still absent, but the practical risk this
+      was flagging turned out much smaller than feared — UPDATED 2026-10-02,
+      upgraded from inference to confirmed.** `tournaments_lpdb.currency`
+      remains `NULL` on every row, by construction (no currency field exists
+      anywhere in LPDB v3's schema) — that part hasn't changed. What changed:
+      while migrating `mlbb_russia_deep_dive.ipynb`, cross-checked
+      `tournaments_lpdb.prize_pool` against `tournaments.prize_pool`/
+      `currency` for every non-USD MediaWiki-sourced row that also exists in
+      the new table (dozens of matches across `age_of_empires_ii` alone, plus
+      a real MLBB example) — the implied conversion rates are genuine,
+      plausible, date-varying market exchange rates, not noise: CNY
+      ~6.76-6.83/USD, KRW ~1,133-1,310/USD, EUR ~0.82-0.92/USD, GBP ~0.64/USD,
+      and RUB ~82.7/USD for a real 2026 BetBoom Rise of Legends prize pool
+      (₽9,000,000 in `tournaments` → $108,856.92 in `tournaments_lpdb`,
+      implying almost exactly that rate). **`tournaments_lpdb.prize_pool`
+      is genuinely pre-converted to USD by Liquipedia's own display
+      convention** — this is now a confirmed cross-source finding, not an
+      assumption, even though LPDB's own API never states it. `etl/schema.sql`'s
+      comment on `tournaments_lpdb.currency` updated accordingly.
+      **Practical consequence**: `prize_pool` can be treated as USD directly
+      for new analysis built on `tournaments_lpdb`/`tournaments_lpdb_competitive`
+      — the "silently loses non-USD flagging ability" risk this item
+      originally flagged doesn't apply, because the values are already
+      converted, not left in their original currency with the label
+      stripped. The remaining real gap is narrower than first thought: no
+      way to tell *which* rows were originally non-USD (useful for a
+      currency-composition question specifically), and no independent way
+      to verify the conversion's accuracy beyond this cross-check sample —
+      but prize-pool *totals* built on the new table should already be
+      correct in USD terms, not systematically biased.
 - [x] **Dates**: genuinely improves, not just changes. Raw start_date string
       agreement on matched pages was only 71.5% (counter_strike) to 91.1%
       (league_of_legends), but inspecting the disagreements shows the large
