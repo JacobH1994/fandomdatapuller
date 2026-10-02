@@ -156,6 +156,8 @@ CREATE TABLE IF NOT EXISTS tournaments_lpdb (
     fetched_at TEXT NOT NULL,
     source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
     confidence TEXT NOT NULL DEFAULT 'verified',
+    special_tier_category TEXT, -- NULL for every normal-tiered row; populated only for tier='-1' rows by etl/classify_special_tiers.py (built 2026-10-02) as one of 'season_wrapper' / 'showmatch_exhibition' / 'informal' / 'unclassified'. Confirmed live that tier=-1 is NOT one thing -- StarCraft II's $400K "2017 DreamHack Season" and Overwatch's official $225K OWL All-Stars sit in the same raw bucket as Age of Empires II's zero-prize 1v1 community pickup games. This column is a DIFFERENT provenance tier than the row's own `confidence` above, always -- it's a keyword/threshold heuristic classification, ai_assisted_unreviewed regardless of what `confidence` says, not an LPDB-native field. 'unclassified' means the heuristic didn't confidently match any category; treat those as needing a manual look, not as a fourth real category.
+    special_tier_category_confidence TEXT DEFAULT 'ai_assisted_unreviewed',
     UNIQUE (liquipedia_wiki, liquipedia_page)
 );
 
