@@ -335,6 +335,124 @@ CREATE TABLE IF NOT EXISTS broadcasters_lpdb (
     UNIQUE (liquipedia_wiki, objectname)
 );
 
+-- Per-tournament, per-team/-player final standings -- LPDB's `placement`
+-- resource (docs/liquipedia_lpdb_transition_plan.md's own long-flagged gap,
+-- "per-tournament participant lists", never pulled before
+-- collectors/liquipedia_lpdb_placements.py, built 2026-10-03). This is the
+-- actual link between a player/team's identity and WHICH tournaments they
+-- competed in, at what tier -- players_lpdb/squadplayers_lpdb alone have no
+-- such link, only a player's bio and current/past team, never a specific
+-- event. Confirmed live 2026-10-03 against a real completed tournament
+-- (StarLadder StarSeries Fall 2026, wiki=counterstrike): one row per
+-- team/solo opponent's final standing, keyed on LPDB's own `objectname`
+-- (e.g. "374646_ranking_aurora gaming"), same uniqueness convention as
+-- match_streams_lpdb/broadcasters_lpdb.
+--
+-- Confirmed live, same `tournament`-vs-`parent` display-name trap
+-- collectors/liquipedia_lpdb_broadcasts.py already documented for `match` --
+-- `placement.tournament` is the human-readable display name ("StarLadder
+-- StarSeries Fall 2026"), `placement.parent` is the page-slug
+-- ("StarLadder/StarSeries/2026/Fall") matching tournaments_lpdb.liquipedia_page
+-- exactly. tournament_pagename below stores `parent`; tournament_display_name
+-- stores `tournament` for readability only -- never join on the latter.
+--
+-- Confirmed live: `liquipediatier` is present directly on this resource too
+-- (not just on `tournament`), same clean digit-string format -- lets this
+-- collector filter by tier at the API `conditions` level without a prior
+-- tournaments_lpdb lookup. `game` is also present per-row (e.g. "cs2",
+-- confirmed on both counterstrike and starcraft2 samples) -- unlike
+-- `player`/`squadplayer` (players_lpdb's own docstring: no per-title game
+-- field, only a multi-game extradata list), placement rows on the shared
+-- `fighters` wiki should be splittable by title using the same
+-- GAME_CODES_BY_TITLE `conditions` pattern collectors/liquipedia_lpdb.py's
+-- tournament pull already uses -- NOT yet confirmed live against the
+-- fighters wiki specifically (LPDB shared budget was at 0 for the rest of
+-- this session before that check could run); treat as likely-true, verify
+-- before the first real fighters-wiki placement pull.
+--
+-- `opponent_type` ('team' / 'solo', confirmed both live -- CS placements are
+-- 'team', a StarCraft II 1v1 ranking is 'solo') is the reliable team-vs-solo
+-- signal. `mode` (LPDB's own field, e.g. "team", "1v1") is NOT reliable for
+-- this -- confirmed live a StarCraft II show-match row had
+-- opponenttype='team' but mode='1v1' (mode describes match FORMAT, not this
+-- row's opponent shape). Use opponent_type, not mode, for that distinction.
+--
+-- `placement` is TEXT, not INTEGER, on purpose -- confirmed live it holds
+-- tie-ranges ("7-8", "5-6") and can be an empty string (seen on a
+-- show-match-style row with no real standing). `prize_money` is this
+-- opponent's total payout for this placement; `individual_prize_money` is
+-- LPDB's own separate per-player share of it (confirmed live, both
+-- populated on every real standings row sampled).
+--
+-- IMPORTANT date-format gotcha, confirmed live and DIFFERENT from every
+-- other _lpdb table so far: this resource's own null-date sentinel is
+-- "0000-01-01 00:00:00" (a full datetime), not tournaments_lpdb/players_lpdb's
+-- plain "0000-01-01" -- collectors/liquipedia_lpdb.py's own
+-- `_normalize_lpdb_date()` (exact-string-equality against LPDB_NULL_DATE)
+-- would silently NOT catch this on `date`/`start_date` here, since the
+-- strings differ by the trailing time component. This collector does its
+-- own prefix-based normalization instead (`value.startswith("0000-01-01")`)
+-- -- do not blindly reuse `_normalize_lpdb_date()` against this table's raw
+-- API values without accounting for this.
+CREATE TABLE IF NOT EXISTS placements_lpdb (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title_id TEXT NOT NULL REFERENCES titles(id),
+    liquipedia_wiki TEXT NOT NULL,
+    objectname TEXT NOT NULL, -- LPDB's own unique row identifier for this placement entry
+    tournament_pagename TEXT, -- LPDB's own `parent` -- the page slug, matches tournaments_lpdb.liquipedia_page; see table comment on the tournament/parent trap
+    tournament_display_name TEXT, -- LPDB's own `tournament` -- human-readable only, never join on this
+    tier TEXT, -- LPDB's own `liquipediatier` on this row, same clean digit-string format as tournaments_lpdb.tier
+    game TEXT, -- LPDB's own per-row `game` sub-field -- see table comment on shared-wiki splitting
+    placement TEXT, -- e.g. "1", "7-8", or "" -- see table comment on why this is TEXT
+    opponent_type TEXT, -- 'team' / 'solo' -- the reliable signal for this, NOT `mode` (see table comment)
+    opponent_name TEXT,
+    opponent_template TEXT, -- LPDB's own `opponenttemplate` -- a roster-revision-qualified team identity (e.g. "aurora gaming 2025"), distinct from squadplayers_lpdb.team_pagename's plain page name; not reconciled with that table here
+    prize_money REAL,
+    individual_prize_money REAL, -- LPDB's own `individualprizemoney` -- per-player share of prize_money, confirmed live on every sampled row
+    prize_pool_index INTEGER, -- LPDB's own `prizepoolindex` -- distinguishes concurrent prize pools/brackets within one tournament page
+    mode TEXT, -- LPDB's own `mode` field (e.g. "team", "1v1") -- a match-format label, NOT a team/solo signal (see table comment)
+    match_date TEXT, -- normalized: see table comment on the datetime-sentinel gotcha
+    start_date TEXT, -- also normalized the same way
+    extradata_json TEXT, -- raw LPDB `extradata` (playershare, prizepoints, opponentaliases, ...) -- shape varies, not normalized into columns, same treatment as players_lpdb.extradata_json
+    fetched_at TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'liquipedia_lpdb',
+    confidence TEXT NOT NULL DEFAULT 'verified',
+    UNIQUE (liquipedia_wiki, objectname)
+);
+
+-- Normalized out of placements_lpdb's raw `opponentplayers` object -- one
+-- row per player/coach SLOT within one placement row, so "which players
+-- competed in tier-1/2 events" is a plain join, not JSON parsing per query
+-- (same reasoning as player_earnings_by_year_lpdb's own table comment for
+-- players_lpdb's `earningsbyyear`). No source/confidence/fetched_at of its
+-- own -- inherits placements_lpdb's via placement_row_id, same convention
+-- as player_earnings_by_year_lpdb.
+--
+-- THE key confirmed-live finding this whole collector was built to answer:
+-- `player_page` below (LPDB's own opponentplayers "pN"/"cN" value, e.g.
+-- "Yuurih") was checked directly against a real sample of players_lpdb rows
+-- for the same title and MATCHES liquipedia_page exactly, case-sensitive
+-- (e.g. "Yuurih" / "KSCERATO" / "ZywOo" / "Insani" / "B1t" all resolved to
+-- real players_lpdb.liquipedia_page values from the same StarLadder
+-- StarSeries Fall 2026 CS placement row). Players ARE individually
+-- identifiable per placement row, not just teams -- elite-tier (tier IN
+-- ('1','2')) *player* filtering, not only *team* filtering, is genuinely
+-- possible from this data. `display_name` (LPDB's own "pNdn"/"cNdn") is
+-- the as-rendered name and sometimes differs in case from `player_page` --
+-- join on `player_page`, not `display_name`.
+CREATE TABLE IF NOT EXISTS placement_participants_lpdb (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    placement_row_id INTEGER NOT NULL REFERENCES placements_lpdb(id),
+    slot TEXT NOT NULL, -- LPDB's own raw slot key, e.g. "p1", "c1" -- kept for traceability back to the source JSON
+    kind TEXT NOT NULL, -- 'player' / 'coach', derived from the slot's p/c prefix
+    player_page TEXT, -- see table comment -- matches players_lpdb.liquipedia_page / squadplayers_lpdb.player_link
+    display_name TEXT,
+    nationality TEXT, -- LPDB's own "pNflag"/"cNflag"
+    faction TEXT, -- LPDB's own "pNfaction", when present (e.g. StarCraft II race) -- game-specific, NULL elsewhere
+    role_label TEXT, -- LPDB's own "cNrole1" (e.g. "coach") -- only populated for coach slots
+    UNIQUE (placement_row_id, slot)
+);
+
 -- Populated by etl/generate_tournament_aliases.py, keyed on (title_id,
 -- series_key) rather than a specific tournament_id: an alias identifies a
 -- recurring SERIES ("The International", "TI"), not one edition — the
@@ -934,6 +1052,11 @@ CREATE INDEX IF NOT EXISTS idx_squadplayers_lpdb_dates ON squadplayers_lpdb (joi
 CREATE INDEX IF NOT EXISTS idx_match_streams_lpdb_title ON match_streams_lpdb (title_id);
 CREATE INDEX IF NOT EXISTS idx_match_streams_lpdb_channel ON match_streams_lpdb (channel_name);
 CREATE INDEX IF NOT EXISTS idx_broadcasters_lpdb_title ON broadcasters_lpdb (title_id);
+CREATE INDEX IF NOT EXISTS idx_placements_lpdb_title ON placements_lpdb (title_id);
+CREATE INDEX IF NOT EXISTS idx_placements_lpdb_tournament ON placements_lpdb (title_id, tournament_pagename);
+CREATE INDEX IF NOT EXISTS idx_placements_lpdb_tier ON placements_lpdb (tier);
+CREATE INDEX IF NOT EXISTS idx_placement_participants_placement ON placement_participants_lpdb (placement_row_id);
+CREATE INDEX IF NOT EXISTS idx_placement_participants_player ON placement_participants_lpdb (player_page);
 CREATE INDEX IF NOT EXISTS idx_tournament_aliases_series ON tournament_aliases (title_id, series_key);
 CREATE INDEX IF NOT EXISTS idx_viewership_broadcast_tier ON viewership_snapshots (broadcast_tier);
 CREATE INDEX IF NOT EXISTS idx_tournaments_title_dates ON tournaments (title_id, start_date, end_date);
