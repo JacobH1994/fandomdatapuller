@@ -885,6 +885,56 @@ most of Latin America, or MENA as a dominant region, so a subset of
 "mismatches" are scheme artifacts, not real divergence — checked and
 separated from the genuine ones, not pooled together.
 
+**Fifth pass — `research/foundations/notebooks/pro_maturity_vs_audience_era_test.ipynb`
+(2026-10-03): cashes in a promise this brief made to itself on
+2026-09-25 and never tested.** The framing-caveat section below states
+`milestone_year` is a *lagging* indicator of network maturity, not the
+maturation event itself, and points at the `mode_of_engagement_model`
+engagement ladder's "Professionalised Play" rung as the fuller
+framework — this notebook is the first time the pro-cohort thread's own
+data has actually been used to test that, rather than just describe the
+pro side on its own terms.
+
+**Does pro-side behavioral maturity (the roster-aging curve's `delta`)
+predict creator tenure better than `milestone_year` does? No.** A
+single-snapshot "current position on the aging curve" per title adds
+nothing over `milestone_year` (partial r=-0.028, p=0.91) and is itself
+nearly binary at the snapshot tested (15 of 19 titles sit at exactly
+1.0). A trailing 3-year average improves things in the predicted
+direction (partial r rises to 0.137) without reaching significance at
+n=19. `milestone_year`, and even simpler `release_year`, remain the
+better-supported predictors with the sample size this project currently
+has — a real negative result for replacing `milestone_year` with
+pro-cohort behavioral data, not reframed as a win.
+
+**Follow-up, raised directly: is `milestone_year`'s own stale data
+source (confirmed live — `analysis/metrics.py` still queries the old
+MediaWiki `tournaments` table, never migrated to
+`tournaments_lpdb_competitive` the way everything else in this project
+was) the reason it isn't being outperformed? Also no.** Recomputed
+`milestone_year` against `tournaments_lpdb_competitive` (region bucketed
+to real macro-continents first, reusing `pro_player_regional_distribution.ipynb`'s
+own scheme, since LPDB's raw region field would badly over-count "spans
+2+ continents" otherwise). **18 of 19 titles get the exact same year
+either way** — only Age of Empires II shifts, by one year — and the
+predictive correlations with creator tenure are unchanged to the third
+decimal place. This rules the data-source explanation out cleanly:
+whatever gap exists between `milestone_year` and true network maturity
+is the conceptual lagging-indicator problem already named, not a
+fixable artifact of which tournament table feeds it.
+
+**Net for this thread's original question ("are we deprecating or
+redefining milestone_year")**: not supported by what this project's data
+can currently show. `milestone_year` survives both a replacement attempt
+and a data-quality upgrade attempt unscathed. `get_success_milestone()`
+should still be migrated to `tournaments_lpdb_competitive` for
+consistency with the rest of the project, but per this test that's
+cosmetic housekeeping, not a finding-changing fix — and the
+Professionalised-Play-predicts-Watch question this pass was built to
+test stays genuinely open rather than resolved, for lack of a stronger
+pro-side maturity measure or a larger sample of titles with both data
+types.
+
 The C3 pro-crossover analysis mirroring `creator_crossover.ipynb`'s own
 method is the one piece of this thread not yet started.
 
