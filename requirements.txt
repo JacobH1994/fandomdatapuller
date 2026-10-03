@@ -13,7 +13,12 @@ ruptures>=1.1
 seaborn>=0.13
 plotly>=6.0
 kaleido>=0.2  # static PNG export for plotly figures, so notebook outputs are portable (render in GitHub's preview, not just a live Jupyter kernel) -- same reasoning every other notebook already embeds matplotlib PNGs, not interactive widgets
+networkx>=3.2  # graph construction + built-in Louvain community detection (research/foundations/notebooks/creator_crossover_community_detection.ipynb) -- analysis-only, never imported by a collector script
+python-igraph>=1.0  # leidenalg's required graph backend (research/foundations/notebooks/creator_crossover_leiden.ipynb) -- analysis-only
+leidenalg>=0.12  # Leiden community detection, compared directly against the Louvain notebook above -- analysis-only
+scikit-learn>=1.5  # adjusted_rand_score, for comparing the intra-title behavioral clustering against the Leiden communities (research/foundations/posts/post_3_anatomy_of_a_network/notebooks/cross_title_intra_community_comparison.ipynb) -- analysis-only
 markdown>=3.5  # scripts/build_client_report.py -- renders clean report-body markdown to HTML for the Boudica PDF report pipeline
+powerlaw>=2.0  # Clauset-Shalizi-Newman MLE power-law fitting + distribution comparison (research/foundations/notebooks/pro_player_debut_age_and_tenure.ipynb's career-length tail check) -- analysis-only
 
 # anthropic (LLM-derived tournament aliases, etl/generate_tournament_aliases.py)
 # is deliberately NOT listed here. This file is installed as-is by
