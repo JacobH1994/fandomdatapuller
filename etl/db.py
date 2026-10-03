@@ -81,6 +81,15 @@ def get_connection(db_path: Path = DB_PATH) -> sqlite3.Connection:
     # this file independently (collector, ETL, connector, analysis) — this
     # is the standard fix for that access pattern, not a perf tweak.
     conn.execute("PRAGMA journal_mode=WAL")
+    # WAL still only allows one writer at a time — Python's sqlite3 default
+    # busy timeout (5s) was confirmed too short live (2026-10-03):
+    # collectors/steam_catalog_backfill.py crashed with "database is
+    # locked" during a burst of concurrent commits from the LPDB overnight
+    # sync + a second LPDB collector starting around the same moment.
+    # 30s gives a writer enough margin to just wait its turn under this
+    # project's real multi-script concurrent-write pattern instead of
+    # hard-crashing (which steam_catalog_backfill.py has no retry around).
+    conn.execute("PRAGMA busy_timeout=30000")
     conn.executescript(SCHEMA_PATH.read_text())
     return conn
 
