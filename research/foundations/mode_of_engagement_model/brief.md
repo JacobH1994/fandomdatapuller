@@ -387,6 +387,17 @@ renumbering the existing list):
 
 ## 11. Behaviours and artifacts of competitive-practice networks, drafted (2026-10-03) — and a three-level structure this surfaces
 
+**Superseded in large part by §12 (2026-10-04) — kept as-is rather than
+rewritten, since the collapse-test reasoning that got from this table to
+§12's leaner one is itself worth keeping on record.** In particular: the
+behaviour/institution split wasn't in this version at all (added in
+§12), Elite Play/Professionalised Play are no longer separate behaviours
+(folded into Play), Organise never made it in here but was considered
+and folded into Create/Discuss in §12, and Purchase/Socialise — both
+listed as ordinary behaviours below — are demoted to cross-cutting
+dimensions in §12. Read this section as the historical first pass, §12
+as current.
+
 Raised directly, out of the `post_3_anatomy_of_a_network` milestone_year
 discussion (§10): §10's ladder (Play -> Elite Play -> Professionalised
 Play -> Watch -> Socialise -> Attend -> Purchase) and §7's prose-form
@@ -462,3 +473,189 @@ Task list addition:
     level-2 behaviour/artifact tables, as a likely prerequisite for §5
     task 3 (cross-mode-comparable dimensions) rather than independent of
     it. Not started.
+
+## 12. Consolidated reference (2026-10-04) -- participation behaviours, institutions, and the dimensions that cut across both
+
+**Purpose of this section**: a single, current reference for a live
+working session's worth of conceptual development, written explicitly
+so the framework survives a context-window reset -- not a notebook
+finding, not yet tested against data, argued from first principles the
+same way §3's original mode definitions were. Supersedes §11's table in
+most particulars; §11 kept for its own reasoning trail, not deleted.
+
+### 12.1 The governing methodological commitment
+
+**Narrative-consumption and social-creative-sandbox (§3) are hypotheses,
+not proven categories -- and the count of three modes is itself not
+guaranteed.** The right move is not to presuppose modes and look for
+confirming behaviour, but to build behaviour/institution measurement
+vectors that are genuinely comparable across any network regardless of
+type, cluster real networks on those vectors, and test statistically
+whether the resulting clusters are real -- the same move already proven
+in this project at `creator_crossover_null_model_test.ipynb` (let Leiden
+find communities from the crossover graph, then test each against a
+configuration-model null; one of four clusters found that way turned
+out statistically indistinguishable from random). Modes, if they exist
+at all, should be an *output* of clustering on the framework below, not
+an input to it.
+
+**The collapse test, used repeatedly below and worth naming as a
+reusable tool**: for any candidate behaviour, ask whether it is a
+genuinely distinct verb with its own output or goal, or whether it is
+better modelled as a *dimension* that modifies one or more other
+behaviours. Four candidates failed this test during this session's
+discussion (Elite Play, Professionalised Play, Stream, Organise,
+Purchase, Socialise -- six, not four) and were folded into either a
+surviving behaviour or a cross-cutting dimension rather than kept as
+their own line.
+
+### 12.2 Participation behaviours
+
+*A participation behaviour is a voluntary, individually-performed act,
+bounded in time, whose performance is what constitutes a person's
+membership in the network at that moment -- episodic and renewable, not
+a permanent status change.* One real soft spot in this definition,
+flagged rather than resolved: "opt-in" undersells how much some
+behaviour (Watch especially) is algorithmically induced rather than
+purely elective -- activation plausibly sits on a spectrum from
+self-initiated to platform-induced.
+
+Five survive the collapse test as their own verbs:
+
+| Behaviour | Definition | Episodic or intensity-measured? |
+|---|---|---|
+| **Play** | Direct participation in the core practice/substrate -- spans casual through highest-stakes competing; institutional context is tracked as a separate dimension (12.3), not encoded in the verb itself (this is where Elite Play/Professionalised Play went -- see 12.6) | Intensity |
+| **Watch** | Spectate, live or recorded | Intensity |
+| **Discuss** | Commentary, analysis, meta-discourse -- verbal, bilateral or multilateral, genuinely episodic in a way Socialise turned out not to be (12.4) | Intensity |
+| **Attend** | Synchronized physical or virtual co-presence at an event | Episodic |
+| **Create** | Produces an output that becomes part of the network and would not otherwise exist -- the admission test that pulled Stream and event-organising in (12.6). Has real internal structure by output-type: **broadcast** (streams/VODs), **reference** (guides, wikis), **creative/fan** (art, fiction, edits, cosplay), **competitive-structure** (tournaments, leagues -- i.e. what "organising" actually is) | Intensity |
+
+### 12.3 Institutions
+
+*An institution is a persistent, supra-individual, nameable structure
+that forms when sustained participation behaviour crosses a threshold
+sufficient to justify external investment in formalizing it -- outlives
+individual participants and individual behavioural instances, has its
+own lifecycle (form / grow / stabilize / decline), and feeds back to
+reshape the rate and shape of future participation.* That last clause is
+not speculative inside this project: VCT's franchising (an
+institutional change) measurably changed roster churn afterward, in a
+direction opposite to what a purely-passive-residue model would predict
+(`pro_player_roster_churn.ipynb`) -- institutions are not just sediment,
+they actively reshape the behaviour-space going forward.
+
+**Institution is not a second, parallel list -- it is the reified,
+named state a behaviour's own institutionalization reading (12.4)
+produces once it crosses a threshold and holds.** `milestone_year`
+(`analysis/metrics.py`) is exactly this move already built and running:
+the dated moment Play's own institutionalization axis first crossed a
+specific line, for a specific title. Paired by originating behaviour,
+for concreteness, not as a separate taxonomy to maintain:
+
+| Originates from | Institution category | Examples |
+|---|---|---|
+| Play | Competitive/league institutions, spanning informal ladders through franchised pro leagues | VCT, publisher matchmaking infrastructure, ESL/PGL as organizers |
+| Watch | Broadcast/platform institutions | Official broadcast rights holders, the platform itself (Twitch) |
+| Discuss | Discourse institutions | Subreddits (as moderated bodies), Liquipedia, dedicated esports journalism |
+| Attend | Event institutions | **Blizzcon** -- notably *not* a Play-institution even though it hosts competitive content, which means institutions can nest/overlap, not sit in one clean bucket |
+| Create | Content-economy institutions | Twitch/YouTube Partner programs, organized wiki-editor bodies |
+
+### 12.4 Dimensions that cut across multiple behaviours
+
+Two families, one behaviour-side (supply), one person-side (demand).
+
+**Institutionalization (behaviour-side)**: how organized/formalized the
+context of a behaviour-instance is, from none through informal,
+semi-organized, to fully institutional. Applies natively to Play. Also
+applies to Watch, Discuss, and Attend, but there it reads the
+institutionalization of *what is being consumed*, not of the consuming
+act itself -- watching an individual creator's Create-output (low) vs.
+watching an institutional broadcast (high) is a materially different
+experience even when the raw volume is identical, a distinction a
+title's "mode" label would otherwise hide (the creator-composite vs.
+institutional-broadcast case worked through in this session's Watch
+discussion). Does **not** obviously apply to Purchase as its own
+independent axis -- see 12.6, likely correlates with the parent
+behaviour's own institutionalization closely enough to be redundant,
+untested.
+
+**Parasocial attachment and social-embeddedness (person-side)**:
+theoretically real, deliberately kept explicit rather than dropped, and
+honestly marked as **not currently measurable with this project's
+data** -- the point of naming them precisely even though they're out of
+reach now is that measurement techniques change; a named-but-unmeasured
+axis can be picked up later, a dimension never named cannot.
+- **Parasocial attachment**: one-directional attachment, orthogonal to
+  (not opposite of) social-embeddedness -- the two cross into four real,
+  distinguishable cases (watching a favourite creator *with* your friend
+  group, who share the attachment, is high on both at once; a lone
+  superfan is high-parasocial/low-social; a watch party for the shared
+  occasion more than the specific players is low-parasocial/high-social).
+  Attachment object can be an individual *or* an institution (devotion to
+  a team brand is still one-directional). Closest available proxy:
+  audience concentration (Gini/top-N-channel-share, already computed
+  throughout this project) as a rough population-level signal. **A
+  stronger, not-yet-checked candidate surfaced this session**: Twitch
+  Bits/cheer volume per channel, if accessible in any aggregate form,
+  would be a direct monetary parasocial-intensity signal -- a concrete
+  data-availability question for later, not resolved here.
+- **Social-embeddedness**: degree to which a behaviour-instance is
+  co-experienced with a person's own real, reciprocal relationships. No
+  proxy identified -- would need a friend-graph over participants, which
+  this project has no access to and which would sit squarely behind the
+  same confidentiality wall as individual-level Play data generally.
+
+### 12.5 Centrality / Investment -- the row-wise twin of Institution
+
+**A new construct surfaced this session, not a renaming of Socialise.**
+Institutionalization aggregates one behaviour *across all people* to
+produce a network-level object (an Institution) -- a column operation
+over a people-x-behaviours matrix. This is the transpose: aggregating
+*all of a person's behaviours* to produce an individual-level object --
+a row operation over the same matrix. Inputs include both overall
+behavioural intensity across the behaviour-set and social-embeddedness
+specifically; social-embeddedness is one input into this construct, not
+identical with it, which is why Socialise itself doesn't survive as its
+own behaviour (12.6) even though the intuition that produced it was
+real.
+
+The reified individual-level state this produces -- tentatively named
+**Centrality** (positional: core vs. periphery) or **Investment**
+(mechanistic: how much identity/personal value is stored in the
+network) -- plausibly also feeds back to reshape future behaviour,
+mirroring Institution's own feedback property: a core, identity-invested
+member should be more resistant to leaving through a quality dip, more
+likely to recruit others, more likely to defend the community. **Stated
+here as a hypothesis carried by the structural parallel, not yet shown
+by anything in this project's data.** Name not settled; both candidates
+kept live.
+
+### 12.6 What collapsed, and why -- the full record
+
+| Candidate | Verdict | Reasoning |
+|---|---|---|
+| Elite Play, Professionalised Play | Folded into **Play** | Not separate verbs -- one behaviour (Play) read at different points on the institutionalization dimension (12.4). `milestone_year` already measures exactly this threshold-crossing. |
+| Stream | Folded into **Create** | Passes Create's own admission test (composes an output into the network that wouldn't otherwise exist) more cleanly than it fits Play. Generalizes: creators and tournament organizers sit on the same spectrum -- both produce a consumable output, differing only in output-type. |
+| Organise | Folded into **Create** (event/tournament production, an output-type) and **Discuss** (community moderation, already covered there) | No residual instance survived that wasn't already one of these two. |
+| Purchase | Demoted to a cross-cutting **quantified-expression metric**, not a behaviour | Reads off institutionalization (official vs. informal purchase channel) and/or parasocial or social-embeddedness (paying *because of* a one-directional attachment, vs. paying to *signal* community membership to one's own social circle -- the hoodie case). Raw currency value is not a stable cross-context unit (purchasing power varies by region) -- prefer counting discrete purchase-decisions over summing value, or PPP-normalize if magnitude is specifically needed. Total network economic value remains a legitimate, separate, simpler metric on its own, independent of this resolution. |
+| Socialise | Demoted -- absorbed into **Centrality/Investment** (12.5) | Doesn't share Discuss's episodic, timebound shape ("private -> socialised" is a state change, not a bounded act). Social-embeddedness survives as a dimension; "Socialise" the verb does not survive as its own behaviour. |
+
+### 12.7 Open, not yet resolved
+
+- Centrality/Investment's name, and whether social-embeddedness and raw
+  behavioural intensity are its only two inputs or whether parasocial
+  attachment contributes too.
+- Whether institutionalization is worth tracking as Purchase's own
+  independent axis or is redundant with the parent behaviour's reading
+  -- an empirical question, not resolved by reasoning alone.
+- Play and Attend have not had the same scrutiny pass Watch, Purchase,
+  and Socialise just had.
+- Discuss's own boundary was redrawn relative to Socialise in this
+  session but not independently re-examined on its own terms.
+- The Bits/cheer-volume parasocial proxy's actual data availability --
+  unchecked.
+- Task list items 9-10 (§8) -- Discuss/Create's exact status, and
+  drafting narrative-consumption's and social-creative-sandbox's own
+  behaviour tables -- remain open and are arguably more urgent now that
+  12.1's clustering plan depends on having more than one mode's table to
+  compare.
