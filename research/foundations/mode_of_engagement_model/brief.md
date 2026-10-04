@@ -659,3 +659,117 @@ kept live.
   behaviour tables -- remain open and are arguably more urgent now that
   12.1's clustering plan depends on having more than one mode's table to
   compare.
+
+## 13. Three resolutions from pressure-testing Play and Attend (2026-10-04)
+
+**Behaviours co-occur; they are not mutually exclusive states a person
+occupies.** Surfaced by a hard test case: a very high-skill VALORANT
+player who only ever streams to their own community, never entering
+institutional competition. Is this Elite Play, Professionalised Play, or
+Create? **All of the first and the third, at once, and not the second.**
+The player is doing Play (high skill, genuinely low on the
+institutionalization axis -- no tournament, no league) *and
+simultaneously* doing Create (composing a broadcast output) -- the same
+co-occurrence already established for a LAN competitor doing
+Play-with-physical-co-presence. Revenue was never a property of Play
+itself; it is a property of whichever institution the Purchase/
+quantified-expression metric actually attaches to -- a salaried pro's
+revenue attaches to Play's own institution (a team paying for play), this
+streamer's attaches to Create's (subs/donations/ad-share paying for the
+broadcast). Same mechanism, different institutional landscape, no
+mode-specific special case needed: a title with no salaried/prize-pooled
+play structure at all simply has no Play-institution for revenue to
+attach to, so it defaults to Create -- not an exception, the same rule
+producing a different mix. **Worth stating plainly, since it's the same
+lesson as the original milestone_year critique recurring from a
+different angle: "being paid" and "being Play-institutionalized" are not
+the same claim**, and conflating them was exactly the original sin of
+the fused "Professionalised Play" label.
+
+**Lagging does not disqualify a behaviour from the framework -- it's a
+hypothesis the framework exists to test, not a reason to fold one
+behaviour into another.** Raised directly: is physical Attend plausibly
+*not* downstream of significant institutionalization elsewhere? Probably
+true as a median case, but "usually downstream" is a temporal/causal
+question, completely separate from "is this a legitimate, independently
+measured thing" (an ontological question). Already established
+elsewhere in this document that precedence between behaviours isn't a
+fixed universal law (title/genre-conditional, not mode-conditional) --
+collapsing "usually downstream" into its upstream cause would make that
+claim untestable by construction, which defeats the purpose of keeping
+behaviours separable in the first place.
+
+**Primary/governing behaviours: resolved as a layering decision, not a
+forced choice between "support causal analysis" and "don't presuppose
+hierarchy."** The taxonomy itself (12.2-12.5) stays flat and symmetric
+-- no behaviour declared primary by definition, consistent with the
+modes-as-hypotheses commitment (12.1). "Which behaviour governs" becomes
+a **downstream, empirical, per-network analytical output**: once
+per-behaviour time series exist for a given network, lead-lag
+relationships can be tested directly between every pair, generalizing
+§10's own still-unrun Task 7 (does Watch lead or lag `milestone_year`)
+from one pair to all pairs. The result is allowed to differ by network
+(VALORANT suspected Watch-leading per §10; a classic RTS plausibly
+Play-leading) -- "Play is the prime mover" stops being an axiom and
+becomes a testable, falsifiable, per-network claim, with deviant cases
+surfaced as findings rather than explained away. Not yet buildable
+(needs per-behaviour time series this project doesn't have assembled
+yet) -- recorded here as the planned analytical layer, not a taxonomy
+decision.
+
+### 13.1 Missing axes surfaced on Play, not yet resolved
+
+- **Adversarial structure** (competitive/PvP, cooperative/PvE, solo) is
+  not the same property as institutionalization and is currently
+  invisible in the framework -- hasn't mattered for an esports-first
+  title list (nearly everything tracked is adversarial at its
+  competitive core) but will matter once narrative-consumption and
+  social-creative-sandbox get their own tables (GTA Online's NoPixel RP
+  is neither competitive nor cleanly cooperative).
+- **Skill/stakes-level may be a second axis distinct from
+  institutionalization**, collapsed into it perhaps too aggressively
+  when Elite Play folded into Play (12.6) -- a world-class player at the
+  top of an anonymous ladder is high-skill/zero-institutionalization; an
+  open amateur qualifier bracket is real institutional structure
+  populated by sub-elite players. Usually correlated, not identical.
+- **Coaching/theorycrafting** doesn't cleanly fit Play (no direct
+  substrate interaction) or Discuss (instructional, not discursive) --
+  flagged, not resolved.
+- **Social-embeddedness applies to Play directly** (solo queue vs. a
+  5-stack), not just to the consumption behaviours as originally scoped
+  in 12.4 -- that scoping note needs broadening.
+
+### 13.2 Attend narrowed, one dimension split out
+
+**Attend narrows to physical co-presence specifically.** "Virtual
+attendance" does not survive as its own case -- watching a synchronized
+stream with a voice call running is just Watch at high social-
+embeddedness, happening live, with nothing left over. Physical
+attendance keeps an irreducible property virtual "attendance" lacks:
+real cost (travel, tickets, time), genuine irreversible commitment.
+
+**This surfaces a previously unnamed dimension: synchronicity** (live/
+real-time vs. asynchronous/after-the-fact — VOD, recap), applicable to
+Watch and Discuss both. What "virtual attendance" was actually gesturing
+at before it collapsed.
+
+**Still genuinely open**: whether Attend survives as its own behaviour
+or is better modelled as a physical-co-presence *context* that Play,
+Watch, or Discuss happen within (a LAN competitor is arguably just
+Play-with-physical-co-presence; a fan in the crowd is Watch-with-
+physical-co-presence) -- leaning toward survival (the cost/commitment
+signature is real and irreducible regardless of what's happening once
+someone is there) but flagged as the least confident resolution in this
+section.
+
+Task list addition (continuing §8/12.7's numbering):
+
+11. Build the per-network, per-behaviour-pair lead-lag analytical layer
+    once time-series data exists per behaviour -- the concrete
+    realization of §13's primary/secondary resolution. Not started,
+    blocked on having enough per-behaviour time series assembled.
+12. Resolve whether Attend is a standalone behaviour or a context-
+    modifier on Play/Watch/Discuss. Not decided.
+13. Decide whether adversarial structure and skill/stakes-level need to
+    be added as their own dimensions, or can stay folded into
+    institutionalization a while longer. Not decided.
