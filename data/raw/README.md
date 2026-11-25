@@ -1,5 +1,13 @@
 # Raw snapshot landing zone
 
+> **Moved 2026-11-25: people-identifying raw data is now private.** `twitch/`, `twitch_platform/`,
+> `youtube/`, `twitch_accounts/` and `twitch_arabic_snapshot/` contain channel logins, display names,
+> stream titles and account creation dates, so they live in the private `fandomdatapuller-data` repo.
+> The collector workflows write there with a deploy key (`DATA_REPO_DEPLOY_KEY`). Locally that repo is
+> cloned to `data/private/` and `data/raw/<folder>` is a symlink to `../private/<folder>`, so every
+> path below still works. Steam data (game-level, no people) stays here. Everything below still
+> describes the files; only where they are stored changed.
+
 Append-only. Every file here is committed to git and never edited after the
 fact — this is the git-scraping pattern (PRD §9.1) and the permanent record
 referenced in PRD §2. If the schema changes or the ETL has a bug, these

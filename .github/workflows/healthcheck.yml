@@ -42,8 +42,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # People-identifying raw data lives in the PRIVATE fandomdatapuller-data repo (moved 2026-11-25;
+      # see data/raw/README.md). The deploy key is scoped to that one repo, with write access.
+      # Only the folder(s) this job reads are checked out.
+      - name: Check out the private data repo
+        uses: actions/checkout@v4
         with:
+          repository: JacobH1994/fandomdatapuller-data
+          ssh-key: ${{ secrets.DATA_REPO_DEPLOY_KEY }}
+          path: data/private
           fetch-depth: 1
+          sparse-checkout: |
+            twitch
+            youtube
+            twitch_platform
+
+      - name: Point data/raw at the private data repo
+        run: |
+          mkdir -p data/raw
+          mkdir -p data/private/twitch
+          rm -rf data/raw/twitch
+          ln -s ../private/twitch data/raw/twitch
+          mkdir -p data/private/youtube
+          rm -rf data/raw/youtube
+          ln -s ../private/youtube data/raw/youtube
+          mkdir -p data/private/twitch_platform
+          rm -rf data/raw/twitch_platform
+          ln -s ../private/twitch_platform data/raw/twitch_platform
 
       - name: Check snapshot freshness
         env:

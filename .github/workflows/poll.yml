@@ -40,6 +40,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # People-identifying raw data lives in the PRIVATE fandomdatapuller-data repo (moved 2026-11-25;
+      # see data/raw/README.md). The deploy key is scoped to that one repo, with write access.
+      # Only its README is checked out: this collector only writes, so existing files
+      # aren't needed (saves a large download every run); new files go in with `git add --sparse`.
+      - name: Check out the private data repo
+        uses: actions/checkout@v4
+        with:
+          repository: JacobH1994/fandomdatapuller-data
+          ssh-key: ${{ secrets.DATA_REPO_DEPLOY_KEY }}
+          path: data/private
+          fetch-depth: 1
+          sparse-checkout: README.md
+          sparse-checkout-cone-mode: false
+
+      - name: Point data/raw at the private data repo
+        run: |
+          mkdir -p data/raw
+          mkdir -p data/private/twitch
+          rm -rf data/raw/twitch
+          ln -s ../private/twitch data/raw/twitch
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -53,8 +74,8 @@ jobs:
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           TITLES="${{ github.event.inputs.titles }}"
           DURATION="${{ github.event.inputs.duration_minutes }}"
@@ -101,12 +122,12 @@ jobs:
           push_with_retry() {
             local max_attempts=5 attempt=1
             while [ "$attempt" -le "$max_attempts" ]; do
-              if git push; then
+              if git -C data/private push; then
                 return 0
               fi
               echo "[warn] push attempt $attempt failed -- fetching + rebasing before retry"
-              git fetch origin main
-              git rebase origin/main
+              git -C data/private fetch origin main
+              git -C data/private rebase origin/main
               attempt=$((attempt + 1))
               sleep $((attempt * 2))
             done
@@ -119,9 +140,9 @@ jobs:
           while true; do
             python collectors/twitch_poll.py "${ARGS[@]}" || overall_status=1
 
-            git add data/raw
-            if ! git diff --cached --quiet; then
-              git commit -m "Twitch snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git -C data/private add --sparse twitch
+            if ! git -C data/private diff --cached --quiet; then
+              git -C data/private commit -m "Twitch snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
               push_with_retry || overall_status=1
             fi
 

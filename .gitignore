@@ -13,6 +13,17 @@ docs/Other/
 docs/humanoid_robot_entertainment_episode.zip
 docs/humanoid_robot_entertainment_episode/
 
+# People-identifying raw collector output (channel logins and names, stream titles, account
+# creation dates) lives in the PRIVATE fandomdatapuller-data repo since 2026-11-25. Locally it is
+# cloned to data/private/ and each data/raw/<folder> below is a symlink into it, so collectors and
+# the ETL keep their paths. Never commit these here.
+data/private/
+data/raw/twitch
+data/raw/twitch_platform
+data/raw/youtube
+data/raw/twitch_accounts
+data/raw/twitch_arabic_snapshot
+
 # Databases (derived and disposable — rebuilt from data/raw/, see CLAUDE.md)
 *.db
 *.db-journal

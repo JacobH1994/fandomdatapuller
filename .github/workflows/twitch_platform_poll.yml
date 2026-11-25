@@ -40,6 +40,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # People-identifying raw data lives in the PRIVATE fandomdatapuller-data repo (moved 2026-11-25;
+      # see data/raw/README.md). The deploy key is scoped to that one repo, with write access.
+      # Only its README is checked out: this collector only writes, so existing files
+      # aren't needed (saves a large download every run); new files go in with `git add --sparse`.
+      - name: Check out the private data repo
+        uses: actions/checkout@v4
+        with:
+          repository: JacobH1994/fandomdatapuller-data
+          ssh-key: ${{ secrets.DATA_REPO_DEPLOY_KEY }}
+          path: data/private
+          fetch-depth: 1
+          sparse-checkout: README.md
+          sparse-checkout-cone-mode: false
+
+      - name: Point data/raw at the private data repo
+        run: |
+          mkdir -p data/raw
+          mkdir -p data/private/twitch_platform
+          rm -rf data/raw/twitch_platform
+          ln -s ../private/twitch_platform data/raw/twitch_platform
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -53,8 +74,8 @@ jobs:
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           MAX_PAGES="${{ github.event.inputs.max_pages }}"
           MIN_VIEWERS="${{ github.event.inputs.min_viewers }}"
@@ -74,25 +95,25 @@ jobs:
           python collectors/twitch_platform_poll.py "${ARGS[@]}" || overall_status=1
 
           if [ -d data/raw/twitch_platform ]; then
-            git add data/raw/twitch_platform
+            git -C data/private add --sparse twitch_platform
           fi
-          if ! git diff --cached --quiet; then
-            git commit -m "Twitch platform-wide snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if ! git -C data/private diff --cached --quiet; then
+            git -C data/private commit -m "Twitch platform-wide snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             # Same fetch+rebase+retry as poll.yml/steam_poll.yml -- safe
             # here for the same reason: this collector writes only to
             # its own data/raw/twitch_platform/ subtree, so a concurrent
             # commit from another collector's workflow never conflicts
             # at the content level, only at the ref-update level.
             attempt=1
-            until git push; do
+            until git -C data/private push; do
               if [ "$attempt" -ge 5 ]; then
                 echo "[error] push failed after 5 attempts"
                 overall_status=1
                 break
               fi
               echo "[warn] push attempt $attempt failed -- fetching + rebasing before retry"
-              git fetch origin main
-              git rebase origin/main
+              git -C data/private fetch origin main
+              git -C data/private rebase origin/main
               attempt=$((attempt + 1))
               sleep $((attempt * 2))
             done

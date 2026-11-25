@@ -41,6 +41,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # People-identifying raw data lives in the PRIVATE fandomdatapuller-data repo (moved 2026-11-25;
+      # see data/raw/README.md). The deploy key is scoped to that one repo, with write access.
+      # Only the folder(s) this job reads are checked out.
+      - name: Check out the private data repo
+        uses: actions/checkout@v4
+        with:
+          repository: JacobH1994/fandomdatapuller-data
+          ssh-key: ${{ secrets.DATA_REPO_DEPLOY_KEY }}
+          path: data/private
+          fetch-depth: 1
+          sparse-checkout: |
+            youtube
+
+      - name: Point data/raw at the private data repo
+        run: |
+          mkdir -p data/raw
+          mkdir -p data/private/youtube
+          rm -rf data/raw/youtube
+          ln -s ../private/youtube data/raw/youtube
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -53,8 +73,8 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           TITLES="${{ github.event.inputs.titles }}"
           SWEEP="${{ github.event.inputs.sweep }}"
@@ -84,10 +104,10 @@ jobs:
           # fired every scheduled run while config/channels_youtube.yaml
           # was still empty.
           if [ -d data/raw/youtube ]; then
-            git add data/raw/youtube
+            git -C data/private add --sparse youtube
           fi
-          if ! git diff --cached --quiet; then
-            git commit -m "YouTube snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if ! git -C data/private diff --cached --quiet; then
+            git -C data/private commit -m "YouTube snapshot $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             # Confirmed live 2026-09-09 (poll.yml, steam_poll.yml,
             # steam_discovery_poll.yml): with five scheduled collector
             # workflows now pushing to main on similar cadences, two can
@@ -100,15 +120,15 @@ jobs:
             # commit from another workflow never conflicts at the
             # content level, only at the ref-update level.
             attempt=1
-            until git push; do
+            until git -C data/private push; do
               if [ "$attempt" -ge 5 ]; then
                 echo "[error] push failed after 5 attempts"
                 overall_status=1
                 break
               fi
               echo "[warn] push attempt $attempt failed -- fetching + rebasing before retry"
-              git fetch origin main
-              git rebase origin/main
+              git -C data/private fetch origin main
+              git -C data/private rebase origin/main
               attempt=$((attempt + 1))
               sleep $((attempt * 2))
             done
